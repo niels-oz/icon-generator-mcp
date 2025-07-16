@@ -38,6 +38,10 @@ export class MCPServer {
             output_name: { 
               type: 'string',
               description: 'Optional custom output filename'
+            },
+            output_path: { 
+              type: 'string',
+              description: 'Optional custom output directory path'
             }
           },
           required: ['png_paths', 'prompt']
@@ -89,7 +93,8 @@ export class MCPServer {
     return {
       png_paths: request.png_paths,
       prompt: request.prompt.trim(),
-      output_name: request.output_name
+      output_name: request.output_name,
+      output_path: request.output_path
     };
   }
 
@@ -112,9 +117,10 @@ export class MCPServer {
     const outputFilename = request.output_name || llmResponse.filename;
 
     // Step 4: Save generated SVG to file
+    const referenceForLocation = request.output_path || request.png_paths[0];
     const saveResult = await this.fileWriterService.saveGeneratedIcon(
       outputFilename,
-      request.png_paths[0], // Use first PNG path as reference for output location
+      referenceForLocation,
       llmResponse.svg
     );
 

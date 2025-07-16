@@ -2,10 +2,9 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { execSync } from 'child_process';
 import { LLMService } from '../../src/services/llm';
 
-// Mock subprocess execution
+// Only mock the edge dependency (external process execution)
 jest.mock('child_process', () => ({
-  execSync: jest.fn(),
-  spawn: jest.fn()
+  execSync: jest.fn()
 }));
 
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
@@ -134,7 +133,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     });
   });
 
-  describe('SVG sanitization', () => {
+  describe('SVG sanitization (no mocks - testing actual logic)', () => {
     it('should remove script tags from SVG', () => {
       const maliciousSVG = `
         <svg xmlns="http://www.w3.org/2000/svg">
@@ -183,9 +182,29 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
       expect(sanitized).not.toContain('onclick');
       expect(sanitized).not.toContain('alert');
     });
+
+    it('should handle multiple security issues in one SVG', () => {
+      const maliciousSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg">
+          <script>alert('xss')</script>
+          <foreignObject><div>bad</div></foreignObject>
+          <circle onclick="hack()" onmouseover="more()" fill="red"/>
+        </svg>
+      `;
+
+      const sanitized = service.sanitizeSVG(maliciousSVG);
+
+      expect(sanitized).toContain('<svg');
+      expect(sanitized).toContain('<circle');
+      expect(sanitized).not.toContain('<script>');
+      expect(sanitized).not.toContain('<foreignObject');
+      expect(sanitized).not.toContain('onclick');
+      expect(sanitized).not.toContain('onmouseover');
+      expect(sanitized).not.toContain('alert');
+    });
   });
 
-  describe('prompt building', () => {
+  describe('prompt building (no mocks - testing actual logic)', () => {
     it('should build proper system prompt with SVG references', () => {
       const userPrompt = 'Change blue to red';
       const svgReferences = [
@@ -201,6 +220,8 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
       expect(systemPrompt).toContain('<svg><rect fill="blue"/></svg>');
       expect(systemPrompt).toContain('FILENAME:');
       expect(systemPrompt).toContain('SVG:');
+      expect(systemPrompt).toContain('Reference 1:');
+      expect(systemPrompt).toContain('Reference 2:');
     });
 
     it('should handle empty SVG references', () => {
@@ -213,6 +234,16 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
       expect(systemPrompt).toContain('Create a simple icon');
       expect(systemPrompt).toContain('FILENAME:');
       expect(systemPrompt).toContain('SVG:');
+      expect(systemPrompt).not.toContain('Reference 1:');
+    });
+
+    it('should include proper formatting instructions', () => {
+      const systemPrompt = service.buildSystemPrompt('test', []);
+      
+      expect(systemPrompt).toContain('Format your response exactly as:');
+      expect(systemPrompt).toContain('xmlns="http://www.w3.org/2000/svg"');
+      expect(systemPrompt).toContain('viewBox attribute');
+      expect(systemPrompt).toContain('kebab-case');
     });
   });
 

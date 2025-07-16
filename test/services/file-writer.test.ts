@@ -3,7 +3,7 @@ import { FileWriterService } from '../../src/services/file-writer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Mock file system operations
+// Only mock the edge dependency (file system operations)
 jest.mock('fs', () => ({
   existsSync: jest.fn(),
   writeFileSync: jest.fn(),
@@ -25,7 +25,7 @@ describe('FileWriterService', () => {
     mockFs.accessSync.mockReset();
   });
 
-  describe('output path generation', () => {
+  describe('output path generation (no mocks - testing actual logic)', () => {
     it('should generate output path in same directory as reference PNG', () => {
       const referencePath = '/Users/user/project/icons/source.png';
       const filename = 'red-circle-icon';
@@ -60,6 +60,24 @@ describe('FileWriterService', () => {
       const outputPath = service.generateOutputPath(filename, referencePath);
 
       expect(outputPath).toBe('/Users/user/project/generated-icon.svg');
+    });
+
+    it('should handle directory path as reference location', () => {
+      const referencePath = '/Users/user/project/icons';
+      const filename = 'new-icon';
+
+      const outputPath = service.generateOutputPath(filename, referencePath);
+
+      expect(outputPath).toBe('/Users/user/project/icons/new-icon.svg');
+    });
+
+    it('should handle nested directory paths', () => {
+      const referencePath = '/Users/user/project/assets/icons/subfolder/ref.png';
+      const filename = 'nested-icon';
+
+      const outputPath = service.generateOutputPath(filename, referencePath);
+
+      expect(outputPath).toBe('/Users/user/project/assets/icons/subfolder/nested-icon.svg');
     });
   });
 
@@ -243,7 +261,7 @@ describe('FileWriterService', () => {
     });
   });
 
-  describe('filename sanitization', () => {
+  describe('filename sanitization (no mocks - testing actual logic)', () => {
     it('should sanitize various invalid characters', () => {
       const testCases = [
         { input: 'my<icon>', expected: 'my-icon' },
@@ -268,6 +286,21 @@ describe('FileWriterService', () => {
     it('should preserve valid characters', () => {
       const result = service.sanitizeFilename('my-valid_filename.with.dots');
       expect(result).toBe('my-valid_filename.with.dots');
+    });
+
+    it('should handle multiple consecutive invalid characters', () => {
+      const result = service.sanitizeFilename('test<>:|multiple');
+      expect(result).toBe('test-multiple');
+    });
+
+    it('should handle mixed valid and invalid characters', () => {
+      const result = service.sanitizeFilename('valid-name<with>some|bad:chars');
+      expect(result).toBe('valid-name-with-some-bad-chars');
+    });
+
+    it('should remove leading and trailing dashes', () => {
+      const result = service.sanitizeFilename('---test-name---');
+      expect(result).toBe('test-name');
     });
   });
 

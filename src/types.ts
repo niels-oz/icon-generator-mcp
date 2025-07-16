@@ -4,6 +4,7 @@ export interface IconGenerationRequest {
   png_paths: string[];
   prompt: string;
   output_name?: string;
+  output_path?: string;
 }
 
 export interface IconGenerationResponse {

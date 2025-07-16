@@ -33,18 +33,23 @@ export class FileWriterService {
   }
 
   /**
-   * Generate output path based on filename and reference PNG location
+   * Generate output path based on filename and reference location
    */
-  generateOutputPath(filename: string, referencePngPath: string): string {
+  generateOutputPath(filename: string, referenceLocation: string): string {
     const sanitizedFilename = this.sanitizeFilename(filename);
-    const referenceDir = path.dirname(referencePngPath);
+    
+    // If reference location is a directory, use it directly
+    // If it's a file, extract the directory
+    const outputDir = path.extname(referenceLocation) 
+      ? path.dirname(referenceLocation) 
+      : referenceLocation;
     
     // Ensure .svg extension
     const finalFilename = sanitizedFilename.endsWith('.svg') 
       ? sanitizedFilename 
       : `${sanitizedFilename}.svg`;
     
-    return path.join(referenceDir, finalFilename);
+    return path.join(outputDir, finalFilename);
   }
 
   /**
@@ -116,20 +121,20 @@ export class FileWriterService {
    */
   async saveGeneratedIcon(
     suggestedFilename: string,
-    referencePngPath: string,
+    referenceLocation: string,
     svgContent: string
   ): Promise<SaveResult> {
     try {
-      // Validate reference path exists
-      if (!this.validateReferencePath(referencePngPath)) {
+      // Validate reference location exists (if it's a file path)
+      if (path.extname(referenceLocation) && !this.validateReferencePath(referenceLocation)) {
         return {
           success: false,
-          error: `Reference PNG file not found: ${referencePngPath}`
+          error: `Reference file not found: ${referenceLocation}`
         };
       }
 
       // Generate output path
-      const outputPath = this.generateOutputPath(suggestedFilename, referencePngPath);
+      const outputPath = this.generateOutputPath(suggestedFilename, referenceLocation);
       
       // Resolve any naming conflicts
       const resolvedPath = this.resolveNameConflicts(outputPath);
