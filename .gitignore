@@ -1,0 +1,96 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+dist/
+build/
+*.tgz
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+.npm
+.eslintcache
+.nyc_output
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+test-results/
+playwright-report/
+test-results.xml
+
+# MCP Server specific
+# Temporary BMP files created during PNG to SVG conversion
+*.bmp.tmp
+temp_*.bmp
+
+# Generated SVG files during testing
+test-output-*.svg
+test_*.svg
+
+# Debug files
+debug.log
+mcp-debug.log
+
+# Package manager lock files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+
+# Local configuration overrides
+config/local.json
+.config/local.json
+
+# Binaries (if ever bundled in future versions)
+binaries/
+vendor/
+
+# Documentation build artifacts
+docs/build/
+docs/.vuepress/dist/
+
+# Benchmark results
+benchmark-results/
