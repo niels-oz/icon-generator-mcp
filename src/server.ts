@@ -1,14 +1,21 @@
 import { IconGenerationRequest, IconGenerationResponse } from './types';
 import { ConversionService } from './services/converter';
+import { LLMService } from './services/llm';
+import { FileWriterService } from './services/file-writer';
+import * as path from 'path';
 
 export class MCPServer {
   public readonly name = 'icon-generator-mcp';
   public readonly version = '0.1.0';
   
   private conversionService: ConversionService;
+  private llmService: LLMService;
+  private fileWriterService: FileWriterService;
   
   constructor() {
     this.conversionService = new ConversionService();
+    this.llmService = new LLMService();
+    this.fileWriterService = new FileWriterService();
   }
 
   getTools() {
@@ -87,11 +94,38 @@ export class MCPServer {
   }
 
   private async generateIcon(request: IconGenerationRequest): Promise<{ output_path: string; message: string }> {
-    // For now, just return a simple response
-    // In the next iteration, we'll implement the full pipeline
+    // Step 1: Convert all PNG files to SVG references
+    const svgReferences: string[] = [];
+    for (const pngPath of request.png_paths) {
+      try {
+        const svgContent = await this.conversionService.convertPNGToSVG(pngPath);
+        svgReferences.push(svgContent);
+      } catch (error) {
+        throw new Error(`Failed to convert PNG file ${pngPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    // Step 2: Generate icon using LLM with SVG references and prompt
+    const llmResponse = await this.llmService.generateSVG(request.prompt, svgReferences);
+
+    // Step 3: Determine output filename
+    const outputFilename = request.output_name || llmResponse.filename;
+
+    // Step 4: Save generated SVG to file
+    const saveResult = await this.fileWriterService.saveGeneratedIcon(
+      outputFilename,
+      request.png_paths[0], // Use first PNG path as reference for output location
+      llmResponse.svg
+    );
+
+    if (!saveResult.success) {
+      throw new Error(saveResult.error || 'Failed to save generated icon');
+    }
+
+    // Step 5: Return success response
     return {
-      output_path: '/tmp/generated-icon.svg',
-      message: `Icon generated successfully from ${request.png_paths.length} PNG file(s) with prompt: "${request.prompt}"`
+      output_path: saveResult.outputPath!,
+      message: `Icon generated successfully: ${path.basename(saveResult.outputPath!)}`
     };
   }
 }
