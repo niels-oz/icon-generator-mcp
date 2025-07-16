@@ -25,7 +25,7 @@ describe('Output Path Parameter', () => {
       const generateIconTool = tools.find(tool => tool.name === 'generate_icon');
       
       expect(generateIconTool!.inputSchema.required).not.toContain('output_path');
-      expect(generateIconTool!.inputSchema.required).toEqual(['png_paths', 'prompt']);
+      expect(generateIconTool!.inputSchema.required).toEqual(['prompt']);
     });
   });
 
@@ -99,8 +99,21 @@ describe('Output Path Parameter', () => {
       const validated = (server as any).validateRequest(request);
       
       // Test that the logic correctly falls back to png_paths[0]
-      const referenceForLocation = validated.output_path || validated.png_paths[0];
+      const referenceForLocation = validated.output_path || (validated.png_paths && validated.png_paths.length > 0 ? validated.png_paths[0] : undefined);
       expect(referenceForLocation).toBe('/path/to/test.png');
+    });
+
+    it('should handle prompt-only requests (no PNG files)', () => {
+      const request = {
+        png_paths: [],
+        prompt: 'Create a test icon'
+      };
+
+      const validated = (server as any).validateRequest(request);
+      
+      // Test that the logic correctly handles no PNG files
+      const referenceForLocation = validated.output_path || (validated.png_paths && validated.png_paths.length > 0 ? validated.png_paths[0] : undefined);
+      expect(referenceForLocation).toBeUndefined();
     });
   });
 });

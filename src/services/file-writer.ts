@@ -35,8 +35,16 @@ export class FileWriterService {
   /**
    * Generate output path based on filename and reference location
    */
-  generateOutputPath(filename: string, referenceLocation: string): string {
+  generateOutputPath(filename: string, referenceLocation: string | undefined | null): string {
     const sanitizedFilename = this.sanitizeFilename(filename);
+    
+    // If no reference location provided, use current directory
+    if (!referenceLocation) {
+      const finalFilename = sanitizedFilename.endsWith('.svg') 
+        ? sanitizedFilename 
+        : `${sanitizedFilename}.svg`;
+      return `./${finalFilename}`;
+    }
     
     // If reference location is a directory, use it directly
     // If it's a file, extract the directory
@@ -121,12 +129,12 @@ export class FileWriterService {
    */
   async saveGeneratedIcon(
     suggestedFilename: string,
-    referenceLocation: string,
+    referenceLocation: string | undefined,
     svgContent: string
   ): Promise<SaveResult> {
     try {
       // Validate reference location exists (if it's a file path)
-      if (path.extname(referenceLocation) && !this.validateReferencePath(referenceLocation)) {
+      if (referenceLocation && path.extname(referenceLocation) && !this.validateReferencePath(referenceLocation)) {
         return {
           success: false,
           error: `Reference file not found: ${referenceLocation}`

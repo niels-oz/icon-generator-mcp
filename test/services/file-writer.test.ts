@@ -71,6 +71,24 @@ describe('FileWriterService', () => {
       expect(outputPath).toBe('/Users/user/project/icons/new-icon.svg');
     });
 
+    it('should use current directory when no reference path provided', () => {
+      const referencePath = undefined;
+      const filename = 'prompt-only-icon';
+
+      const outputPath = service.generateOutputPath(filename, referencePath);
+
+      expect(outputPath).toBe('./prompt-only-icon.svg');
+    });
+
+    it('should handle null reference path', () => {
+      const referencePath = null;
+      const filename = 'prompt-only-icon';
+
+      const outputPath = service.generateOutputPath(filename, referencePath);
+
+      expect(outputPath).toBe('./prompt-only-icon.svg');
+    });
+
     it('should handle nested directory paths', () => {
       const referencePath = '/Users/user/project/assets/icons/subfolder/ref.png';
       const filename = 'nested-icon';
@@ -258,6 +276,30 @@ describe('FileWriterService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Cannot write to directory');
+    });
+
+    it('should handle prompt-only generation (no PNG reference)', async () => {
+      const referencePath = undefined; // No PNG reference
+      const suggestedName = 'prompt-only-icon';
+      const svgContent = '<svg xmlns="http://www.w3.org/2000/svg"><circle fill="blue"/></svg>';
+
+      // Mock no conflicts, directory writable
+      mockFs.existsSync.mockReturnValueOnce(false); // No conflict with output file
+      mockFs.accessSync.mockReturnValue(undefined);
+
+      const result = await service.saveGeneratedIcon(
+        suggestedName,
+        referencePath,
+        svgContent
+      );
+
+      expect(result.outputPath).toBe('./prompt-only-icon.svg');
+      expect(result.success).toBe(true);
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        './prompt-only-icon.svg',
+        svgContent,
+        'utf8'
+      );
     });
   });
 

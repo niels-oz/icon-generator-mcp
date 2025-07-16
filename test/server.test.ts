@@ -37,7 +37,7 @@ describe('MCPServer', () => {
           prompt: { type: 'string' },
           output_name: { type: 'string' }
         },
-        required: ['png_paths', 'prompt']
+        required: ['prompt']
       });
     });
   });
@@ -55,6 +55,31 @@ describe('MCPServer', () => {
       expect(response).toHaveProperty('message');
     });
 
+    it('should handle prompt-only requests (empty png_paths)', async () => {
+      const request = {
+        png_paths: [],
+        prompt: 'Create a simple blue circle icon'
+      };
+
+      const response = await server.handleToolCall('generate_icon', request);
+      
+      expect(response).toHaveProperty('success');
+      expect(response).toHaveProperty('message');
+      expect(response).toHaveProperty('output_path');
+    });
+
+    it('should handle prompt-only requests (missing png_paths)', async () => {
+      const request = {
+        prompt: 'Create a simple red square icon'
+      };
+
+      const response = await server.handleToolCall('generate_icon', request);
+      
+      expect(response).toHaveProperty('success');
+      expect(response).toHaveProperty('message');
+      expect(response).toHaveProperty('output_path');
+    });
+
     it('should validate required parameters', async () => {
       const request = {
         png_paths: [],
@@ -64,7 +89,19 @@ describe('MCPServer', () => {
       const response = await server.handleToolCall('generate_icon', request);
       
       expect(response.success).toBe(false);
-      expect(response.error).toContain('png_paths');
+      expect(response.error).toContain('prompt');
+    });
+
+    it('should fail when both png_paths and prompt are empty', async () => {
+      const request = {
+        png_paths: [],
+        prompt: ''
+      };
+
+      const response = await server.handleToolCall('generate_icon', request);
+      
+      expect(response.success).toBe(false);
+      expect(response.error).toContain('prompt');
     });
 
     it('should handle unknown tools', async () => {

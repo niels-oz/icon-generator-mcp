@@ -92,6 +92,35 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     expect(response.processing_time).toBeDefined();
   });
 
+  it('should handle prompt-only generation (no PNG files)', async () => {
+    const request = {
+      png_paths: [],
+      prompt: 'Create a simple blue circle icon'
+    };
+
+    // Mock no PNG files, but directory writable
+    mockFs.existsSync.mockReturnValueOnce(false); // No conflict with output file
+    mockFs.accessSync.mockReturnValue(undefined);
+    
+    // Mock Claude generation directly (no PNG conversion needed)
+    mockExecSync
+      .mockReturnValueOnce('/usr/local/bin/claude') // which claude
+      .mockReturnValueOnce(`
+FILENAME: blue-circle-icon
+SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="40" fill="blue"/>
+</svg>
+      `); // claude generation
+
+    const response = await server.handleToolCall('generate_icon', request);
+    
+    expect(response.success).toBe(true);
+    expect(response.message).toContain('Icon generated successfully');
+    expect(response.message).toContain('blue-circle-icon.svg');
+    expect(response.output_path).toBe('./blue-circle-icon.svg');
+    expect(response.processing_time).toBeDefined();
+  });
+
   it('should handle validation errors gracefully', async () => {
     const request = {
       png_paths: [],
