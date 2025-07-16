@@ -30,9 +30,9 @@ After comparing CLI tool vs MCP server approaches, MCP server was chosen for:
 - **Future**: Bundled binaries for zero-dependency experience
 
 ### Platform Support
-- **MVP**: macOS Apple Silicon only
-- **Rationale**: Focused scope, minimal testing overhead
-- **Future**: macOS Intel, Windows, Linux support
+- **MVP**: macOS (Intel and Apple Silicon)
+- **Rationale**: Homebrew handles architecture detection automatically
+- **Future**: Windows, Linux support
 
 ### LLM Integration
 - **MVP**: Claude Code CLI only

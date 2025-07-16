@@ -17,7 +17,7 @@ The Icon Generator MCP Server enables developers to create custom SVG icons by p
 
 Before installing, ensure you have:
 - **Node.js** (v18 or newer)
-- **macOS** (Apple Silicon) - MVP version
+- **macOS** (Intel or Apple Silicon)
 - **Claude Code** installed and configured
 
 ## Installation
@@ -59,7 +59,7 @@ Add the server to your Claude Code configuration:
 
 ### 4. Restart Claude Code
 
-Restart Claude Code to load the new MCP server. You should see `generate_icon` available in the tools list.
+Restart Claude Code to load the new MCP server. The `generate_icon` tool will be available for Claude Code to use automatically when you request icon generation.
 
 ## Usage
 
@@ -204,9 +204,6 @@ We welcome contributions! Please see:
 - [Development Guide](CLAUDE.md)
 - [Future Improvements](docs/future-improvements.md)
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 
