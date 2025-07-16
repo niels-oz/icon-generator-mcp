@@ -74,6 +74,7 @@ temp_*.bmp
 # Generated SVG files during testing
 test-output-*.svg
 test_*.svg
+*.svg
 
 # Debug files
 debug.log
