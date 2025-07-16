@@ -1,14 +1,15 @@
 # Icon Generator MCP Server
 
-Generate SVG icons from PNG references using AI, integrated directly into your Claude Code workflow.
+Generate SVG icons from PNG references and/or text prompts using AI, integrated directly into your Claude Code workflow.
 
 ## Overview
 
-The Icon Generator MCP Server enables developers to create custom SVG icons by providing PNG reference images and text prompts. It leverages AI to understand your design intent and generates production-ready SVG icons that match your requirements.
+The Icon Generator MCP Server enables developers to create custom SVG icons by providing PNG reference images and/or text prompts. It leverages AI to understand your design intent and generates production-ready SVG icons that match your requirements.
 
 **Key Features:**
 - 🎨 **AI-Powered Generation**: Uses Claude to create contextually appropriate icons
-- 🔄 **PNG to SVG Conversion**: Automatically vectorizes reference images
+- 🔄 **PNG to SVG Conversion**: Automatically vectorizes reference images (optional)
+- ✨ **Prompt-Only Generation**: Create icons from text descriptions alone
 - 🛠️ **Claude Code Integration**: Works seamlessly within your development workflow
 - 🔒 **Local Processing**: All processing happens locally on your machine
 - 📁 **Smart File Management**: Automatically places icons in appropriate locations
@@ -67,9 +68,15 @@ Restart Claude Code to load the new MCP server. The `generate_icon` tool will be
 
 Once configured, you can generate icons directly through Claude Code:
 
+**With PNG References:**
 ```
 Generate an icon based on these PNG files: logo.png, reference.png
 Make it more minimalist and suitable for a web application.
+```
+
+**Prompt-Only Generation:**
+```
+Create a simple blue circle icon for a navigation button
 ```
 
 ### Advanced Usage
@@ -93,13 +100,20 @@ Generate a new icon that combines elements from all three
 Make it cohesive and modern
 ```
 
+**Prompt-Only with Custom Settings:**
+```
+Create a minimalist arrow icon pointing right
+Save it as "nav-arrow" in the ./assets/icons/ directory
+```
+
 ### File Management
 
-- **Input**: PNG files from your project directory
-- **Output**: SVG files saved in the same directory as input PNGs (or custom path)
+- **Input**: PNG files from your project directory (optional) or text prompts only
+- **Output**: SVG files saved in the same directory as input PNGs, custom path, or current directory
 - **Naming**: AI generates contextually appropriate filenames
 - **Conflicts**: Automatic numbering (e.g., `icon-2.svg`, `icon-3.svg`)
 - **Custom Paths**: Use `output_path` parameter to specify save location
+- **Prompt-Only**: When no PNG files provided, saves to current directory by default
 
 ## Examples
 
@@ -122,6 +136,21 @@ Output: branded-material-icon.svg
 Input: product-photo.png
 Prompt: "Remove the background and create a clean product icon"
 Output: clean-product-icon.svg
+```
+
+### Example 4: Prompt-Only Generation
+```
+Input: (none)
+Prompt: "Create a simple home icon with a house outline"
+Output: home-outline-icon.svg
+```
+
+### Example 5: Prompt-Only with Custom Settings
+```
+Input: (none)
+Prompt: "Create a minimalist settings gear icon"
+Custom Name: "settings-gear"
+Output: settings-gear.svg
 ```
 
 ## Troubleshooting
@@ -161,9 +190,9 @@ DEBUG=icon-generator:* icon-generator-mcp --server
 ## Supported Formats
 
 ### Input
-- **PNG files** (required)
-- **File sizes** up to 10MB
-- **Multiple references** supported
+- **PNG files** (optional) - File sizes up to 10MB, multiple references supported
+- **Text prompts** (required) - Descriptive text for icon generation
+- **Hybrid approach** - Combine PNG references with text prompts for best results
 
 ### Output
 - **SVG format** (scalable vector graphics)

@@ -58,12 +58,17 @@ npm run build:prod
 ## MCP Tool Schema
 ```typescript
 generate_icon: {
-  png_paths: string[]    // Required: PNG file paths
+  png_paths?: string[]   // Optional: PNG file paths for reference
   prompt: string         // Required: Text prompt for icon generation
   output_name?: string   // Optional: Custom filename (without .svg)
   output_path?: string   // Optional: Custom output directory
 }
 ```
+
+**Usage Modes:**
+- **PNG-based**: Provide `png_paths` with reference images + descriptive `prompt`
+- **Prompt-only**: Provide only `prompt` for text-based icon generation
+- **Hybrid**: Combine PNG references with detailed text instructions
 
 ## Code Conventions
 - **TypeScript**: Strict mode enabled
@@ -93,6 +98,9 @@ node example/simple-test.js
 
 # Test with custom output path
 node example/test-output-path.js
+
+# Test prompt-only generation
+node example/test-prompt-only.js
 ```
 
 ### Debugging
@@ -105,13 +113,15 @@ which potrace && which claude
 ```
 
 ## Architecture Notes
-- **Pipeline**: PNG → SVG (Potrace) → LLM Processing → File Output
+- **Pipeline**: [PNG → SVG (Potrace)] → LLM Processing → File Output
+- **Modes**: PNG-based, prompt-only, or hybrid generation
 - **Security**: No credential handling, delegates to Claude Code CLI
 - **Dependencies**: External binaries managed via Homebrew
-- **Testing**: 67 tests across unit, integration, and security suites
+- **Testing**: 75 tests across unit, integration, and security suites
 
 ## Important Implementation Details
 - LLM service uses Claude Code CLI via subprocess execution
 - File writer handles conflict resolution with numeric suffixes
-- PNG conversion uses Jimp for preprocessing before Potrace
+- PNG conversion uses Jimp for preprocessing before Potrace (optional)
+- Prompt-only generation defaults to current directory output
 - All services follow error-first callback pattern with structured responses

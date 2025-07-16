@@ -1,7 +1,7 @@
 {
   "name": "icon-generator-mcp",
   "version": "0.1.0",
-  "description": "MCP server for AI-powered SVG icon generation",
+  "description": "MCP server for AI-powered SVG icon generation from PNG references and/or text prompts",
   "main": "dist/server.js",
   "bin": {
     "icon-generator-mcp": "dist/bin/cli.js"
