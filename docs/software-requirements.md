@@ -30,11 +30,9 @@ This document specifies the software requirements for the `icon-generator-mcp` M
 | **FR-5** | The system **MUST** accept an optional output filename parameter. If not provided, the LLM **MUST** generate a contextually appropriate filename. | High |
 | **FR-6** | The system **MUST** internally vectorize each input PNG image into a structured SVG XML format using a locally installed Potrace binary. | High |
 | **FR-7** | The system **MUST** construct a single, coherent prompt for the LLM that includes the full SVG XML text of all reference images and the user's text prompt. | High |
-| **FR-8** | The system **MUST** invoke the external Claude Code CLI tool as a subprocess to send the complete prompt to the Claude API. | High |
-| **FR-9** | The system **MUST** capture and parse the standard output from the Claude CLI, expecting it to contain both the generated SVG data and suggested filename. | High |
-| **FR-10**| The system **MUST** perform security sanitization on the received SVG to remove potentially executable elements (e.g., `<script>` tags, `on*` event attributes). | High |
-| **FR-11**| The system **MUST** save the final, sanitized SVG to the same directory as the input PNG files, with automatic filename conflict resolution. | High |
-| **FR-12**| The system **MUST** start on-demand when icon generation is requested through the MCP protocol. | High |
+| **FR-8**| The system **MUST** perform security sanitization on the received SVG to remove potentially executable elements (e.g., `<script>` tags, `on*` event attributes). | High |
+| **FR-9**| The system **MUST** save the final, sanitized SVG to the same directory as the input PNG files, with automatic filename conflict resolution. | High |
+| **FR-10**| The system **MUST** start on-demand when icon generation is requested through the MCP protocol. | High |
 
 ### 4. Non-Functional Requirements (NFR)
 
