@@ -1,4 +1,4 @@
-const { MCPServer } = require('../dist/server');
+const { MCPServer } = require('../../dist/server');
 const path = require('path');
 
 async function runSimpleTest() {
@@ -8,7 +8,7 @@ async function runSimpleTest() {
   const server = new MCPServer();
   
   // Test PNG file path
-  const testPngPath = path.join(__dirname, '../test/fixtures/test.png');
+  const testPngPath = path.join(__dirname, '../../test/fixtures/test.png');
   
   // Test request
   const request = {

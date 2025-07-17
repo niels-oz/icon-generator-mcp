@@ -3,8 +3,7 @@
 export interface IconGenerationRequest {
   png_paths: string[];
   prompt: string;
-  search_keyword?: string;
-  auto_search?: boolean;
+  generate_variations?: boolean;
   output_name?: string;
   output_path?: string;
 }

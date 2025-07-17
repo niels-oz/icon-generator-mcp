@@ -2,9 +2,13 @@ import { IconGenerationRequest, IconGenerationResponse } from './types';
 import { ConversionService } from './services/converter';
 import { LLMService } from './services/llm';
 import { FileWriterService } from './services/file-writer';
-import { WebImageSearchService } from './services/web-search';
 import * as path from 'path';
 import * as fs from 'fs';
+
+interface VariationConfig {
+  name: string;
+  prompt: string;
+}
 
 export class MCPServer {
   public readonly name = 'icon-generator-mcp';
@@ -13,13 +17,11 @@ export class MCPServer {
   private conversionService: ConversionService;
   private llmService: LLMService;
   private fileWriterService: FileWriterService;
-  private webSearchService: WebImageSearchService;
   
   constructor() {
     this.conversionService = new ConversionService();
     this.llmService = new LLMService();
     this.fileWriterService = new FileWriterService();
-    this.webSearchService = new WebImageSearchService();
   }
 
   getTools() {
@@ -39,13 +41,9 @@ export class MCPServer {
               type: 'string',
               description: 'Text description of the desired icon'
             },
-            search_keyword: {
-              type: 'string',
-              description: 'Single keyword or 2-word phrase for web image search (e.g., "star", "folder", "shopping cart")'
-            },
-            auto_search: {
+            generate_variations: {
               type: 'boolean',
-              description: 'Whether to automatically search web for reference images'
+              description: 'Generate multiple variations (3-4) instead of single icon. Automatically enabled for style-specific requests.'
             },
             output_name: { 
               type: 'string',
@@ -111,26 +109,120 @@ export class MCPServer {
     return {
       png_paths: pngPaths,
       prompt: request.prompt.trim(),
-      search_keyword: request.search_keyword,
-      auto_search: request.auto_search,
+      generate_variations: request.generate_variations,
       output_name: request.output_name,
       output_path: request.output_path
     };
   }
 
   private async generateIcon(request: IconGenerationRequest): Promise<{ output_path: string; message: string }> {
-    // Step 1: Get PNG files from manual uploads and web search
-    let pngPaths = request.png_paths || [];
+    // Check if variations should be generated
+    const shouldGenerateVariations = request.generate_variations || this.shouldAutoGenerateVariations(request.prompt);
     
-    // Add web search results if requested
-    if (request.auto_search && request.search_keyword) {
+    if (shouldGenerateVariations) {
+      return this.generateIconVariations(request);
+    }
+    
+    return this.generateSingleIcon(request);
+  }
+
+  private shouldAutoGenerateVariations(prompt: string): boolean {
+    const styleKeywords = [
+      'black and white', 'black & white', 'b&w', 'monochrome',
+      'outline', 'outlines', 'line art', 'stroke',
+      'flat', 'minimal', 'simple', 'clean',
+      'variations', 'options', 'different styles'
+    ];
+    
+    const promptLower = prompt.toLowerCase();
+    return styleKeywords.some(keyword => promptLower.includes(keyword));
+  }
+
+  private async generateIconVariations(request: IconGenerationRequest): Promise<{ output_path: string; message: string }> {
+    const variations = this.createVariationPrompts(request.prompt);
+    const results: string[] = [];
+    
+    for (const variation of variations) {
       try {
-        const searchedPngs = await this.webSearchService.searchSimpleIcons(request.search_keyword);
-        pngPaths = [...pngPaths, ...searchedPngs];
+        const variationRequest = {
+          ...request,
+          prompt: variation.prompt,
+          output_name: request.output_name ? `${request.output_name}-${variation.name}` : undefined,
+          generate_variations: false // Prevent recursion
+        };
+        
+        const result = await this.generateSingleIcon(variationRequest);
+        results.push(result.output_path);
       } catch (error) {
-        console.warn('Web search failed, continuing with manual PNGs only:', error);
+        console.warn(`Failed to generate variation ${variation.name}:`, error);
       }
     }
+    
+    if (results.length === 0) {
+      throw new Error('Failed to generate any variations');
+    }
+    
+    return {
+      output_path: results.join(', '),
+      message: `Generated ${results.length} variations: ${results.map(p => path.basename(p)).join(', ')}`
+    };
+  }
+
+  private createVariationPrompts(basePrompt: string): VariationConfig[] {
+    const keyword = this.extractKeyword(basePrompt);
+    const style = this.extractStyle(basePrompt);
+    
+    return [
+      {
+        name: 'primary',
+        prompt: `${basePrompt} - focus on the main concept with ${style}`
+      },
+      {
+        name: 'detailed',
+        prompt: `Create a ${keyword} icon with more detail and elements. ${style}`
+      },
+      {
+        name: 'minimal',
+        prompt: `Create a ${keyword} icon with minimal elements and maximum simplicity. ${style}`
+      },
+      {
+        name: 'geometric',
+        prompt: `Create a ${keyword} icon using geometric shapes and clean lines. ${style}`
+      }
+    ];
+  }
+
+  private extractKeyword(prompt: string): string {
+    // Simple keyword extraction - can be improved
+    const words = prompt.toLowerCase().split(' ');
+    const stopWords = ['create', 'icon', 'with', 'and', 'the', 'a', 'an', 'for', 'black', 'white', 'simple', 'flat', 'outline'];
+    const keywords = words.filter(word => !stopWords.includes(word) && word.length > 2);
+    return keywords.slice(0, 2).join(' ') || 'icon';
+  }
+
+  private extractStyle(prompt: string): string {
+    const styles = [];
+    const promptLower = prompt.toLowerCase();
+    
+    if (promptLower.includes('black and white') || promptLower.includes('black & white')) {
+      styles.push('black and white');
+    }
+    if (promptLower.includes('outline')) {
+      styles.push('outline style');
+    }
+    if (promptLower.includes('flat')) {
+      styles.push('flat design');
+    }
+    if (promptLower.includes('minimal')) {
+      styles.push('minimal approach');
+    }
+    
+    return styles.length > 0 ? `Use ${styles.join(', ')}` : 'Use clean, professional styling';
+  }
+
+  private async generateSingleIcon(request: IconGenerationRequest): Promise<{ output_path: string; message: string }> {
+    // Step 1: Get PNG files from manual uploads
+    let pngPaths = request.png_paths || [];
     
     // Step 2: Convert all image files to SVG references
     const svgReferences: string[] = [];
