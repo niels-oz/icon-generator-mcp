@@ -1,17 +1,18 @@
 {
   "name": "icon-generator-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for AI-powered SVG icon generation from PNG references and/or text prompts",
   "main": "dist/server.js",
   "bin": {
-    "icon-generator-mcp": "dist/bin/cli.js"
+    "icon-generator-mcp": "bin/mcp-server.js"
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "node dist/server.js"
+    "start": "node bin/mcp-server.js",
+    "setup": "cp .env.example .env && echo 'Please edit .env with your API keys'"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.4.0",
@@ -33,14 +34,19 @@
     "darwin"
   ],
   "files": [
-    "dist/"
+    "dist/",
+    "bin/",
+    "README.md"
   ],
   "keywords": [
     "mcp",
     "icon",
     "svg",
     "ai",
-    "claude"
+    "claude",
+    "generator",
+    "developer-tools",
+    "automation"
   ],
   "author": "",
   "license": "MIT"

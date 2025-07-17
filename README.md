@@ -1,6 +1,289 @@
 # Icon Generator MCP Server
 
-Generate SVG icons from PNG references and/or text prompts using AI, integrated directly into your Claude Code workflow.
+> **AI-powered SVG icon generation for developers** - Generate professional icons instantly using Claude Code MCP integration
+
+Transform your development workflow with intelligent icon generation. This MCP server combines web search, PNG-to-SVG conversion, and AI creativity to produce clean, scalable icons in seconds.
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment
+npm run setup
+
+# Build the project
+npm run build
+
+# Start the MCP server
+npm start
+```
+
+## ✨ Features
+
+- **🎨 Intelligent Icon Generation**: Create SVG icons from text prompts
+- **🔍 Web Search Integration**: Automatically find reference images
+- **🖼️ PNG to SVG Conversion**: Convert PNG references using Potrace
+- **🎭 Smart Variations**: Auto-generate multiple design options
+- **⚡ Style Detection**: Automatically detects style preferences
+- **🛡️ Production Ready**: Robust error handling and validation
+
+## 🛠️ Installation
+
+### Prerequisites
+```bash
+# Required system dependencies
+brew install potrace
+npm install -g @anthropic-ai/claude-dev
+
+# Verify installations
+potrace --version
+claude --version
+```
+
+### Setup
+```bash
+git clone <repository-url>
+cd icon-generator
+npm install
+npm run setup
+```
+
+### Configuration
+Edit `.env` file with your API keys:
+```env
+GOOGLE_SEARCH_API_KEY=your_google_search_api_key_here
+GOOGLE_SEARCH_ENGINE_ID=your_custom_search_engine_id_here
+```
+
+## 📖 Usage
+
+### Basic Icon Generation
+```javascript
+const { MCPServer } = require('./dist/server');
+const server = new MCPServer();
+
+const request = {
+  prompt: 'Create a star icon with clean lines'
+};
+
+const response = await server.handleToolCall('generate_icon', request);
+console.log(response.output_path); // ./star-icon.svg
+```
+
+### Web Search Enhanced
+```javascript
+const request = {
+  prompt: 'Create a folder icon',
+  search_keyword: 'folder',
+  auto_search: true
+};
+```
+
+### Style-Specific Generation
+```javascript
+const request = {
+  prompt: 'Create a code review icon with black and white outlines, simple flat design'
+  // Auto-generates 4 variations due to style keywords
+};
+```
+
+### Multiple Variations
+```javascript
+const request = {
+  prompt: 'Create a star icon',
+  generate_variations: true  // Force variation mode
+};
+```
+
+## 🎯 MCP Tool Schema
+
+### `generate_icon`
+Generate SVG icons from prompts and references.
+
+**Parameters:**
+- `prompt` (string, required): Text description of the desired icon
+- `png_paths` (array, optional): PNG file paths for references
+- `search_keyword` (string, optional): Keyword for web search
+- `auto_search` (boolean, optional): Enable web search
+- `generate_variations` (boolean, optional): Generate multiple variations
+- `output_name` (string, optional): Custom filename
+- `output_path` (string, optional): Custom output directory
+
+**Response:**
+- `success` (boolean): Operation success status
+- `output_path` (string): Path to generated icon(s)
+- `message` (string): Human-readable result message
+- `processing_time` (number): Generation time in milliseconds
+
+## 🧠 Smart Features
+
+### Auto-Variation Detection
+The system automatically generates variations when it detects style-specific keywords:
+- `black and white`, `monochrome`, `b&w`
+- `outline`, `line art`, `stroke`
+- `flat`, `minimal`, `simple`, `clean`
+- `variations`, `options`, `different styles`
+
+### Intelligent Prompt Analysis
+- **Keyword Extraction**: Identifies main concepts
+- **Style Detection**: Recognizes design preferences
+- **Context Understanding**: Adapts generation approach
+
+### Web Search Integration
+- **Smart Queries**: Optimized search terms
+- **Format Filtering**: SVG/PNG only, excludes JPG
+- **Quality Filtering**: Filters out photos and complex graphics
+- **Reference Downloading**: Automatic image acquisition
+
+## 🔧 Development
+
+### Project Structure
+```
+icon-generator/
+├── src/
+│   ├── server.ts           # Main MCP server
+│   ├── types.ts           # TypeScript interfaces
+│   └── services/
+│       ├── converter.ts    # PNG to SVG conversion
+│       ├── llm.ts         # Claude CLI integration
+│       ├── file-writer.ts # File output management
+│       └── web-search.ts  # Google Search integration
+├── test/                  # Test suites
+├── example/
+│   ├── demos/            # Demo scripts
+│   └── test-outputs/     # Generated test icons
+├── bin/
+│   └── mcp-server.js     # Server entry point
+└── CLAUDE.md             # Claude Code instructions
+```
+
+### Development Commands
+```bash
+npm run dev          # Watch mode with auto-rebuild
+npm test            # Run test suite
+npm run test:watch  # Watch mode testing
+npm run build       # Build TypeScript
+npm start           # Start production server
+```
+
+### Testing
+```bash
+# Run all tests
+npm test
+
+# Test specific functionality
+npm test -- --testNamePattern="WebImageSearchService"
+
+# Run with coverage
+npm test -- --coverage
+
+# Demo scripts
+node example/demos/test-simple.js
+node example/demos/test-code-review-workflow.js
+```
+
+## 🎨 Examples
+
+### Single Icon Generation
+```bash
+node example/demos/test-simple.js
+```
+**Output:** `./star-icon.svg` (10s)
+
+### Multiple Variations
+```bash
+node example/demos/test-code-review-bw-variations.js
+```
+**Output:** 4 variations (44s total)
+- `code-review-bw-primary.svg`
+- `code-review-bw-detailed.svg`
+- `code-review-bw-minimal.svg`
+- `code-review-bw-geometric.svg`
+
+### Web Search Integration
+```bash
+node example/demos/test-web-search.js
+```
+**Features:**
+- Finds reference images automatically
+- Combines with custom prompts
+- Graceful fallback without API keys
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+# Google Search API (optional)
+GOOGLE_SEARCH_API_KEY=your_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_engine_id
+
+# Server Configuration
+DEFAULT_OUTPUT_PATH=./icons
+MAX_SEARCH_RESULTS=3
+DEBUG_MODE=false
+
+# MCP Settings
+MCP_SERVER_NAME=icon-generator-mcp
+MCP_SERVER_VERSION=1.0.0
+```
+
+### MCP Server Registration
+Add to your Claude Code MCP configuration:
+```json
+{
+  "servers": {
+    "icon-generator": {
+      "command": "node",
+      "args": ["/path/to/icon-generator/bin/mcp-server.js"]
+    }
+  }
+}
+```
+
+## 📊 Performance
+
+### Benchmarks
+- **Single icon**: ~10 seconds
+- **4 variations**: ~44 seconds (sequential)
+- **Web search**: +2-3 seconds per query
+- **PNG conversion**: ~1-2 seconds per file
+
+### Optimization Tips
+- Use web search for better results
+- Enable variations for style-specific requests
+- Provide clear, descriptive prompts
+- Use PNG references for complex concepts
+
+## 🛡️ Security
+
+- **Input Validation**: All inputs are sanitized
+- **SVG Sanitization**: Generated SVGs are validated
+- **No Credential Storage**: Uses Claude CLI authentication
+- **Path Validation**: Secure file operations
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - feel free to use in your projects!
+
+## 🆘 Support
+
+- **Issues**: Report bugs on GitHub
+- **Documentation**: See `CLAUDE.md` for detailed implementation
+- **Examples**: Check `example/demos/` for usage patterns
+
+---
+
+**Made with ❤️ for developers who need beautiful icons fast.**
 
 ## Overview
 

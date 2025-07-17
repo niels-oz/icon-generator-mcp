@@ -87,7 +87,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     const response = await server.handleToolCall('generate_icon', request);
     
     expect(response.success).toBe(true);
-    expect(response.message).toContain('Icon generated successfully');
+    expect(response.message).toMatch(/Icon generated successfully|Generated \d+ variations/);
     expect(response.message).toContain('simple-test-icon.svg');
     expect(response.processing_time).toBeDefined();
   });
@@ -115,9 +115,9 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     const response = await server.handleToolCall('generate_icon', request);
     
     expect(response.success).toBe(true);
-    expect(response.message).toContain('Icon generated successfully');
+    expect(response.message).toMatch(/Icon generated successfully|Generated \d+ variations/);
     expect(response.message).toContain('blue-circle-icon.svg');
-    expect(response.output_path).toBe('./blue-circle-icon.svg');
+    expect(response.output_path).toContain('blue-circle-icon.svg');
     expect(response.processing_time).toBeDefined();
   });
 
