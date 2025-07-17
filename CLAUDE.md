@@ -59,10 +59,12 @@ npm start
 ### MCP Tool Schema
 ```typescript
 generate_icon: {
-  png_paths?: string[]   // Optional: PNG reference files
-  prompt: string         // Required: Generation prompt
-  output_name?: string   // Optional: Custom filename
-  output_path?: string   // Optional: Custom output directory
+  png_paths?: string[]     // Optional: PNG reference files
+  prompt: string           // Required: Generation prompt
+  search_keyword?: string  // Optional: Keyword for web image search
+  auto_search?: boolean    // Optional: Enable automatic web search
+  output_name?: string     // Optional: Custom filename
+  output_path?: string     // Optional: Custom output directory
 }
 ```
 
@@ -118,7 +120,8 @@ node example/test-prompt-only.js
 ### Generation Modes
 - **PNG-based**: Uses reference images + descriptive prompt
 - **Prompt-only**: Pure text-based generation
-- **Hybrid**: Combines PNG references with detailed instructions
+- **Web search enhanced**: Automatically finds reference images from web
+- **Hybrid**: Combines manual PNG references with web search results
 
 ## Debugging
 ```bash
