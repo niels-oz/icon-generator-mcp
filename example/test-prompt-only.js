@@ -9,7 +9,13 @@ async function testPromptOnly() {
   console.log('📋 Test 1: Empty png_paths array');
   const request1 = {
     png_paths: [],
-    prompt: 'Create a simple blue circle icon'
+    prompt: `The Confirmed Commit
+
+This icon focuses on the "completion" and "confirmation" aspect of a commit. It is very popular in modern UIs like VS Code.
+
+    Description: Draw a simple, medium-sized circle in the center of the icon. Inside this circle, place a bold, clean checkmark (✓). The checkmark's lines should be thick so they are clearly visible.
+
+    Concept: The changes are confirmed and saved. The circle represents the commit as a self-contained unit.`
   };
   
   console.log(`  PNG paths: ${JSON.stringify(request1.png_paths)}`);
@@ -31,7 +37,13 @@ async function testPromptOnly() {
   // Test 2: Missing png_paths property
   console.log('📋 Test 2: Missing png_paths property');
   const request2 = {
-    prompt: 'Create a simple red square icon'
+    prompt: `The Simple Branch
+
+This icon abstracts the Git logo, focusing on the creation of a commit on a branch.
+
+    Description: Draw a primary vertical line. About halfway up, have a second, shorter line branch off at a 45-degree angle. At the very end of this shorter branch, place a single, solid, filled circle.
+
+    Concept: This is a commit (the dot) being made on a new or existing branch. It’s instantly recognizable to anyone familiar with Git.`
   };
   
   console.log(`  PNG paths: (not provided)`);

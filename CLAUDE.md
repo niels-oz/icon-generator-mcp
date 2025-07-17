@@ -1,28 +1,18 @@
-# Icon Generator MCP Server - Development Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Tech Stack
-- **Language**: TypeScript
-- **Platform**: macOS (Intel and Apple Silicon)
+- **Language**: TypeScript with strict mode
+- **Platform**: macOS (Intel and Apple Silicon)  
 - **Runtime**: Node.js v18+
-- **Testing**: Jest
+- **Testing**: Jest with ts-jest
 - **Dependencies**: Potrace (via Homebrew), Claude Code CLI
 - **Architecture**: MCP Server for PNG→SVG icon generation
 
-## Project Structure
-```
-src/
-├── server.ts          # MCP server entry point
-├── bin/cli.ts         # CLI interface
-├── services/
-│   ├── converter.ts   # PNG to SVG conversion
-│   ├── llm.ts         # Claude Code CLI wrapper
-│   └── file-writer.ts # Output management
-└── types.ts           # TypeScript definitions
-```
-
 ## Prerequisites
 ```bash
-# Required dependencies
+# Required system dependencies
 brew install potrace
 npm install -g @anthropic-ai/claude-dev
 
@@ -39,61 +29,66 @@ npm install
 # Build TypeScript
 npm run build
 
+# Development with auto-rebuild
+npm run dev
+
 # Run tests
 npm test
 
-# Run integration tests
-npm run test:integration
+# Run tests in watch mode
+npm run test:watch
 
-# Run security tests
-npm run test:security
-
-# Development server (with auto-reload)
-npm run dev
-
-# Production build
-npm run build:prod
+# Start production server
+npm start
 ```
 
-## MCP Tool Schema
+## Project Architecture
+
+### Core Components
+- **MCPServer** (`src/server.ts`) - Main orchestrator, handles MCP protocol and coordinates services
+- **ConversionService** (`src/services/converter.ts`) - PNG→SVG conversion using Potrace
+- **LLMService** (`src/services/llm.ts`) - Claude CLI integration with security validation
+- **FileWriterService** (`src/services/file-writer.ts`) - Output management with conflict resolution
+
+### Service Flow
+1. Request validation and parsing
+2. PNG conversion (if PNG files provided)
+3. LLM processing for SVG generation/enhancement
+4. Output file writing with automatic naming
+
+### MCP Tool Schema
 ```typescript
 generate_icon: {
-  png_paths?: string[]   // Optional: PNG file paths for reference
-  prompt: string         // Required: Text prompt for icon generation
-  output_name?: string   // Optional: Custom filename (without .svg)
+  png_paths?: string[]   // Optional: PNG reference files
+  prompt: string         // Required: Generation prompt
+  output_name?: string   // Optional: Custom filename
   output_path?: string   // Optional: Custom output directory
 }
 ```
 
-**Usage Modes:**
-- **PNG-based**: Provide `png_paths` with reference images + descriptive `prompt`
-- **Prompt-only**: Provide only `prompt` for text-based icon generation
-- **Hybrid**: Combine PNG references with detailed text instructions
+## Testing Strategy
 
-## Code Conventions
-- **TypeScript**: Strict mode enabled
-- **Testing**: TDD approach with minimal mocking
-- **Error Handling**: Structured error responses with step context
-- **Security**: Input validation, output sanitization for SVG
-- **File Management**: Smart naming with conflict resolution
+### Test Organization
+- **Unit Tests**: Individual service testing with mocking
+- **Integration Tests**: End-to-end workflow testing (timeout: 30s)
+- **Fixtures**: Real PNG/SVG files in `test/fixtures/`
+- **Coverage**: Jest coverage reporting enabled
 
-## Common Tasks
-
-### Running Tests
+### Running Specific Tests
 ```bash
-# Run specific test file
+# Test specific service
 npm test -- --testNamePattern="ConversionService"
 
-# Run with coverage
+# Test with coverage
 npm test -- --coverage
 
-# Run integration tests only
-npm run test:integration
+# Watch mode for development
+npm run test:watch
 ```
 
-### Manual Testing
+## Manual Testing
 ```bash
-# Test end-to-end with example script
+# Basic functionality test
 node example/simple-test.js
 
 # Test with custom output path
@@ -103,25 +98,39 @@ node example/test-output-path.js
 node example/test-prompt-only.js
 ```
 
-### Debugging
+## Key Implementation Details
+
+### Security Features
+- SVG sanitization in LLM service
+- Input validation for all file paths
+- No credential handling (delegates to Claude CLI)
+
+### Error Handling
+- Structured error responses with step context
+- Graceful fallbacks for missing dependencies
+- Proper cleanup of temporary files
+
+### File Management
+- Smart naming with conflict resolution (numeric suffixes)
+- Flexible output directory support
+- PNG preprocessing with Jimp before Potrace conversion
+
+### Generation Modes
+- **PNG-based**: Uses reference images + descriptive prompt
+- **Prompt-only**: Pure text-based generation
+- **Hybrid**: Combines PNG references with detailed instructions
+
+## Debugging
 ```bash
 # Enable MCP debug logging
 DEBUG=mcp:* npm run dev
 
-# Check dependencies
+# Check system dependencies
 which potrace && which claude
 ```
 
-## Architecture Notes
-- **Pipeline**: [PNG → SVG (Potrace)] → LLM Processing → File Output
-- **Modes**: PNG-based, prompt-only, or hybrid generation
-- **Security**: No credential handling, delegates to Claude Code CLI
-- **Dependencies**: External binaries managed via Homebrew
-- **Testing**: 75 tests across unit, integration, and security suites
-
-## Important Implementation Details
-- LLM service uses Claude Code CLI via subprocess execution
-- File writer handles conflict resolution with numeric suffixes
-- PNG conversion uses Jimp for preprocessing before Potrace (optional)
-- Prompt-only generation defaults to current directory output
-- All services follow error-first callback pattern with structured responses
+## Code Conventions
+- TypeScript strict mode enabled
+- Error-first callback pattern for services
+- Comprehensive input validation
+- No external API keys (uses Claude CLI authentication)
