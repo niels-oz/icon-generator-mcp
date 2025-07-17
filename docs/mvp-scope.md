@@ -19,17 +19,16 @@ To create an MCP server that enables developers to generate SVG icons from PNG r
 
 The following features and characteristics define the mandatory scope for the initial release:
 
-*   **Core Functionality:** The MCP server will perform single, end-to-end icon generation per request, creating one new SVG icon from provided PNG references and text prompt.
+*   **Core Functionality:** The MCP server will perform single, end-to-end icon generation per request, creating one - three new SVG icon from provided PNG references and text prompt.
 *   **MCP Server Architecture:** The server will expose an `generate_icon` tool via the MCP protocol, allowing integration with Claude Code and other MCP-compatible clients.
 *   **Input Format:** The server will support PNG files as image inputs (single or multiple references) plus mandatory text prompt.
-*   **Platform Support:** The MVP will be officially developed for and supported on **macOS Apple Silicon only** to minimize complexity.
-*   **LLM Provider:** The server will exclusively use the **Anthropic Claude** model family via the Claude Code CLI tool as its generative engine.
-*   **LLM Interaction:** The server will interact with Claude by invoking the official Claude Code CLI tool as a subprocess. It will not handle API keys or authentication tokens directly.
+*   **Platform Support:** The MVP will be officially developed for and supported on **macOS only** to minimize complexity.
+*   **LLM Provider:** The server will exclusively use the **Anthropic Claude** model family.
 *   **Vectorization Engine:** The server will use locally installed `potrace` binary for PNG-to-SVG vectorization. Users must install via `brew install potrace`.
 *   **Image Pre-processing:** Any necessary image manipulation (e.g., converting PNG to the BMP format required by Potrace) will be handled by a pure JavaScript library (`jimp`) to avoid system-level dependencies like ImageMagick.
 *   **Installation:** The server must be installable as a global package via npm (`npm install -g icon-generator-mcp`).
 *   **Server Activation:** The MCP server will be started on-demand when icon generation is requested through the MCP protocol.
-*   **Output Management:** Generated SVG files will be saved to the same directory as input PNG files with LLM-generated filenames and automatic conflict resolution.
+*   **Output Management:** Generated SVG files will be saved to the same directory as input PNG files with LLM-generated filenames and automatic conflict resolution OR in a given path.
 *   **Tool Agnostic Design:** The server architecture will support future integration with other LLM providers, though MVP implementation uses Claude Code CLI only.
 
 ### 3. MVP: Out-of-Scope (Future Iterations)
