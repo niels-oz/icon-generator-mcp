@@ -61,8 +61,7 @@ npm start
 generate_icon: {
   png_paths?: string[]     // Optional: PNG reference files
   prompt: string           // Required: Generation prompt
-  search_keyword?: string  // Optional: Keyword for web image search
-  auto_search?: boolean    // Optional: Enable automatic web search
+  style?: string           // Optional: Style preset for consistent generation (e.g., "black-white-flat")
   output_name?: string     // Optional: Custom filename
   output_path?: string     // Optional: Custom output directory
 }

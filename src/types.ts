@@ -3,9 +3,9 @@
 export interface IconGenerationRequest {
   png_paths: string[];
   prompt: string;
-  generate_variations?: boolean;
   output_name?: string;
   output_path?: string;
+  style?: string;
 }
 
 export interface IconGenerationResponse {

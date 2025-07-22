@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import { LLMResponse } from '../types';
+import { StyleConfig, getStyleConfig } from '../styles/few-shot-examples';
 
 export interface LLMConfig {
   timeout: number;
@@ -69,6 +70,9 @@ export class LLMService {
    * Sanitize SVG content to remove dangerous elements
    */
   sanitizeSVG(svg: string): string {
+    // Remove markdown code fences if present
+    svg = svg.replace(/^```\w*\n?/m, '').replace(/\n?```$/m, '');
+    
     // Remove script tags and their content
     svg = svg.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
     
@@ -85,17 +89,37 @@ export class LLMService {
   }
 
   /**
-   * Build system prompt for Claude CLI
+   * Build system prompt for Claude CLI with optional few-shot learning
    */
-  buildSystemPrompt(userPrompt: string, svgReferences: string[]): string {
-    const systemPrompt = `You are an expert SVG icon designer. Given SVG references and a user request, generate a clean, optimized SVG icon.
+  buildSystemPrompt(userPrompt: string, svgReferences: string[], styleConfig?: StyleConfig): string {
+    let systemPrompt = `You are an expert SVG icon designer. Given SVG references and a user request, generate a clean, optimized SVG icon.`;
 
-${svgReferences.length > 0 ? `Reference SVG icons:
+    // Add few-shot examples if style config is provided
+    if (styleConfig) {
+      systemPrompt += `\n\nSTYLE: ${styleConfig.name}
+${styleConfig.description}
+
+Here are examples of this style:
+
+${styleConfig.examples.map((example, index) => `Example ${index + 1}:
+Prompt: "${example.prompt}"
+Description: ${example.description}
+SVG:
+${example.svg}
+`).join('\n')}
+
+Follow the exact same style, structure, and visual approach as these examples.`;
+    }
+
+    // Add reference SVGs if provided
+    if (svgReferences.length > 0) {
+      systemPrompt += `\n\nReference SVG icons:
 ${svgReferences.map((svg, index) => `Reference ${index + 1}:
 ${svg}
-`).join('\n')}` : ''}
+`).join('\n')}`;
+    }
 
-User request: ${userPrompt}
+    systemPrompt += `\n\nUser request: ${userPrompt}
 
 Please generate:
 1. A clean SVG icon that fulfills the request
@@ -110,7 +134,8 @@ Requirements:
 - Include viewBox attribute for scalability
 - Use clean, optimized SVG code
 - No script tags or dangerous elements
-- Filename should be descriptive and kebab-case`;
+- Filename should be descriptive and kebab-case${styleConfig ? `
+- CRITICALLY IMPORTANT: Follow the exact style, stroke-width, color scheme, and visual approach from the provided examples` : ''}`;
 
     return systemPrompt;
   }
@@ -144,17 +169,20 @@ Requirements:
   }
 
   /**
-   * Generate SVG icon using Claude CLI
+   * Generate SVG icon using Claude CLI with optional style guidance
    */
-  async generateSVG(prompt: string, svgReferences: string[] = []): Promise<LLMResponse> {
+  async generateSVG(prompt: string, svgReferences: string[] = [], styleName?: string): Promise<LLMResponse> {
     // Validate input
     this.validatePrompt(prompt);
 
     // Check if Claude CLI is available
     this.findClaudeBinary();
 
-    // Build system prompt
-    const systemPrompt = this.buildSystemPrompt(prompt, svgReferences);
+    // Get style config if specified
+    const styleConfig = styleName ? getStyleConfig(styleName) : undefined;
+
+    // Build system prompt with few-shot learning if style is specified
+    const systemPrompt = this.buildSystemPrompt(prompt, svgReferences, styleConfig);
 
     try {
       // Execute Claude CLI with the prompt - use proper shell escaping
