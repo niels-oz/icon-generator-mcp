@@ -10,7 +10,7 @@ async function testOutputPath() {
   // Test 1: Using output_path parameter
   console.log('📋 Test 1: Using custom output_path');
   const request1 = {
-    png_paths: [testPngPath],
+    reference_paths: [testPngPath],
     prompt: 'Create a green circle icon',
     output_name: 'green-circle',
     output_path: '/tmp'  // Custom output directory
@@ -36,7 +36,7 @@ async function testOutputPath() {
   // Test 2: Without output_path (should use PNG directory)
   console.log('📋 Test 2: Without output_path (fallback to PNG directory)');
   const request2 = {
-    png_paths: [testPngPath],
+    reference_paths: [testPngPath],
     prompt: 'Create a blue square icon',
     output_name: 'blue-square'
   };

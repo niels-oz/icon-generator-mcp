@@ -41,7 +41,7 @@ async function yourTest() {
   try {
     const server = new MCPServer();
     const request = {
-      png_paths: [yourPngPath],
+      reference_paths: [yourPngPath],
       prompt: yourPrompt,
       output_name: 'your-custom-icon'
     };

@@ -25,11 +25,11 @@ describe('Core Functionality (Consolidated)', () => {
       expect(generateIconTool.name).toBe('generate_icon');
       expect(generateIconTool.inputSchema.required).toEqual(['prompt']);
       expect(generateIconTool.inputSchema.properties).toMatchObject({
-        png_paths: { type: 'array' },
+        reference_paths: { type: 'array' },
         prompt: { type: 'string' },
         output_name: { type: 'string' },
         output_path: { type: 'string' },
-        llm_provider: { enum: ['claude', 'gemini'] }
+        style: { type: 'string' }
       });
     });
 

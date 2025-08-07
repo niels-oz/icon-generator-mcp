@@ -5,10 +5,10 @@ async function testPromptOnly() {
   
   const server = new MCPServer();
   
-  // Test 1: Empty png_paths array
-  console.log('📋 Test 1: Empty png_paths array');
+  // Test 1: Empty reference_paths array
+  console.log('📋 Test 1: Empty reference_paths array');
   const request1 = {
-    png_paths: [],
+    reference_paths: [],
     prompt: `The Confirmed Commit
 
 This icon focuses on the "completion" and "confirmation" aspect of a commit. It is very popular in modern UIs like VS Code.
@@ -18,7 +18,7 @@ This icon focuses on the "completion" and "confirmation" aspect of a commit. It 
     Concept: The changes are confirmed and saved. The circle represents the commit as a self-contained unit.`
   };
   
-  console.log(`  PNG paths: ${JSON.stringify(request1.png_paths)}`);
+  console.log(`  PNG paths: ${JSON.stringify(request1.reference_paths)}`);
   console.log(`  Prompt: ${request1.prompt}`);
   console.log('');
   
@@ -34,8 +34,8 @@ This icon focuses on the "completion" and "confirmation" aspect of a commit. It 
     console.error('❌ Test 1 failed:', error.message);
   }
   
-  // Test 2: Missing png_paths property
-  console.log('📋 Test 2: Missing png_paths property');
+  // Test 2: Missing reference_paths property
+  console.log('📋 Test 2: Missing reference_paths property');
   const request2 = {
     prompt: `The Simple Branch
 
@@ -65,12 +65,12 @@ This icon abstracts the Git logo, focusing on the creation of a commit on a bran
   // Test 3: With custom output name
   console.log('📋 Test 3: With custom output name');
   const request3 = {
-    png_paths: [],
+    reference_paths: [],
     prompt: 'Create a green triangle icon',
     output_name: 'custom-triangle'
   };
   
-  console.log(`  PNG paths: ${JSON.stringify(request3.png_paths)}`);
+  console.log(`  PNG paths: ${JSON.stringify(request3.reference_paths)}`);
   console.log(`  Prompt: ${request3.prompt}`);
   console.log(`  Output name: ${request3.output_name}`);
   console.log('');

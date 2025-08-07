@@ -133,7 +133,7 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     const outputPath = path.join(testOutputDir, outputFilename);
     
     const newIconRequest = {
-      png_paths: [],
+      reference_paths: [],
       prompt: crossDomainPrompt,
       output_name: 'test-code-review-cross-domain-regression',
       output_path: testOutputDir,

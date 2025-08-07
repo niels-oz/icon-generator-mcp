@@ -50,7 +50,7 @@ describe('Add User Icon Generation Regression Test', () => {
     const outputPath = path.join(testOutputDir, outputFilename);
 
     const newIconRequest = {
-      png_paths: [],
+      reference_paths: [],
       prompt: addUserPrompt,
       style: 'black-white-flat',
       output_name: 'test-add-user-icon-regression',

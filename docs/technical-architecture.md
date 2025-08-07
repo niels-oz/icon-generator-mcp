@@ -209,7 +209,7 @@ Comprehensive testing with 32 essential tests:
 ### PNG Reference Mode
 ```javascript
 {
-  png_paths: ["./reference.png"],
+  reference_paths: ["./reference.png"],
   prompt: "Make this icon more geometric and flat"
 }
 ```

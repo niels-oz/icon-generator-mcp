@@ -12,7 +12,7 @@ async function runSimpleTest() {
   
   // Test request
   const request = {
-    png_paths: [testPngPath],
+    reference_paths: [testPngPath],
     prompt: 'Change the color from blue to red',
     output_name: 'red-circle-icon'
   };

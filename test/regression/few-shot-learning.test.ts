@@ -80,7 +80,7 @@ describe('Few-Shot Learning Regression Test', () => {
     const outputPath = path.join(testOutputDir, outputFilename);
     
     const newIconRequest = {
-      png_paths: [],
+      reference_paths: [],
       prompt: housePlantPrompt,
       output_name: 'test-monstera-few-shot-regression',
       output_path: testOutputDir,

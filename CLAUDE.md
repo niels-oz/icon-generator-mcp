@@ -74,7 +74,7 @@ npm start
 ### MCP Tool Schema
 ```typescript
 generate_icon: {
-  png_paths?: string[]     // Optional: PNG/SVG reference files
+  reference_paths?: string[]     // Optional: PNG/SVG reference files
   prompt: string           // Required: Generation prompt
   style?: string           // Optional: Style preset (e.g., "black-white-flat")
   output_name?: string     // Optional: Custom filename
