@@ -1,6 +1,7 @@
 import { IconGenerationRequest, IconGenerationResponse, GenerationPhase } from './types';
 import { ConversionService } from './services/converter';
-import { LLMService } from './services/llm';
+import { LLM } from './services/llm/types';
+import { getLLMProvider, LLMProvider } from './services/llm/factory';
 import { FileWriterService } from './services/file-writer';
 import { StateManager } from './services/state-manager';
 import { VisualFormatter } from './services/visual-formatter';
@@ -12,14 +13,14 @@ export class MCPServer {
   public readonly version = '0.2.0';
   
   private conversionService: ConversionService;
-  private llmService: LLMService;
+  private llmService: LLM;
   private fileWriterService: FileWriterService;
   private stateManager: StateManager;
   private formatter: VisualFormatter;
   
-  constructor() {
+  constructor(llmProvider: LLMProvider = 'claude') {
     this.conversionService = new ConversionService();
-    this.llmService = new LLMService();
+    this.llmService = getLLMProvider(llmProvider);
     this.fileWriterService = new FileWriterService();
     this.stateManager = new StateManager();
     this.formatter = new VisualFormatter();
@@ -53,6 +54,11 @@ export class MCPServer {
             style: { 
               type: 'string',
               description: 'Optional style preset for consistent icon generation (e.g., "black-white-flat")'
+            },
+            llm_provider: { 
+              type: 'string',
+              description: 'Optional LLM provider to use (claude or gemini)',
+              enum: ['claude', 'gemini']
             }
           },
           required: ['prompt']
@@ -74,9 +80,12 @@ export class MCPServer {
       // Validate request first
       const validatedRequest = this.validateRequest(request);
       
-      // Create generation session with Sequential Thinking state management
+      // Create generation session with phase-based state management
       const state = this.stateManager.createSession(validatedRequest);
       
+      const llmProvider = validatedRequest.llm_provider || 'claude';
+      this.llmService = getLLMProvider(llmProvider);
+
       try {
         // Execute generation with step-by-step tracking
         const result = await this.executeSequentialGeneration(state.sessionId);
@@ -143,12 +152,17 @@ export class MCPServer {
       pngPaths = request.png_paths;
     }
 
+    if (request.llm_provider && !['claude', 'gemini'].includes(request.llm_provider)) {
+      throw new Error("Invalid llm_provider specified. Must be one of ['claude', 'gemini']");
+    }
+
     return {
       png_paths: pngPaths,
       prompt: request.prompt.trim(),
       output_name: request.output_name,
       output_path: request.output_path,
-      style: request.style
+      style: request.style,
+      llm_provider: request.llm_provider
     };
   }
 
@@ -283,7 +297,7 @@ export class MCPServer {
     console.log('\n' + progress);
     
     try {
-      const llmResponse = await this.llmService.generateSVG(
+      const llmResponse = await this.llmService.generate(
         state.request.prompt,
         state.context.svgReferences,
         state.request.style
@@ -297,9 +311,11 @@ export class MCPServer {
         `Generated SVG icon using AI (${llmResponse.svg.length} characters)`);
       
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Generation failed';
-      this.stateManager.addError(sessionId, 'generation', errorMsg);
-      throw error;
+      // The error from llmService is already specific, so we pass it directly
+      const specificErrorMessage = error instanceof Error ? error.message : 'Generation failed';
+      this.stateManager.addError(sessionId, 'generation', specificErrorMessage);
+      // Throw a new error with the specific message to ensure it propagates
+      throw new Error(specificErrorMessage);
     }
   }
   

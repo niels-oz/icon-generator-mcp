@@ -2,31 +2,24 @@
 
 > **AI-powered SVG icon generation for developers** - Generate professional icons instantly using Claude Code MCP integration
 
-Transform your development workflow with intelligent icon generation. This MCP server combines web search, PNG-to-SVG conversion, and AI creativity to produce clean, scalable icons in seconds.
+Transform your development workflow with intelligent icon generation. This MCP server combines PNG-to-SVG conversion, AI creativity, and style consistency to produce clean, scalable icons in seconds.
 
 ## 🚀 Quick Start
 
 ```bash
-# Install dependencies
-npm install
+# Install globally via npm (zero configuration required)
+npm install -g icon-generator-mcp
 
-# Set up environment
-npm run setup
-
-# Build the project
-npm run build
-
-# Start the MCP server
-npm start
+# That's it! The MCP server is now available in Claude Code
+# No additional setup, API keys, or configuration needed
 ```
 
 ## ✨ Features
 
 - **🎨 Intelligent Icon Generation**: Create SVG icons from text prompts
-- **🔍 Web Search Integration**: Automatically find reference images
 - **🖼️ PNG to SVG Conversion**: Convert PNG references using Potrace
-- **🎭 Smart Variations**: Auto-generate multiple design options
-- **⚡ Style Detection**: Automatically detects style preferences
+- **🎭 Style Consistency**: Built-in style templates with few-shot learning
+- **⚡ Multi-Provider Support**: Works with Claude and Gemini
 - **🛡️ Production Ready**: Robust error handling and validation
 
 ## 🛠️ Installation
@@ -35,66 +28,200 @@ npm start
 ```bash
 # Required system dependencies
 brew install potrace
-npm install -g @anthropic-ai/claude-dev
 
-# Verify installations
+# Verify installation
 potrace --version
-claude --version
 ```
 
-### Setup
+### Global Installation
 ```bash
-git clone <repository-url>
-cd icon-generator
-npm install
-npm run setup
+# Install the MCP server globally
+npm install -g icon-generator-mcp
+
+# Verify installation
+icon-generator-mcp --version
 ```
 
-### Configuration
-Edit `.env` file with your API keys:
-```env
-GOOGLE_SEARCH_API_KEY=your_google_search_api_key_here
-GOOGLE_SEARCH_ENGINE_ID=your_custom_search_engine_id_here
+### Claude Code Setup
+1. **Add MCP Server to Configuration**
+   
+   Edit `~/.claude/claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "icon-generator": {
+         "command": "icon-generator-mcp"
+       }
+     }
+   }
+   ```
+
+2. **Test Installation** - In Claude Code, try:
+   ```
+   Generate a simple star icon in black and white flat style
+   ```
+
+That's it! No API keys or additional configuration needed.
+
+## 📖 Usage Examples
+
+### 1. Text-Only Generation
+
+Generate icons from descriptive text prompts without any reference images.
+
+**In Claude Code:**
+```
+Create a simple star icon with clean lines and sharp points
 ```
 
-## 📖 Usage
+**Result:** Clean SVG star icon saved to your current directory
 
-### Basic Icon Generation
-```javascript
-const { MCPServer } = require('./dist/server');
-const server = new MCPServer();
-
-const request = {
-  prompt: 'Create a star icon with clean lines'
-};
-
-const response = await server.handleToolCall('generate_icon', request);
-console.log(response.output_path); // ./star-icon.svg
+**Advanced text-only examples:**
+```
+Create a minimalist folder icon with rounded corners
+Create a settings gear icon with 8 teeth
+Create a user profile icon showing a person silhouette
+Create a database icon with stacked cylinders
 ```
 
-### Web Search Enhanced
-```javascript
-const request = {
-  prompt: 'Create a folder icon',
-  search_keyword: 'folder',
-  auto_search: true
-};
+### 2. PNG Reference Conversion
+
+Convert existing PNG images to clean SVG icons with AI enhancement.
+
+**Setup:**
+```bash
+# Place your PNG file in your project directory
+ls my-logo.png
 ```
 
-### Style-Specific Generation
-```javascript
-const request = {
-  prompt: 'Create a code review icon with black and white outlines, simple flat design'
-  // Auto-generates 4 variations due to style keywords
-};
+**In Claude Code:**
+```
+Convert my-logo.png to SVG and make it more minimalist for web use
 ```
 
-### Multiple Variations
-```javascript
-const request = {
-  prompt: 'Create a star icon',
-  generate_variations: true  // Force variation mode
-};
+**Advanced PNG examples:**
+```
+# Multiple references
+Convert logo.png and icon.png to SVG, combine their best elements
+
+# Style transformation
+Convert complex-logo.png to a simple flat design suitable for favicons
+
+# Background removal
+Convert product-photo.png to a clean icon by removing the background
+```
+
+### 3. Style-Based Generation
+
+Use predefined styles for consistent icon families.
+
+#### Black & White Flat Style
+
+Perfect for professional applications, documentation, and UI consistency.
+
+**Examples:**
+```
+Create a code review icon in black and white flat style
+Create a user management icon in black and white flat style
+Create a database icon in black and white flat style
+```
+
+**Generated icons maintain consistent:**
+- Black outlines on white background
+- Minimal geometric shapes
+- Clean, professional appearance
+- 24x24 viewBox for scalability
+
+#### Style Variations Available:
+- `black-white-flat` - Professional monochrome icons
+- `minimal` - Ultra-simple designs
+- `outline` - Line-art style icons
+- `geometric` - Angular, modern shapes
+
+### 4. Advanced Usage Patterns
+
+#### Custom Output Management
+```
+Create a navigation arrow icon pointing right
+Save it as "nav-arrow" in the ./assets/icons/ directory
+```
+
+#### Batch Generation with Consistency
+```
+Create these icons in black and white flat style:
+1. User profile icon
+2. Settings gear icon
+3. Database icon
+4. Folder icon
+Save them all to ./icons/ directory
+```
+
+#### Reference + Style Combination
+```
+Use reference-logo.png as inspiration
+Create a simplified version in black and white flat style
+Make it suitable for use as a 16x16 favicon
+```
+
+## 🎨 Real Examples
+
+### Example 1: Code Review Icon
+
+**Input:**
+```
+Create a code review icon in black and white flat style showing a document with code lines and a checkmark overlay
+```
+
+**Generated SVG:**
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Document background -->
+  <rect x="3" y="2" width="14" height="20" rx="1" fill="white" stroke="black"/>
+  
+  <!-- Code lines -->
+  <line x1="5" y1="6" x2="13" y2="6" stroke="black" stroke-width="1"/>
+  <line x1="5" y1="8" x2="11" y2="8" stroke="black" stroke-width="1"/>
+  <line x1="5" y1="10" x2="14" y2="10" stroke="black" stroke-width="1"/>
+  
+  <!-- Checkmark overlay -->
+  <circle cx="18" cy="18" r="4" fill="white" stroke="black" stroke-width="2"/>
+  <polyline points="16,18 17.5,19.5 20,17" fill="none" stroke="black" stroke-width="2"/>
+</svg>
+```
+
+### Example 2: User Profile Icon
+
+**Input:**
+```
+Create a user profile icon in black and white flat style showing a person silhouette
+```
+
+**Generated SVG:**
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Head/Face circle -->
+  <circle cx="12" cy="8" r="4" fill="white" stroke="black" stroke-width="2"/>
+  
+  <!-- Body/Shoulders -->
+  <path d="M6 20c0-4 2.7-6 6-6s6 2 6 6" fill="white" stroke="black" stroke-width="2"/>
+  
+  <!-- Profile frame -->
+  <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="black" stroke-width="2"/>
+</svg>
+```
+
+### Example 3: Simple Star Icon
+
+**Input:**
+```
+Create a simple star icon with clean lines
+```
+
+**Generated SVG:**
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+</svg>
 ```
 
 ## 🎯 MCP Tool Schema
@@ -105,11 +232,10 @@ Generate SVG icons from prompts and references.
 **Parameters:**
 - `prompt` (string, required): Text description of the desired icon
 - `png_paths` (array, optional): PNG file paths for references
-- `search_keyword` (string, optional): Keyword for web search
-- `auto_search` (boolean, optional): Enable web search
-- `generate_variations` (boolean, optional): Generate multiple variations
 - `output_name` (string, optional): Custom filename
 - `output_path` (string, optional): Custom output directory
+- `style` (string, optional): Style preset (e.g., "black-white-flat")
+- `llm_provider` (string, optional): LLM provider ("claude" or "gemini")
 
 **Response:**
 - `success` (boolean): Operation success status
@@ -119,157 +245,140 @@ Generate SVG icons from prompts and references.
 
 ## 🧠 Smart Features
 
-### Auto-Variation Detection
-The system automatically generates variations when it detects style-specific keywords:
-- `black and white`, `monochrome`, `b&w`
-- `outline`, `line art`, `stroke`
-- `flat`, `minimal`, `simple`, `clean`
-- `variations`, `options`, `different styles`
+### Auto-Style Detection
+The system automatically applies appropriate styles when it detects keywords:
+- `black and white`, `monochrome`, `b&w` → Black & white flat style
+- `outline`, `line art`, `stroke` → Outline style
+- `flat`, `minimal`, `simple`, `clean` → Minimal style
+- `geometric`, `angular` → Geometric style
 
-### Intelligent Prompt Analysis
-- **Keyword Extraction**: Identifies main concepts
-- **Style Detection**: Recognizes design preferences
-- **Context Understanding**: Adapts generation approach
+### Few-Shot Learning
+The system learns from built-in examples to maintain consistency:
+- **Style Templates**: Pre-defined visual patterns
+- **Prompt Analysis**: Understands design intent
+- **Context Adaptation**: Adjusts based on use case
 
-### Web Search Integration
-- **Smart Queries**: Optimized search terms
-- **Format Filtering**: SVG/PNG only, excludes JPG
-- **Quality Filtering**: Filters out photos and complex graphics
-- **Reference Downloading**: Automatic image acquisition
-
-## 🔧 Development
-
-### Project Structure
-```
-icon-generator/
-├── src/
-│   ├── server.ts           # Main MCP server
-│   ├── types.ts           # TypeScript interfaces
-│   └── services/
-│       ├── converter.ts    # PNG to SVG conversion
-│       ├── llm.ts         # Claude CLI integration
-│       ├── file-writer.ts # File output management
-│       └── web-search.ts  # Google Search integration
-├── test/                  # Test suites
-├── example/
-│   ├── demos/            # Demo scripts
-│   └── test-outputs/     # Generated test icons
-├── bin/
-│   └── mcp-server.js     # Server entry point
-└── CLAUDE.md             # Claude Code instructions
-```
-
-### Development Commands
-```bash
-npm run dev          # Watch mode with auto-rebuild
-npm test            # Run test suite
-npm run test:watch  # Watch mode testing
-npm run build       # Build TypeScript
-npm start           # Start production server
-```
-
-### Testing
-```bash
-# Run all tests
-npm test
-
-# Test specific functionality
-npm test -- --testNamePattern="WebImageSearchService"
-
-# Run with coverage
-npm test -- --coverage
-
-# Demo scripts
-node example/demos/test-simple.js
-node example/demos/test-code-review-workflow.js
-```
-
-## 🎨 Examples
-
-### Single Icon Generation
-```bash
-node example/demos/test-simple.js
-```
-**Output:** `./star-icon.svg` (10s)
-
-### Multiple Variations
-```bash
-node example/demos/test-code-review-bw-variations.js
-```
-**Output:** 4 variations (44s total)
-- `code-review-bw-primary.svg`
-- `code-review-bw-detailed.svg`
-- `code-review-bw-minimal.svg`
-- `code-review-bw-geometric.svg`
-
-### Web Search Integration
-```bash
-node example/demos/test-web-search.js
-```
-**Features:**
-- Finds reference images automatically
-- Combines with custom prompts
-- Graceful fallback without API keys
+### Intelligent File Management
+- **Smart Naming**: AI generates contextually appropriate filenames
+- **Conflict Resolution**: Automatic numbering (icon-2.svg, icon-3.svg)
+- **Path Intelligence**: Saves to logical locations based on context
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Environment Variables (Optional)
 ```env
-# Google Search API (optional)
-GOOGLE_SEARCH_API_KEY=your_api_key
-GOOGLE_SEARCH_ENGINE_ID=your_engine_id
-
-# Server Configuration
+# Default output directory
 DEFAULT_OUTPUT_PATH=./icons
-MAX_SEARCH_RESULTS=3
+
+# Debug mode
 DEBUG_MODE=false
 
-# MCP Settings
-MCP_SERVER_NAME=icon-generator-mcp
-MCP_SERVER_VERSION=1.0.0
-```
-
-### MCP Server Registration
-Add to your Claude Code MCP configuration:
-```json
-{
-  "servers": {
-    "icon-generator": {
-      "command": "node",
-      "args": ["/path/to/icon-generator/bin/mcp-server.js"]
-    }
-  }
-}
+# Preferred LLM provider
+DEFAULT_LLM_PROVIDER=claude
 ```
 
 ## 📊 Performance
 
 ### Benchmarks
-- **Single icon**: ~10 seconds
-- **4 variations**: ~44 seconds (sequential)
-- **Web search**: +2-3 seconds per query
-- **PNG conversion**: ~1-2 seconds per file
+- **Text-only generation**: 3-8 seconds
+- **PNG conversion**: 5-12 seconds
+- **Style-based generation**: 4-10 seconds
+- **Complex multi-reference**: 8-15 seconds
 
 ### Optimization Tips
-- Use web search for better results
-- Enable variations for style-specific requests
-- Provide clear, descriptive prompts
-- Use PNG references for complex concepts
+- Use descriptive, specific prompts for better results
+- Combine PNG references with text for complex concepts
+- Specify style preferences for consistent icon families
+- Use custom output paths for organized file management
 
-## 🛡️ Security
+## 🎨 Style Gallery
 
-- **Input Validation**: All inputs are sanitized
-- **SVG Sanitization**: Generated SVGs are validated
-- **No Credential Storage**: Uses Claude CLI authentication
-- **Path Validation**: Secure file operations
+### Black & White Flat Style
+Perfect for professional applications and documentation.
+
+**Characteristics:**
+- Black outlines on white background
+- Minimal geometric shapes
+- Clean, scalable design
+- Consistent stroke width
+
+**Best for:**
+- UI icons
+- Documentation
+- Professional applications
+- Icon families
+
+### Minimal Style
+Ultra-simple designs focusing on essential elements.
+
+**Characteristics:**
+- Reduced visual complexity
+- Essential shapes only
+- High contrast
+- Maximum clarity
+
+**Best for:**
+- Small sizes (16x16, 24x24)
+- Mobile interfaces
+- Quick recognition
+
+### Outline Style
+Line-art approach with no fills.
+
+**Characteristics:**
+- Stroke-only design
+- Consistent line weight
+- Scalable at any size
+- Modern appearance
+
+**Best for:**
+- Modern web interfaces
+- Flexible theming
+- High-contrast needs
+
+## 🛡️ Security & Quality
+
+- **Input Validation**: All inputs are sanitized and validated
+- **SVG Sanitization**: Generated SVGs are cleaned of potentially harmful content
+- **Local Processing**: No data sent to external services (except LLM APIs)
+- **Quality Assurance**: Built-in validation ensures proper SVG structure
+
+## 🚀 Development
+
+### Local Development Setup
+```bash
+# Clone and setup
+git clone <repository>
+cd icon-generator-mcp
+npm install
+
+# Build and test
+npm run build
+npm test
+
+# Local testing without publishing
+npm link
+```
+
+### Testing Examples
+```bash
+# Test text-only generation
+node example/demos/test-prompt-only.js
+
+# Test PNG conversion
+node example/demos/test-conversion.js
+
+# Test style consistency
+node example/test-few-shot.js
+```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+We welcome contributions! Areas for improvement:
+- Additional style templates
+- New LLM provider integrations
+- Enhanced PNG processing
+- Cross-platform support
 
 ## 📄 License
 
@@ -278,272 +387,9 @@ MIT License - feel free to use in your projects!
 ## 🆘 Support
 
 - **Issues**: Report bugs on GitHub
-- **Documentation**: See `CLAUDE.md` for detailed implementation
-- **Examples**: Check `example/demos/` for usage patterns
+- **Documentation**: See `/docs` directory
+- **Examples**: Check `/example` directory for usage patterns
 
 ---
 
-**Made with ❤️ for developers who need beautiful icons fast.**
-
-## Overview
-
-The Icon Generator MCP Server enables developers to create custom SVG icons by providing PNG reference images and/or text prompts. It leverages AI to understand your design intent and generates production-ready SVG icons that match your requirements.
-
-**Key Features:**
-- 🎨 **AI-Powered Generation**: Uses Claude to create contextually appropriate icons
-- 🔄 **PNG to SVG Conversion**: Automatically vectorizes reference images (optional)
-- ✨ **Prompt-Only Generation**: Create icons from text descriptions alone
-- 🛠️ **Claude Code Integration**: Works seamlessly within your development workflow
-- 🔒 **Local Processing**: All processing happens locally on your machine
-- 📁 **Smart File Management**: Automatically places icons in appropriate locations
-
-## Prerequisites
-
-Before installing, ensure you have:
-- **Node.js** (v18 or newer)
-- **macOS** (Intel or Apple Silicon)
-- **Claude Code** installed and configured
-
-## Installation
-
-### 1. Install System Dependencies
-
-```bash
-# Install Potrace for PNG to SVG conversion
-brew install potrace
-
-# Verify installation
-potrace --version
-```
-
-### 2. Install the MCP Server
-
-```bash
-# Install globally via npm
-npm install -g icon-generator-mcp
-
-# Verify installation
-icon-generator-mcp --version
-```
-
-### 3. Configure Claude Code
-
-Add the server to your Claude Code configuration:
-
-```json
-{
-  "mcpServers": {
-    "icon-generator": {
-      "command": "icon-generator-mcp",
-      "args": ["--server"]
-    }
-  }
-}
-```
-
-### 4. Restart Claude Code
-
-Restart Claude Code to load the new MCP server. The `generate_icon` tool will be available for Claude Code to use automatically when you request icon generation.
-
-## Usage
-
-### Basic Usage
-
-Once configured, you can generate icons directly through Claude Code:
-
-**With PNG References:**
-```
-Generate an icon based on these PNG files: logo.png, reference.png
-Make it more minimalist and suitable for a web application.
-```
-
-**Prompt-Only Generation:**
-```
-Create a simple blue circle icon for a navigation button
-```
-
-### Advanced Usage
-
-**Custom Output Names:**
-```
-Create an icon from header-bg.png with the prompt "remove background, make it a simple outline"
-Save it as "header-outline"
-```
-
-**Custom Output Directory:**
-```
-Generate an icon from logo.png with the prompt "make it minimalist"
-Save it to the /assets/icons/ directory
-```
-
-**Multiple References:**
-```
-I have three PNG files: icon1.png, icon2.png, icon3.png
-Generate a new icon that combines elements from all three
-Make it cohesive and modern
-```
-
-**Prompt-Only with Custom Settings:**
-```
-Create a minimalist arrow icon pointing right
-Save it as "nav-arrow" in the ./assets/icons/ directory
-```
-
-### File Management
-
-- **Input**: PNG files from your project directory (optional) or text prompts only
-- **Output**: SVG files saved in the same directory as input PNGs, custom path, or current directory
-- **Naming**: AI generates contextually appropriate filenames
-- **Conflicts**: Automatic numbering (e.g., `icon-2.svg`, `icon-3.svg`)
-- **Custom Paths**: Use `output_path` parameter to specify save location
-- **Prompt-Only**: When no PNG files provided, saves to current directory by default
-
-## Examples
-
-### Example 1: Logo Simplification
-```
-Input: complex-logo.png
-Prompt: "Simplify this logo for use as a favicon"
-Output: simplified-favicon.svg
-```
-
-### Example 2: Icon Style Transfer
-```
-Input: material-icon.png, brand-logo.png
-Prompt: "Create an icon with the style of the brand logo but the shape of the material icon"
-Output: branded-material-icon.svg
-```
-
-### Example 3: Background Removal
-```
-Input: product-photo.png
-Prompt: "Remove the background and create a clean product icon"
-Output: clean-product-icon.svg
-```
-
-### Example 4: Prompt-Only Generation
-```
-Input: (none)
-Prompt: "Create a simple home icon with a house outline"
-Output: home-outline-icon.svg
-```
-
-### Example 5: Prompt-Only with Custom Settings
-```
-Input: (none)
-Prompt: "Create a minimalist settings gear icon"
-Custom Name: "settings-gear"
-Output: settings-gear.svg
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**"Potrace not found"**
-```bash
-# Install Potrace
-brew install potrace
-
-# Verify it's in your PATH
-which potrace
-```
-
-**"Claude CLI not found"**
-- Ensure Claude Code is installed and authenticated
-- Check that the CLI is accessible in your PATH
-
-**"MCP server not responding"**
-- Verify the server is configured correctly in Claude Code
-- Restart Claude Code after configuration changes
-- Check server status: `icon-generator-mcp --health`
-
-**"Permission denied"**
-- Ensure you have write permissions to the directory containing PNG files
-- Check file permissions: `ls -la your-file.png`
-
-### Debug Mode
-
-Enable debug logging for troubleshooting:
-
-```bash
-DEBUG=icon-generator:* icon-generator-mcp --server
-```
-
-## Supported Formats
-
-### Input
-- **PNG files** (optional) - File sizes up to 10MB, multiple references supported
-- **Text prompts** (required) - Descriptive text for icon generation
-- **Hybrid approach** - Combine PNG references with text prompts for best results
-
-### Output
-- **SVG format** (scalable vector graphics)
-- **Clean, optimized** SVG code
-- **Security sanitized** (no executable content)
-
-## Limitations
-
-### Current Status
-- ✅ **MVP Complete**: All core features implemented and tested
-- ✅ **macOS Support**: Intel and Apple Silicon
-- ✅ **PNG Input**: Full PNG to SVG conversion pipeline
-- ✅ **Single Icon Generation**: One icon per request
-- ✅ **Manual Dependencies**: Requires `brew install potrace`
-- ✅ **Test Coverage**: 67 tests, 74.87% code coverage
-
-### Future Improvements
-- Multi-platform support (Windows, Linux)
-- Additional input formats (JPEG, GIF, WebP)  
-- Batch processing
-- Multiple LLM providers
-- Bundled binary distribution
-- Advanced conversion parameters
-
-## Security
-
-The Icon Generator MCP Server prioritizes security:
-- **Local Processing**: No data sent to external services (except Claude API)
-- **Output Sanitization**: Generated SVGs are cleaned of potentially malicious content
-- **No Credential Handling**: Authentication is handled by Claude Code CLI
-- **Input Validation**: PNG files are validated before processing
-
-## Performance
-
-Typical processing times:
-- **Small icons** (< 1MB): 3-8 seconds
-- **Medium icons** (1-5MB): 8-15 seconds
-- **Large icons** (5-10MB): 15-30 seconds
-
-Performance depends on:
-- PNG file size and complexity
-- Claude API response time
-- System resources
-- Potrace conversion time
-
-**Tested Performance** (on MacBook Pro M2):
-- Blue circle PNG → Red circle SVG: ~4.2 seconds
-- 50x50 PNG → Optimized SVG: ~3.5 seconds
-
-## Contributing
-
-We welcome contributions! Please see:
-- [Technical Documentation](docs/technical-design.md)
-- [Development Guide](CLAUDE.md)
-- [Future Improvements](docs/future-improvements.md)
-
-
-## Support
-
-For issues and questions:
-- **Bug Reports**: [GitHub Issues](https://github.com/your-org/icon-generator-mcp/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/your-org/icon-generator-mcp/discussions)
-- **Documentation**: [docs/](docs/) directory
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
-
----
-
-**Built with ❤️ for developers who need quick, AI-powered icon generation in their workflow.**
+**Built with ❤️ for developers who need beautiful, consistent icons fast.**

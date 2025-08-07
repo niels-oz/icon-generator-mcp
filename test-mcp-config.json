@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "icon-generator": {
+      "command": "node",
+      "args": [
+        "/Users/user/Dev/icon-generator/bin/mcp-server-proper.js"
+      ],
+      "env": {}
+    }
+  }
+}

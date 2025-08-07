@@ -1,78 +1,99 @@
 #!/usr/bin/env node
 
-const { MCPServer } = require('../dist/server');
-const { createReadStream } = require('fs');
-const { createInterface } = require('readline');
-
-/**
- * MCP Server Entry Point
- * This script starts the Icon Generator MCP Server for use with Claude Code.
- */
-
-async function startMCPServer() {
-  console.log('🚀 Starting Icon Generator MCP Server...');
-  
+// Since the MCP SDK is an ES module, we need to use dynamic import
+async function main() {
   try {
-    const server = new MCPServer();
+    // Dynamic import for ES modules
+    const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
+    const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+    const { ListToolsRequestSchema, CallToolRequestSchema } = await import('@modelcontextprotocol/sdk/types.js');
     
-    // Log server info
-    console.log(`📋 Server: ${server.name} v${server.version}`);
-    console.log(`🛠️  Tools: ${server.getTools().length} available`);
-    console.log('✅ Server ready for MCP connections');
+    // Import our server (CommonJS)
+    const { MCPServer } = require('../dist/server');
     
-    // Basic health check
-    const tools = server.getTools();
-    if (tools.length === 0) {
-      throw new Error('No tools available');
-    }
+    // Create the icon generator instance
+    const iconGenerator = new MCPServer();
     
-    // Keep the process running
-    process.on('SIGINT', () => {
-      console.log('\n🛑 Shutting down MCP Server...');
+    // Create MCP server with proper protocol handling
+    const server = new Server(
+      {
+        name: iconGenerator.name,
+        version: iconGenerator.version,
+      },
+      {
+        capabilities: {
+          tools: {},
+        },
+      }
+    );
+
+    // Get tools from icon generator
+    const tools = iconGenerator.getTools();
+    
+    // Register tools/list handler
+    server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+      return {
+        tools: tools.map(tool => ({
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema
+        }))
+      };
+    });
+    
+    // Register tools/call handler
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const toolName = request.params.name;
+      const toolArgs = request.params.arguments || {};
+      
+      // Find the requested tool
+      const tool = tools.find(t => t.name === toolName);
+      if (!tool) {
+        throw new Error(`Unknown tool: ${toolName}`);
+      }
+      
+      try {
+        // Execute the tool
+        const result = await iconGenerator.handleToolCall(toolName, toolArgs);
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2)
+            }
+          ]
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error.message}`
+            }
+          ],
+          isError: true
+        };
+      }
+    });
+
+    // Create stdio transport
+    const transport = new StdioServerTransport();
+    
+    // Connect server to transport
+    await server.connect(transport);
+    
+    // Handle graceful shutdown
+    process.on('SIGINT', async () => {
+      await server.close();
       process.exit(0);
     });
     
-    // Wait for input/keep alive
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-    
-    rl.on('line', async (input) => {
-      try {
-        if (input.trim() === 'quit' || input.trim() === 'exit') {
-          console.log('👋 Goodbye!');
-          process.exit(0);
-        }
-        
-        if (input.trim() === 'tools') {
-          console.log('🛠️  Available tools:');
-          tools.forEach(tool => {
-            console.log(`  - ${tool.name}: ${tool.description}`);
-          });
-          return;
-        }
-        
-        if (input.trim() === 'help') {
-          console.log('💡 Available commands:');
-          console.log('  - tools: List available tools');
-          console.log('  - help: Show this help message');
-          console.log('  - quit/exit: Shutdown server');
-          return;
-        }
-        
-        console.log('❓ Unknown command. Type "help" for available commands.');
-        
-      } catch (error) {
-        console.error('❌ Error:', error.message);
-      }
-    });
-    
   } catch (error) {
-    console.error('❌ Failed to start MCP Server:', error.message);
+    console.error('Failed to start MCP server:', error);
     process.exit(1);
   }
 }
 
 // Start the server
-startMCPServer().catch(console.error);
+main();
