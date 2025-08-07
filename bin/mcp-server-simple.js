@@ -2,6 +2,10 @@
 
 const { MCPServer } = require('../dist/server');
 
+// Suppress console output when running as MCP server
+const originalConsoleLog = console.log;
+console.log = () => {}; // Disable console.log for MCP mode
+
 // Simple MCP server that handles JSON-RPC over stdio
 async function main() {
   const iconGenerator = new MCPServer();
