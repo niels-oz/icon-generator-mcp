@@ -30,14 +30,14 @@ export class MCPServer {
     return [
       {
         name: 'generate_icon',
-        description: 'Generate SVG icon from PNG references and/or text prompt with step-by-step visual feedback',
+        description: 'Generate SVG icon from PNG/SVG references and/or text prompt with step-by-step visual feedback',
         inputSchema: {
           type: 'object',
           properties: {
-            png_paths: { 
+            reference_paths: { 
               type: 'array', 
               items: { type: 'string' },
-              description: 'Optional array of PNG file paths to use as references'
+              description: 'Optional array of PNG or SVG file paths to use as references'
             },
             prompt: { 
               type: 'string',
@@ -55,11 +55,6 @@ export class MCPServer {
               type: 'string',
               description: 'Optional style preset for consistent icon generation (e.g., "black-white-flat")'
             },
-            llm_provider: { 
-              type: 'string',
-              description: 'Optional LLM provider to use (claude or gemini)',
-              enum: ['claude', 'gemini']
-            }
           },
           required: ['prompt']
         }
@@ -83,8 +78,8 @@ export class MCPServer {
       // Create generation session with phase-based state management
       const state = this.stateManager.createSession(validatedRequest);
       
-      const llmProvider = validatedRequest.llm_provider || 'claude';
-      this.llmService = getLLMProvider(llmProvider);
+      // Always use Claude since this is running inside Claude Code
+      this.llmService = getLLMProvider('claude');
 
       try {
         // Execute generation with step-by-step tracking
@@ -143,26 +138,22 @@ export class MCPServer {
       throw new Error('prompt is required and must be a non-empty string');
     }
 
-    // Validate png_paths (optional, but if provided must be valid array)
-    let pngPaths: string[] = [];
-    if (request.png_paths !== undefined) {
-      if (!Array.isArray(request.png_paths)) {
-        throw new Error('png_paths must be an array if provided');
+    // Validate reference_paths (optional, but if provided must be valid array)
+    let referencePaths: string[] = [];
+    if (request.reference_paths !== undefined) {
+      if (!Array.isArray(request.reference_paths)) {
+        throw new Error('reference_paths must be an array if provided');
       }
-      pngPaths = request.png_paths;
+      referencePaths = request.reference_paths;
     }
 
-    if (request.llm_provider && !['claude', 'gemini'].includes(request.llm_provider)) {
-      throw new Error("Invalid llm_provider specified. Must be one of ['claude', 'gemini']");
-    }
 
     return {
-      png_paths: pngPaths,
+      reference_paths: referencePaths,
       prompt: request.prompt.trim(),
       output_name: request.output_name,
       output_path: request.output_path,
-      style: request.style,
-      llm_provider: request.llm_provider
+      style: request.style
     };
   }
 
@@ -205,10 +196,10 @@ export class MCPServer {
         throw new Error('Prompt is required and cannot be empty');
       }
       
-      // Validate PNG files if provided
+      // Validate reference files if provided
       const validatedFiles: string[] = [];
-      if (state.request.png_paths && state.request.png_paths.length > 0) {
-        for (const filePath of state.request.png_paths) {
+      if (state.request.reference_paths && state.request.reference_paths.length > 0) {
+        for (const filePath of state.request.reference_paths) {
           if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
           }

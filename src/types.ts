@@ -1,12 +1,11 @@
 // Core types for the icon generator MCP server with phase-based generation pipeline
 
 export interface IconGenerationRequest {
-  png_paths: string[];
+  reference_paths?: string[];
   prompt: string;
   output_name?: string;
   output_path?: string;
   style?: string;
-  llm_provider?: 'claude' | 'gemini';
 }
 
 export interface IconGenerationResponse {
