@@ -1,4 +1,4 @@
-// Core types for the icon generator MCP server with Sequential Thinking architecture
+// Core types for the icon generator MCP server with phase-based generation pipeline
 
 export interface IconGenerationRequest {
   png_paths: string[];
@@ -28,7 +28,7 @@ export interface LLMResponse {
   filename: string;
 }
 
-// Sequential Thinking building blocks for icon generation
+// Phase-based processing building blocks for icon generation
 export interface GenerationStep {
   step: GenerationPhase;
   status: StepStatus;

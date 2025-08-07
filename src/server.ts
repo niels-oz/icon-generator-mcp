@@ -80,7 +80,7 @@ export class MCPServer {
       // Validate request first
       const validatedRequest = this.validateRequest(request);
       
-      // Create generation session with Sequential Thinking state management
+      // Create generation session with phase-based state management
       const state = this.stateManager.createSession(validatedRequest);
       
       const llmProvider = validatedRequest.llm_provider || 'claude';

@@ -52,18 +52,18 @@ npm start
 ## Project Architecture
 
 ### Core Components
-- **MCPServer** (`src/server.ts`) - Main orchestrator with Sequential Thinking architecture
+- **MCPServer** (`src/server.ts`) - Main orchestrator with phase-based generation pipeline
 - **ConversionService** (`src/services/converter.ts`) - PNG→SVG conversion using Potrace + Jimp preprocessing
 - **LLM Services** (`src/services/llm/`) - Multi-provider architecture (Claude + Gemini)
   - **Factory** (`factory.ts`) - LLM provider selection
   - **Claude** (`claude.ts`) - Claude CLI integration
   - **Gemini** (`gemini.ts`) - Gemini CLI integration
 - **FileWriterService** (`src/services/file-writer.ts`) - Output management with conflict resolution
-- **StateManager** (`src/services/state-manager.ts`) - Sequential Thinking state tracking
+- **StateManager** (`src/services/state-manager.ts`) - Phase-based state tracking and progress management
 - **VisualFormatter** (`src/services/visual-formatter.ts`) - Progress visualization
 - **CLI** (`src/bin/cli.ts`) - Command-line interface
 
-### Sequential Thinking Architecture
+### Phase-Based Generation Pipeline
 1. **Validation** - Input validation and file checking
 2. **Analysis** - Prompt and reference analysis
 3. **Conversion** - PNG→SVG conversion (if needed)
@@ -146,9 +146,9 @@ node example/test-add-user-icon.js
 - **Gemini Integration**: Uses `gemini` CLI with proper authentication
 - **Fallback Support**: Graceful handling of provider unavailability
 
-### Sequential Thinking Implementation
-- **State Management**: Comprehensive session tracking
-- **Phase Progression**: 6-phase generation pipeline
+### State Management Implementation
+- **Session Tracking**: Comprehensive state management
+- **Phase Progression**: 6-step generation process
 - **Visual Feedback**: Real-time progress display
 - **Error Context**: Phase-specific error reporting
 - **Processing Time**: Detailed timing metrics
@@ -202,7 +202,7 @@ npm test -- --testNamePattern="claude|gemini"
 - Error-first callback pattern for services
 - Comprehensive input validation
 - No external API keys (uses CLI authentication)
-- Sequential Thinking architecture patterns
+- Phase-based processing patterns
 - Factory pattern for multi-provider support
 - State management with session isolation
 - Visual formatting for user feedback
@@ -216,7 +216,7 @@ npm test -- --testNamePattern="claude|gemini"
 
 ## Current Status
 - ✅ **Multi-LLM Support**: Claude + Gemini providers
-- ✅ **Sequential Thinking**: 6-phase generation pipeline
+- ✅ **Phase-Based Pipeline**: 6-step generation process with state management
 - ✅ **Comprehensive Testing**: 81 tests with regression validation
 - ✅ **Visual Feedback**: Real-time progress display
 - ✅ **Error Handling**: Phase-specific error context

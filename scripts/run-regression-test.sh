@@ -44,7 +44,7 @@ if [ $? -eq 0 ]; then
   echo "✅ SVG structure and quality validation"
   echo "✅ Output file management (test/test-output/)"
   echo "✅ Processing time and step tracking"
-  echo "✅ Sequential Thinking architecture validation"
+  echo "✅ Phase-based generation pipeline validation"
   echo ""
   echo "📁 Generated test files are in test/test-output/ (excluded from git)"
 else
