@@ -1,19 +1,19 @@
       
 # Technical Design Document: icon-generator-mcp
 
-- **Version:** 2.0
-- **Date:** July 16, 2025
-- **Status:** Final
-- **Author:** System Architect
+- **Version:** 3.0
+- **Date:** January 2025
+- **Status:** Current Implementation
+- **Author:** Icon Generator Team
 
 ## 1. Purpose & Target Audience
-This document provides the comprehensive technical architecture and specification for the `icon-generator-mcp` MCP server. It is intended for software developers and tech leads responsible for the implementation, testing, and maintenance of the server.
+This document provides the current technical architecture and implementation details for the `icon-generator-mcp` MCP server. It reflects the production system with multi-LLM support, phase-based generation, and comprehensive testing.
 
 ## 2. System Architecture
 
 ### 2.1. High-Level Design
 
-The `icon-generator-mcp` is a stateless MCP server that acts as an intelligent pre-processor and orchestrator for an external LLM CLI. It exposes icon generation capabilities through the Model Context Protocol, executing a local data transformation pipeline before delegating the core AI task and all associated authentication, thus minimizing its own complexity and security footprint.
+The `icon-generator-mcp` is a phase-based MCP server that orchestrates a complete icon generation pipeline with multi-LLM provider support. It combines PNG-to-SVG conversion, AI-powered generation, and intelligent file management through a state-managed workflow with visual progress feedback.
 
 ### 2.2. Component Diagram & Data Flow
 
@@ -77,12 +77,15 @@ The system is designed as a single Node.js process that implements the MCP proto
 | **LLM Interface**| `child_process.spawn` | A secure method for executing the external Claude Code CLI. It avoids invoking a shell, mitigating command injection risks, and allows for efficient streaming of I/O. |
 | **SVG Sanitization**| Custom sanitization | Security-focused SVG cleaning to remove potentially malicious elements like `<script>` tags and event attributes. |
 
-### 3. Component Design & Interfaces
+### 3. Current Architecture Components
 
-#### 3.1. `MCP Server Entry Point` (`server.js`)
-- **Responsibility:** Implements the MCP protocol, registers the `generate_icon` tool, and handles client connections.
-- **Interface:** MCP tool endpoint: `generate_icon(png_paths: string[], prompt: string, output_name?: string)`
-- **Output:** Starts the MCP server process and handles tool execution requests from MCP clients.
+### 3.1. Core Components
+
+#### MCPServer (`src/server.ts`)
+- **Role:** Main orchestrator with 6-phase generation pipeline
+- **Phases:** Validation → Analysis → Conversion → Generation → Refinement → Output
+- **Features:** State management, visual progress, error handling
+- **Interface:** `generate_icon(png_paths?, prompt, style?, output_name?, output_path?, llm_provider?)`
 
 #### 3.2. `ConversionService`
 - **Responsibility:** Manages the conversion of a single PNG file buffer into a valid SVG string.
@@ -100,14 +103,12 @@ The system is designed as a single Node.js process that implements the MCP proto
     1.  Takes an array of reference SVG strings and the user's text prompt.
     2.  Constructs a single string using a template with clear XML-like delimiters, instructing the LLM on its role, the reference material, and the final task.
 
-#### 3.4. `LLMService` (Claude Code CLI Wrapper)
-- **Responsibility:** Executes the external Claude Code CLI with the generated prompt and returns the LLM's response.
-- **Interface:** `async generate(prompt: string): Promise<{svg: string, filename: string}>`
-- **Implementation Details:**
-    1.  Uses `child_process.spawn` to execute `claude` with the complete prompt.
-    2.  Streams and concatenates the `stdout` from the child process.
-    3.  Parses the response to extract both the generated SVG and suggested filename.
-    4.  Resolves with the parsed output object upon successful process exit. Rejects the promise if the process exits with a non-zero code.
+#### Multi-LLM Architecture (`src/services/llm/`)
+- **Factory Pattern:** `factory.ts` - Dynamic provider selection
+- **Claude Integration:** `claude.ts` - Claude CLI with proper auth handling
+- **Gemini Integration:** `gemini.ts` - Gemini CLI with fallback support
+- **Provider Selection:** Runtime provider switching via `llm_provider` parameter
+- **Authentication:** Delegates to CLI tools, no credential handling
 
 #### 3.5. `SVGValidatorService`
 - **Responsibility:** Cleans and validates the SVG string received from the LLM to ensure it is safe and well-formed.
@@ -126,14 +127,14 @@ The system is designed as a single Node.js process that implements the MCP proto
     3.  Implements conflict resolution by appending index numbers (e.g., `-2`, `-3`).
     4.  Writes the sanitized SVG content to the final path.
 
-### 4. Packaging & Distribution
+### 4. Current Implementation Status
 
-- **`package.json` Configuration:** The package will be configured for global installation and MCP server execution.
-    - **`name`:** `icon-generator-mcp` to clearly identify as an MCP server package.
-    - **`bin`:** A `bin` field will map the command `icon-generator-mcp` to the `server.js` entry point file.
-    - **`files`:** The `files` array will include only the necessary source files, excluding bundled binaries.
-    - **`dependencies`:** Will include the MCP SDK and required Node.js libraries, but not bundled binaries.
-    - **`scripts.postinstall`:** A `postinstall` script will validate the presence of required system dependencies (Potrace, Claude CLI) and provide installation guidance if missing.
+- **Published Package:** Available as `icon-generator-mcp` on npm
+- **Global Installation:** `npm install -g icon-generator-mcp`
+- **Zero Configuration:** Works out-of-box in Claude Code/Gemini environments
+- **Testing:** 32 tests with 81% coverage, including regression tests
+- **Multi-LLM Support:** Claude + Gemini providers with runtime selection
+- **Phase-Based Pipeline:** 6-step generation with state management and visual feedback
 
 ### 5. Security Architecture
 

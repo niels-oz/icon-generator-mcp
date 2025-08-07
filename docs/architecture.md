@@ -1,68 +1,93 @@
-# Icon Generator MCP Architecture
+# Icon Generator MCP Architecture - Current Implementation
 
 ## Overview
 
-The Icon Generator MCP Server follows the standard Model Context Protocol (MCP) pattern, similar to successful MCPs like Context7. Instead of calling external LLM services, it processes input data and returns structured information that Claude Code can use to generate SVG icons.
+The Icon Generator MCP Server implements a complete phase-based icon generation pipeline with multi-LLM provider support. Unlike the original design that returned structured data, the current implementation performs end-to-end generation with comprehensive state management, visual feedback, and production-ready error handling.
 
 ## Core Principle
 
-**Process data locally, return structured results → Let Claude Code handle generation**
+**Phase-based pipeline with multi-provider support → Complete icon generation with state management**
 
-This eliminates circular dependencies and leverages Claude Code's existing authentication and processing capabilities.
+This provides a complete solution with visual feedback, robust error handling, and extensible architecture supporting multiple AI providers.
 
-## Architecture Diagram
+## Current Architecture Diagram
 
 ```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Claude Code │───▶│ MCP Server      │───▶│ Structured Data │
-│             │    │ (Local Process) │    │ Response        │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                            │                       │
-                            ▼                       ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │ PNG Conversion  │    │ Claude Code     │
-                   │ (Potrace)       │    │ SVG Generation  │
-                   └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────────────────────────────┐
+│ Claude Code/    │───▶│ MCP Server (Phase-Based Pipeline)      │
+│ Gemini CLI      │    │                                         │
+└─────────────────┘    │ Phase 1: Validation ─────────────────► │
+                       │ Phase 2: Analysis   ─────────────────► │
+                       │ Phase 3: Conversion (PNG→SVG)  ─────► │
+                       │ Phase 4: Generation (Multi-LLM) ────► │
+                       │ Phase 5: Refinement ─────────────────► │
+                       │ Phase 6: Output (File Writing) ─────► │
+                       │                                         │
+                       │ State: Visual Progress + Error Context │
+                       └─────────────────────────────────────────┘
+                                           │
+                                           ▼
+                              ┌─────────────────────┐
+                              │ Generated SVG Files │
+                              │ + Processing Stats  │
+                              └─────────────────────┘
 ```
 
-## Data Flow
+## Current Data Flow
 
-### 1. Input Processing
-- **PNG Conversion**: Convert reference PNG files to SVG using Potrace
-- **Prompt Processing**: Structure and optimize user prompts
-- **Validation**: Ensure all inputs are safe and properly formatted
+### 1. Phase-Based Processing Pipeline
 
-### 2. Structured Response
+**Phase 1 - Validation:** Input parameter validation, file existence checks
+**Phase 2 - Analysis:** Prompt analysis, provider selection, style detection
+**Phase 3 - Conversion:** PNG→BMP→SVG conversion using Potrace+Jimp
+**Phase 4 - Generation:** Multi-LLM generation (Claude/Gemini) with provider selection
+**Phase 5 - Refinement:** SVG sanitization, validation, quality checks
+**Phase 6 - Output:** File writing, conflict resolution, success reporting
+
+### 2. Current Response Format
 The MCP server returns:
 ```typescript
 {
   success: boolean;
-  svg_references?: string[];     // Converted PNG files
-  generation_prompt: string;     // Optimized prompt for Claude
-  raw_prompt: string;           // Original user prompt
-  output_name?: string;         // User-provided filename
-  output_path?: string;         // Suggested output location
-  instructions: string;         // SVG generation guidelines
-  message: string;              // Status message
+  output_path?: string;          // Path to generated icon(s)
+  message: string;               // Human-readable result
+  processing_time: number;       // Generation time in ms
+  steps?: ProcessingStep[];      // Phase execution details
+  error?: string;               // Error details if failed
+  variations_count?: number;     // Number of variations generated
+  llm_provider?: string;        // Provider used for generation
 }
 ```
 
-### 3. Claude Code Processing
-- Receives structured data from MCP
-- Uses `generation_prompt` to generate SVG content
-- Uses `raw_prompt` or `output_name` for filename generation
-- Follows `instructions` for proper SVG formatting
-- Saves to `output_path` if provided
+### 3. Multi-Provider Architecture
+- **Provider Factory:** Dynamic selection between Claude/Gemini
+- **Runtime Selection:** Provider specified via `llm_provider` parameter
+- **Fallback Support:** Graceful degradation when providers unavailable
+- **Authentication:** Delegates to CLI tools, no credential handling
 
 ## Key Components
 
 ### MCPServer (`src/server.ts`)
-- **Role**: Main orchestrator and MCP protocol handler
+- **Role**: Phase-based pipeline orchestrator with state management
 - **Responsibilities**:
-  - Request validation and parsing
-  - Coordinate service calls
-  - Build structured responses
-  - Handle errors gracefully
+  - 6-phase generation pipeline execution
+  - State management and visual progress feedback
+  - Multi-provider coordination via factory pattern
+  - Comprehensive error handling with context
+  - Processing time tracking and metrics
+
+### StateManager (`src/services/state-manager.ts`)
+- **Role**: Session state tracking and phase progression
+- **Responsibilities**:
+  - Phase-based state management
+  - Processing time metrics
+  - Visual feedback coordination
+  - Session isolation and cleanup
+
+### LLM Factory (`src/services/llm/factory.ts`)
+- **Role**: Multi-provider abstraction and selection
+- **Providers**: Claude (`claude.ts`) + Gemini (`gemini.ts`)
+- **Features**: Runtime provider selection, graceful fallbacks
 
 ### ConversionService (`src/services/converter.ts`)
 - **Role**: PNG to SVG conversion using Potrace
@@ -86,27 +111,31 @@ private buildSVGInstructions(): string {
 }
 ```
 
-## Benefits Over Previous Architecture
+## Current Implementation Benefits
 
-### ✅ Reliability
-- **No subprocess calls**: Eliminates Claude CLI timeout issues
-- **No circular dependencies**: Follows standard MCP pattern
-- **Consistent responses**: Structured data format every time
+### ✅ Multi-Provider Support
+- **Claude + Gemini**: Runtime provider selection
+- **Extensible Factory**: Easy addition of new providers
+- **Graceful Fallbacks**: Provider unavailability handling
+- **CLI Authentication**: Delegates auth to provider tools
 
-### ✅ Performance
-- **Faster processing**: No external CLI execution
-- **Lower latency**: Direct data processing
-- **Better resource usage**: No subprocess overhead
+### ✅ Phase-Based Pipeline
+- **6-Phase Processing**: Structured generation workflow
+- **State Management**: Session tracking and progress feedback
+- **Visual Feedback**: Real-time progress display
+- **Error Context**: Phase-specific error reporting
 
-### ✅ Maintainability
-- **Simpler codebase**: Removed LLMService complexity
-- **Standard pattern**: Follows established MCP conventions
-- **Easy testing**: Pure functions with predictable outputs
+### ✅ Production Quality
+- **32 Essential Tests**: Comprehensive test coverage
+- **Error Handling**: Robust failure recovery
+- **Performance Metrics**: Processing time tracking
+- **File Management**: Smart naming and conflict resolution
 
-### ✅ Security
-- **No credential handling**: Leverages Claude Code's auth
-- **Input validation**: Maintains security checks
-- **No external calls**: Reduced attack surface
+### ✅ Developer Experience
+- **Zero Config**: Works immediately after `npm install -g`
+- **Clear Feedback**: Detailed progress and error messages
+- **Flexible Parameters**: Support for all use cases
+- **Global Distribution**: npm package ready for production
 
 ## Generation Modes
 
@@ -150,13 +179,14 @@ This architecture supports easy extension:
 - **Enhanced prompts**: Template systems, style guides
 - **Batch processing**: Multiple icons at once
 
-## Testing Strategy
+## Current Testing Strategy
 
-The architecture enables comprehensive testing:
-- **Unit tests**: Individual service testing
-- **Integration tests**: End-to-end workflow validation
-- **Response validation**: Structured data format testing
-- **Error scenarios**: Comprehensive error handling tests
+Comprehensive testing with 32 essential tests:
+- **Core Tests**: MCP server, PNG conversion, phase processing (`test/core.test.ts`)
+- **Service Tests**: File operations, multi-provider LLM testing, conversion pipeline
+- **Integration Tests**: End-to-end workflow validation (`test/integration/end-to-end.test.ts`)
+- **Regression Tests**: Cross-domain few-shot learning validation (`test/regression/code-review-icon-generation.test.ts`)
+- **Performance Testing**: Processing time benchmarks and provider comparison
 
 ## Comparison with Other MCPs
 
