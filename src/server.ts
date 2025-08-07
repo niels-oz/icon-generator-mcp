@@ -311,9 +311,11 @@ export class MCPServer {
         `Generated SVG icon using AI (${llmResponse.svg.length} characters)`);
       
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Generation failed';
-      this.stateManager.addError(sessionId, 'generation', errorMsg);
-      throw error;
+      // The error from llmService is already specific, so we pass it directly
+      const specificErrorMessage = error instanceof Error ? error.message : 'Generation failed';
+      this.stateManager.addError(sessionId, 'generation', specificErrorMessage);
+      // Throw a new error with the specific message to ensure it propagates
+      throw new Error(specificErrorMessage);
     }
   }
   

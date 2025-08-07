@@ -204,35 +204,42 @@ Requirements:
       // Parse and return response
       return this.parseResponse(response);
     } catch (error) {
+      // Use a more robust check for timeout errors first
+      if (String(error).includes('ETIMEDOUT')) {
+        throw new Error(`Claude CLI execution timed out after ${this.config.timeout}ms. The service is unresponsive. Please try again later or check the CLI's status.`);
+      }
+
       // Enhanced error handling with specific error types
       if (error instanceof Error) {
-        // Handle timeout errors
-        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
-          throw new Error(`Claude CLI execution timed out after ${this.config.timeout}ms. Try increasing timeout or check system performance.`);
-        }
+        const err = error as any; // Cast to access potential properties like 'code'
         
+        // Handle API quota errors (Anthropic uses 429 for rate limits)
+        if (err.message.includes('429') && (err.message.includes('rate limit') || err.message.includes('quota'))) {
+          throw new Error(`Claude API Quota Exceeded. You have made too many requests. Please wait for your quota to reset.`);
+        }
+
         // Handle command not found errors
-        if (error.message.includes('ENOENT') || error.message.includes('command not found')) {
-          throw new Error('Claude CLI not found. Please ensure Claude Code is installed and the CLI is available in your PATH.');
+        if (err.code === 'ENOENT' || err.message.includes('command not found')) {
+          throw new Error('Claude CLI not found. Please ensure the Claude CLI is installed and that its location is in your system\'s PATH.');
         }
         
         // Handle permission errors
-        if (error.message.includes('EACCES') || error.message.includes('permission denied')) {
-          throw new Error('Permission denied when executing Claude CLI. Check file permissions and user access.');
-        }
-        
-        // Handle process killed errors
-        if (error.message.includes('SIGKILL') || error.message.includes('SIGTERM')) {
-          throw new Error('Claude CLI process was terminated. This may indicate system resource constraints.');
+        if (err.code === 'EACCES' || err.message.includes('permission denied')) {
+          throw new Error('Permission denied while executing Claude CLI. Please check the permissions of the Claude executable.');
         }
         
         // Handle buffer overflow
-        if (error.message.includes('maxBuffer')) {
-          throw new Error('Claude CLI output exceeded buffer limit. The generated content may be too large.');
+        if (err.message.includes('maxBuffer')) {
+          throw new Error('Claude CLI output exceeded the buffer limit. The generated content is too large to process.');
         }
         
-        // Generic error with original message
-        throw new Error(`Claude CLI execution failed: ${error.message}`);
+        // Handle process killed errors
+        if (err.signal === 'SIGKILL' || err.signal === 'SIGTERM') {
+          throw new Error(`Claude CLI process was terminated unexpectedly with signal ${err.signal}.`);
+        }
+        
+        // Generic fallback error with original message
+        throw new Error(`Claude CLI execution failed: ${err.message}`);
       }
       
       // Fallback for non-Error objects

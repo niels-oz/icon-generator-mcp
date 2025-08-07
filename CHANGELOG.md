@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **NPM publishing support**: Package ready for global installation via `npm install -g icon-generator-mcp`
 - **Automatic LLM tool integration**: Seamlessly works within Claude Code and Gemini CLI environments
 - **Comprehensive requirements documentation**: Added detailed requirements and future iterations planning
+- **Few-shot learning example**: Added "add user" icon example demonstrating style learning from existing patterns
+- **Add user icon regression test**: New script for testing few-shot learning capabilities
 
 ### Changed
 - **BREAKING**: Removed dependency on environment configuration files (.env)
@@ -27,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation Experience**: Added postinstall script with helpful setup information
 - **Documentation**: Updated installation and troubleshooting sections
 - **Package Metadata**: Added proper repository, bugs, and homepage URLs
+- **Few-shot Examples**: Extended black-white-flat style with add user icon example
+- **Testing Coverage**: Added regression test for few-shot learning validation
 
 ### Technical Improvements
 - Enhanced `execSync` implementation in both Claude and Gemini services

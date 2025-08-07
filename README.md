@@ -174,6 +174,9 @@ npm test -- --coverage
 # Demo scripts
 node example/demos/test-simple.js
 node example/demos/test-code-review-workflow.js
+
+# Few-shot learning example
+node example/test-add-user-icon.js
 ```
 
 ## 🎨 Examples
@@ -183,6 +186,16 @@ node example/demos/test-code-review-workflow.js
 node example/demos/test-simple.js
 ```
 **Output:** `./star-icon.svg` (10s)
+
+### Few-Shot Learning Example
+```bash
+node example/test-add-user-icon.js
+```
+**Output:** `./example/test-outputs/add-user-icon-example.svg` (8-15s)
+**Features:**
+- Demonstrates few-shot learning with existing black-white-flat examples
+- Generates add user icon using learned style patterns
+- Shows style consistency across different icon types
 
 ### Multiple Variations
 ```bash

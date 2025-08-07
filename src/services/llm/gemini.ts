@@ -110,35 +110,42 @@ export class GeminiService implements LLM {
 
       return this.parseResponse(response);
     } catch (error) {
+      // Use a more robust check for timeout errors first
+      if (String(error).includes('ETIMEDOUT')) {
+        throw new Error(`Gemini CLI execution timed out after ${this.config.timeout}ms. The service is unresponsive. Please try again later or check the CLI's status.`);
+      }
+
       // Enhanced error handling with specific error types
       if (error instanceof Error) {
-        // Handle timeout errors
-        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
-          throw new Error(`Gemini CLI execution timed out after ${this.config.timeout}ms. Try increasing timeout or check system performance.`);
-        }
+        const err = error as any; // Cast to access potential properties like 'code'
         
+        // Handle API quota errors
+        if (err.message.includes('429') && (err.message.includes('Quota exceeded') || err.message.includes('RESOURCE_EXHAUSTED'))) {
+          throw new Error(`Gemini API Quota Exceeded. You have made too many requests for the day. Please wait for your quota to reset.`);
+        }
+
         // Handle command not found errors
-        if (error.message.includes('ENOENT') || error.message.includes('command not found')) {
-          throw new Error('Gemini CLI not found. Please ensure Gemini CLI is installed and available in your PATH.');
+        if (err.code === 'ENOENT' || err.message.includes('command not found')) {
+          throw new Error('Gemini CLI not found. Please ensure the Gemini CLI is installed and that its location is in your system\'s PATH.');
         }
         
         // Handle permission errors
-        if (error.message.includes('EACCES') || error.message.includes('permission denied')) {
-          throw new Error('Permission denied when executing Gemini CLI. Check file permissions and user access.');
+        if (err.code === 'EACCES' || err.message.includes('permission denied')) {
+          throw new Error('Permission denied while executing Gemini CLI. Please check the permissions of the Gemini executable.');
+        }
+
+        // Handle buffer overflow
+        if (err.message.includes('maxBuffer')) {
+          throw new Error('Gemini CLI output exceeded the buffer limit. The generated content is too large to process.');
         }
         
         // Handle process killed errors
-        if (error.message.includes('SIGKILL') || error.message.includes('SIGTERM')) {
-          throw new Error('Gemini CLI process was terminated. This may indicate system resource constraints.');
+        if (err.signal === 'SIGKILL' || err.signal === 'SIGTERM') {
+          throw new Error(`Gemini CLI process was terminated unexpectedly with signal ${err.signal}.`);
         }
         
-        // Handle buffer overflow
-        if (error.message.includes('maxBuffer')) {
-          throw new Error('Gemini CLI output exceeded buffer limit. The generated content may be too large.');
-        }
-        
-        // Generic error with original message
-        throw new Error(`Gemini CLI execution failed: ${error.message}`);
+        // Generic fallback error with original message
+        throw new Error(`Gemini CLI execution failed: ${err.message}`);
       }
       
       // Fallback for non-Error objects

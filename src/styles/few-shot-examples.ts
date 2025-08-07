@@ -79,6 +79,22 @@ export const STYLE_CONFIGS: Record<string, StyleConfig> = {
   <path d="m7 16 2-2-2-2" stroke="black" fill="none"/>
 </svg>`,
         description: 'Two overlapping documents with comparison arrow'
+      },
+      {
+        prompt: 'Create an add user icon in black and white with simple flat design. Show a person silhouette with a plus sign overlay. Use only black outlines on white background, minimal details, clean geometric shapes.',
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Person silhouette -->
+  <circle cx="9" cy="7" r="4" fill="white" stroke="black"/>
+  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" fill="white" stroke="black"/>
+  
+  <!-- Plus sign circle -->
+  <circle cx="19" cy="8" r="3" fill="white" stroke="black"/>
+  
+  <!-- Plus sign -->
+  <line x1="19" y1="6" x2="19" y2="10" stroke="black" stroke-width="1.5"/>
+  <line x1="17" y1="8" x2="21" y2="8" stroke="black" stroke-width="1.5"/>
+</svg>`,
+        description: 'Person silhouette with plus sign overlay for adding users'
       }
     ]
   }
