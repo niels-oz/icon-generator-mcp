@@ -77,6 +77,9 @@ test-output-*.svg
 test_*.svg
 *.svg
 
+# Test output directory
+test/test-output/
+
 # Debug files
 debug.log
 mcp-debug.log
