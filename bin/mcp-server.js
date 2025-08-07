@@ -6,6 +6,7 @@ async function main() {
     // Dynamic import for ES modules
     const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
     const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+    const { ListToolsRequestSchema, CallToolRequestSchema } = await import('@modelcontextprotocol/sdk/types.js');
     
     // Import our server (CommonJS)
     const { MCPServer } = require('../dist/server');
@@ -29,10 +30,21 @@ async function main() {
     // Get tools from icon generator
     const tools = iconGenerator.getTools();
     
-    // Register tool call handler
-    server.setRequestHandler('tools/call', async (request) => {
+    // Register tools/list handler
+    server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+      return {
+        tools: tools.map(tool => ({
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema
+        }))
+      };
+    });
+    
+    // Register tools/call handler
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const toolName = request.params.name;
-      const toolArgs = request.params.arguments;
+      const toolArgs = request.params.arguments || {};
       
       // Find the requested tool
       const tool = tools.find(t => t.name === toolName);
@@ -63,17 +75,6 @@ async function main() {
           isError: true
         };
       }
-    });
-
-    // Handle tool listing
-    server.setRequestHandler('tools/list', async () => {
-      return {
-        tools: tools.map(tool => ({
-          name: tool.name,
-          description: tool.description,
-          inputSchema: tool.inputSchema
-        }))
-      };
     });
 
     // Create stdio transport
