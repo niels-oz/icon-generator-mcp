@@ -16,7 +16,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promis
   }
 }
 
-describe('Code Review Icon Generation Regression Test', () => {
+describe('Cross-Domain Few-Shot Learning Regression Test', () => {
   let server: MCPServer;
   const testOutputDir = path.join(__dirname, '../test-output');
 
@@ -38,101 +38,113 @@ describe('Code Review Icon Generation Regression Test', () => {
     console.log(`🔧 Using LLM provider: ${llmProvider}`);
   });
 
-  it('should generate code review icons using few-shot learning patterns', async () => {
-    console.log('🔍 Testing Code Review Icon Generation with Few-Shot Learning\n');
+  it('should generate code review icon using cross-domain few-shot learning', async () => {
+    console.log('🔍 Testing Cross-Domain Few-Shot Learning for Code Review Icon\n');
     
-    // Few-shot examples: Using the actual SVG examples as patterns
+    // Cross-domain few-shot examples: Different subjects, same consistent visual style
     const fewShotExamples = [
       {
-        name: 'dual-documents',
-        prompt: 'Create a code review icon in black and white with simple flat design. Show two overlapping documents representing before/after or comparison. Use only black outlines on white background, simple geometric forms.',
+        name: 'home-icon',
+        concept: 'residential/housing',
         svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- First document (background) -->
-  <rect x="3" y="4" width="12" height="16" rx="1" fill="white" stroke="black"/>
-  <line x1="6" y1="8" x2="12" y2="8" stroke="black"/>
-  <line x1="6" y1="11" x2="12" y2="11" stroke="black"/>
-  <line x1="6" y1="14" x2="9" y2="14" stroke="black"/>
-  
-  <!-- Second document (foreground, overlapping) -->
-  <rect x="9" y="2" width="12" height="16" rx="1" fill="white" stroke="black"/>
-  <line x1="12" y1="6" x2="18" y2="6" stroke="black"/>
-  <line x1="12" y1="9" x2="18" y2="9" stroke="black"/>
-  <line x1="12" y1="12" x2="15" y2="12" stroke="black"/>
-  
-  <!-- Comparison indicator (small checkmark on second document) -->
-  <polyline points="16,14 17,15 19,13" stroke="black" fill="none"/>
+  <!-- House outline -->
+  <path d="M3 12l9-9 9 9v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9z" fill="white" stroke="black"/>
+  <!-- Door -->
+  <path d="M9 21V15h6v6" fill="white" stroke="black" stroke-width="1"/>
+  <!-- Windows -->
+  <rect x="7" y="9" width="3" height="3" fill="white" stroke="black" stroke-width="1"/>
+  <rect x="14" y="9" width="3" height="3" fill="white" stroke="black" stroke-width="1"/>
 </svg>`,
-        patterns: ['overlapping documents', 'comparison visual', 'geometric forms', 'checkmark indicator']
+        patterns: ['geometric house shape', 'simple rectangular elements', 'consistent stroke weights']
       },
       {
-        name: 'magnifying-code',
-        prompt: 'Create a code review icon in black and white with simple flat design. Show a magnifying glass examining code or document lines. Use only black outlines on white background, geometric shapes, no gradients or shadows.',
+        name: 'settings-gear',
+        concept: 'configuration/tools',
         svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Document/Code background -->
-  <rect x="2" y="3" width="14" height="18" rx="2" ry="2" fill="white" stroke="black"/>
-  
-  <!-- Code lines -->
-  <line x1="4" y1="7" x2="12" y2="7" stroke="black" stroke-width="1"/>
-  <line x1="4" y1="9" x2="10" y2="9" stroke="black" stroke-width="1"/>
-  <line x1="4" y1="11" x2="11" y2="11" stroke="black" stroke-width="1"/>
-  <line x1="4" y1="13" x2="9" y2="13" stroke="black" stroke-width="1"/>
-  <line x1="4" y1="15" x2="12" y2="15" stroke="black" stroke-width="1"/>
-  <line x1="4" y1="17" x2="8" y2="17" stroke="black" stroke-width="1"/>
-  
-  <!-- Magnifying glass -->
-  <circle cx="17" cy="11" r="4" fill="white" stroke="black" stroke-width="2"/>
-  <line x1="20" y1="14" x2="22" y2="16" stroke="black" stroke-width="2"/>
+  <!-- Gear outer circle -->
+  <circle cx="12" cy="12" r="10" fill="white" stroke="black"/>
+  <!-- Gear teeth -->
+  <rect x="11" y="2" width="2" height="4" fill="black"/>
+  <rect x="11" y="18" width="2" height="4" fill="black"/>
+  <rect x="2" y="11" width="4" height="2" fill="black"/>
+  <rect x="18" y="11" width="4" height="2" fill="black"/>
+  <!-- Center hole -->
+  <circle cx="12" cy="12" r="3" fill="white" stroke="black"/>
 </svg>`,
-        patterns: ['magnifying glass', 'code examination', 'document with lines', 'inspection tool']
+        patterns: ['circular base shape', 'symmetrical design', 'contrasting filled elements']
+      },
+      {
+        name: 'star-rating',
+        concept: 'favorites/quality',
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Five-pointed star -->
+  <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="white" stroke="black"/>
+  <!-- Center highlight -->
+  <circle cx="12" cy="12" r="2" fill="white" stroke="black" stroke-width="1"/>
+</svg>`,
+        patterns: ['pointed geometric shape', 'centered design', 'detail stroke differentiation']
       }
     ];
 
-    // Display few-shot learning context
-    console.log('📚 Few-Shot Learning Context for Code Review Icons:');
+    // Display cross-domain few-shot learning context
+    console.log('📚 Cross-Domain Few-Shot Learning Context:');
     console.log('═'.repeat(80));
     
     fewShotExamples.forEach((example, index) => {
-      console.log(`\n${index + 1}. ${example.name.toUpperCase()}`);
-      console.log(`   Pattern: "${example.prompt.substring(0, 100)}..."`);
-      console.log(`   Key traits: ${example.patterns.join(', ')}`);
-      console.log(`   SVG structure: viewBox="0 0 24 24", stroke="black", fill="white"`);
+      console.log(`\n${index + 1}. ${example.name.toUpperCase()} (${example.concept})`);
+      console.log(`   Visual patterns: ${example.patterns.join(', ')}`);
+      console.log(`   Technical specs: viewBox="0 0 24 24", stroke="black", fill="white"`);
     });
     
     console.log('\n═'.repeat(80));
-    console.log('\n🔍 Expected Code Review Icon Characteristics:');
+    console.log('\n🔍 Style Patterns to Extract and Apply:');
     console.log('   • Consistent structure: viewBox="0 0 24 24"');
-    console.log('   • Style: black-white-flat');
-    console.log('   • Visual elements: documents, code lines, review indicators');
-    console.log('   • Technical specs: stroke="black", fill="white", stroke-width="2"');
-    console.log('   • Review concepts: comparison, examination, approval, analysis');
+    console.log('   • Color scheme: stroke="black", fill="white"');
+    console.log('   • Stroke hierarchy: stroke-width="2" for main, stroke-width="1" for details');
+    console.log('   • Design approach: Simple geometric shapes, minimal details');
+    console.log('   • Technical quality: Proper SVG namespace, stroke-linecap="round"');
+    console.log('\n🎯 Goal: Apply these style patterns to NEW DOMAIN (code review/development)');
 
-    // Generate new code review icon based on learned patterns
-    console.log('\n🔍 Generating New Code Review Icon Using Few-Shot Patterns:');
+    // Generate new code review icon based on cross-domain learned patterns
+    console.log('\n🔍 Generating Code Review Icon Using Cross-Domain Style Transfer:');
     console.log('─'.repeat(80));
     
-    const codeReviewPrompt = `Create a code review icon in black and white with simple flat design, following these examples:
+    const crossDomainPrompt = `Learn the visual style from these examples across different domains and apply it to a new code review icon:
 
-EXAMPLE 1 - Dual Documents Pattern:
+EXAMPLE 1 - Home Icon (Residential Domain):
 ${fewShotExamples[0].svg}
 
-EXAMPLE 2 - Magnifying Code Pattern:
+EXAMPLE 2 - Settings Gear (Configuration Domain):
 ${fewShotExamples[1].svg}
 
-Now create a NEW code review icon that shows a document with code lines and a review badge or approval stamp. Use the same style: black outlines on white background, viewBox="0 0 24 24", stroke-width="2" for main elements and stroke-width="1" for details. Show a document with horizontal lines representing code, and add a circular badge or stamp indicating review/approval. Keep it minimal and geometric like the examples.`;
+EXAMPLE 3 - Star Rating (Quality/Favorites Domain):
+${fewShotExamples[2].svg}
+
+Notice the consistent style patterns across all different domains:
+- Technical specs: viewBox="0 0 24 24", xmlns="http://www.w3.org/2000/svg"
+- Color scheme: stroke="black", fill="white" 
+- Stroke hierarchy: stroke-width="2" for main shapes, stroke-width="1" for details
+- Design approach: Simple geometric shapes, minimal details, clean structure
+- Quality: stroke-linecap="round", stroke-linejoin="round"
+
+Now create a NEW code review icon (Development Domain) using the EXACT same visual style and technical specifications. Show a document with code lines and a review indicator like a checkmark or approval badge. Apply the learned style patterns: same viewBox, same color scheme, same stroke hierarchy, same geometric simplicity.`;
     
-    const outputFilename = 'test-code-review-badge-regression.svg';
+    const outputFilename = 'test-code-review-cross-domain-regression.svg';
     const outputPath = path.join(testOutputDir, outputFilename);
     
     const newIconRequest = {
       png_paths: [],
-      prompt: codeReviewPrompt,
-      output_name: 'test-code-review-badge-regression',
+      prompt: crossDomainPrompt,
+      output_name: 'test-code-review-cross-domain-regression',
       output_path: testOutputDir,
       llm_provider: llmProvider
     };
     
-    console.log(`\n📋 Code Review Icon Generation Request:`);
-    console.log(`  Subject: Code Review Badge/Stamp Icon`);
+    console.log(`\n📋 Cross-Domain Style Transfer Request:`);
+    console.log(`  Subject: Code Review Icon (Development Domain)`);
+    console.log(`  Learning Method: Cross-domain few-shot learning`);
+    console.log(`  Source Domains: Residential + Configuration + Quality`);
+    console.log(`  Target Domain: Development/Code Review`);
     console.log(`  Prompt length: ${newIconRequest.prompt.length} characters`);
     console.log(`  LLM Provider: ${llmProvider}`);
     console.log(`  Output path: ${outputPath}`);
@@ -183,13 +195,16 @@ Now create a NEW code review icon that shows a document with code lines and a re
     const hasCodeLines = svgContent.includes('<line') && svgContent.split('<line').length > 2;
     const hasReviewElement = svgContent.includes('<circle') || svgContent.includes('<rect') || svgContent.includes('<polyline');
     
-    console.log('\n🔍 Code Review Icon Pattern Adherence Analysis:');
-    console.log(`  • Uses standard viewBox (0 0 24 24): ${hasViewBox ? '✅' : '❌'}`);
+    console.log('\n🔍 Cross-Domain Style Transfer Analysis:');
+    console.log('─'.repeat(50));
+    console.log('STYLE PATTERN ADHERENCE:');
+    console.log(`  • Standard viewBox (0 0 24 24): ${hasViewBox ? '✅' : '❌'}`);
     console.log(`  • Proper SVG namespace: ${hasProperNamespace ? '✅' : '❌'}`);
     console.log(`  • Black stroke styling: ${hasBlackStroke ? '✅' : '❌'}`);
     console.log(`  • White fill styling: ${hasWhiteFill ? '✅' : '❌'}`);
-    console.log(`  • Contains code lines: ${hasCodeLines ? '✅' : '❌'}`);
-    console.log(`  • Has review elements: ${hasReviewElement ? '✅' : '❌'}`);
+    console.log('DOMAIN-SPECIFIC ELEMENTS:');
+    console.log(`  • Contains code/document lines: ${hasCodeLines ? '✅' : '❌'}`);
+    console.log(`  • Has review indicator: ${hasReviewElement ? '✅' : '❌'}`);
     
     // Quality assertions specific to code review icons
     console.log(svgContent);
@@ -206,10 +221,11 @@ Now create a NEW code review icon that shows a document with code lines and a re
       : svgContent;
     console.log(`\n📄 Generated Code Review Icon SVG Preview:\n${preview}`);
     
-    console.log('\n🎉 Code Review Icon Generation Regression Test Complete!');
+    console.log('\n🎉 Cross-Domain Few-Shot Learning Test Complete!');
     console.log(`✅ Generated: ${path.basename(response.output_path!)}`);
-    console.log('✅ Pattern adherence validated');
-    console.log('✅ Code review visual elements confirmed');
+    console.log('✅ Style patterns successfully transferred across domains');
+    console.log('✅ Domain-specific elements (code review) properly incorporated');
+    console.log('✅ Visual consistency maintained from source examples');
     
   }, 30000); // 30 second timeout for AI generation
 
