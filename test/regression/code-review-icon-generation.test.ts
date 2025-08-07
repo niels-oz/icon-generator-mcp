@@ -127,7 +127,7 @@ Notice the consistent style patterns across all different domains:
 - Design approach: Simple geometric shapes, minimal details, clean structure
 - Quality: stroke-linecap="round", stroke-linejoin="round"
 
-Now create a NEW code review icon (Development Domain) using the EXACT same visual style and technical specifications. Show a document with code lines and a review indicator like a checkmark or approval badge. Apply the learned style patterns: same viewBox, same color scheme, same stroke hierarchy, same geometric simplicity.`;
+Now create a NEW code review icon (Development Domain) using the EXACT same visual style and technical specifications. Show a document with code lines and a magnifying glass examining the code. Apply the learned style patterns: same viewBox, same color scheme, same stroke hierarchy, same geometric simplicity.`;
     
     const outputFilename = 'test-code-review-cross-domain-regression.svg';
     const outputPath = path.join(testOutputDir, outputFilename);
@@ -193,7 +193,7 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     const hasBlackStroke = svgContent.includes('stroke="black"');
     const hasWhiteFill = svgContent.includes('fill="white"');
     const hasCodeLines = svgContent.includes('<line') && svgContent.split('<line').length > 2;
-    const hasReviewElement = svgContent.includes('<circle') || svgContent.includes('<rect') || svgContent.includes('<polyline');
+    const hasMagnifyingGlass = svgContent.includes('<circle') && (svgContent.includes('<line') || svgContent.includes('<rect'));
     
     console.log('\n🔍 Cross-Domain Style Transfer Analysis:');
     console.log('─'.repeat(50));
@@ -204,7 +204,7 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     console.log(`  • White fill styling: ${hasWhiteFill ? '✅' : '❌'}`);
     console.log('DOMAIN-SPECIFIC ELEMENTS:');
     console.log(`  • Contains code/document lines: ${hasCodeLines ? '✅' : '❌'}`);
-    console.log(`  • Has review indicator: ${hasReviewElement ? '✅' : '❌'}`);
+    console.log(`  • Has magnifying glass: ${hasMagnifyingGlass ? '✅' : '❌'}`);
     
     // Quality assertions specific to code review icons
     console.log(svgContent);
@@ -213,7 +213,7 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     expect(hasBlackStroke).toBe(true);
     expect(hasWhiteFill).toBe(true);
     expect(hasCodeLines).toBe(true);
-    expect(hasReviewElement).toBe(true);
+    expect(hasMagnifyingGlass).toBe(true);
     
     // Preview generated content
     const preview = svgContent.length > 300 
@@ -224,7 +224,7 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     console.log('\n🎉 Cross-Domain Few-Shot Learning Test Complete!');
     console.log(`✅ Generated: ${path.basename(response.output_path!)}`);
     console.log('✅ Style patterns successfully transferred across domains');
-    console.log('✅ Domain-specific elements (code review) properly incorporated');
+    console.log('✅ Domain-specific elements (magnifying glass + code) properly incorporated');
     console.log('✅ Visual consistency maintained from source examples');
     
   }, 30000); // 30 second timeout for AI generation
