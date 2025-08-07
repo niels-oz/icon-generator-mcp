@@ -186,24 +186,57 @@ Requirements:
     const systemPrompt = this.buildSystemPrompt(prompt, svgReferences, styleConfig);
 
     try {
-      // Execute Claude CLI with the prompt - use proper shell escaping
+      // Execute Claude CLI with the prompt - improved error handling and timeout management
       const response = execSync('claude', {
         input: systemPrompt,
         encoding: 'utf8',
         timeout: this.config.timeout,
-        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+        stdio: ['pipe', 'pipe', 'pipe'], // Explicit stdio configuration
+        windowsHide: true // Hide window on Windows (future compatibility)
       });
+
+      // Validate response before parsing
+      if (!response || typeof response !== 'string') {
+        throw new Error('Claude CLI returned empty or invalid response');
+      }
 
       // Parse and return response
       return this.parseResponse(response);
     } catch (error) {
+      // Enhanced error handling with specific error types
       if (error instanceof Error) {
-        if (error.message.includes('timeout')) {
-          throw new Error(`Claude CLI execution timed out after ${this.config.timeout}ms`);
+        // Handle timeout errors
+        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+          throw new Error(`Claude CLI execution timed out after ${this.config.timeout}ms. Try increasing timeout or check system performance.`);
         }
+        
+        // Handle command not found errors
+        if (error.message.includes('ENOENT') || error.message.includes('command not found')) {
+          throw new Error('Claude CLI not found. Please ensure Claude Code is installed and the CLI is available in your PATH.');
+        }
+        
+        // Handle permission errors
+        if (error.message.includes('EACCES') || error.message.includes('permission denied')) {
+          throw new Error('Permission denied when executing Claude CLI. Check file permissions and user access.');
+        }
+        
+        // Handle process killed errors
+        if (error.message.includes('SIGKILL') || error.message.includes('SIGTERM')) {
+          throw new Error('Claude CLI process was terminated. This may indicate system resource constraints.');
+        }
+        
+        // Handle buffer overflow
+        if (error.message.includes('maxBuffer')) {
+          throw new Error('Claude CLI output exceeded buffer limit. The generated content may be too large.');
+        }
+        
+        // Generic error with original message
         throw new Error(`Claude CLI execution failed: ${error.message}`);
       }
-      throw new Error('Claude CLI execution failed: Unknown error');
+      
+      // Fallback for non-Error objects
+      throw new Error(`Claude CLI execution failed: ${String(error)}`);
     }
   }
 

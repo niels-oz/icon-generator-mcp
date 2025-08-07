@@ -1,7 +1,7 @@
 {
   "name": "icon-generator-mcp",
-  "version": "0.2.0",
-  "description": "MCP server for AI-powered SVG icon generation from PNG references and/or text prompts",
+  "version": "1.0.0",
+  "description": "Zero-config MCP server for AI-powered SVG icon generation - works seamlessly within Claude Code and Gemini CLI environments",
   "main": "dist/server.js",
   "bin": {
     "icon-generator-mcp": "bin/mcp-server.js"
@@ -14,7 +14,8 @@
     "test:regression": "jest test/regression --timeout=30000",
     "test:code-review": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
     "start": "node bin/mcp-server.js",
-    "setup": "cp .env.example .env && echo 'Please edit .env with your API keys'"
+    "prepublishOnly": "npm run build && npm test",
+    "postinstall": "node -e \"console.log('\\n✅ Icon Generator MCP Server installed successfully!\\n\\nSystem Requirements:\\n- macOS (Intel or Apple Silicon)\\n- Potrace: brew install potrace\\n- Claude Code or Gemini CLI\\n\\nUsage: The server will be automatically available in your LLM tool.\\n')\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.4.0",
@@ -39,7 +40,8 @@
   "files": [
     "dist/",
     "bin/",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "keywords": [
     "mcp",
@@ -47,10 +49,23 @@
     "svg",
     "ai",
     "claude",
+    "gemini",
     "generator",
     "developer-tools",
-    "automation"
+    "automation",
+    "zero-config",
+    "png-to-svg",
+    "potrace"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "Icon Generator MCP Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/icon-generator-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/icon-generator-mcp/issues"
+  },
+  "homepage": "https://github.com/your-org/icon-generator-mcp#readme",
+  "preferGlobal": true
 }

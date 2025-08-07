@@ -1,6 +1,6 @@
 import { IconGenerationRequest, IconGenerationResponse, GenerationPhase } from './types';
 import { ConversionService } from './services/converter';
-import { LLMService } from './services/llm';
+import { getLLMProvider } from './services/llm/factory';
 import { FileWriterService } from './services/file-writer';
 import { StateManager } from './services/state-manager';
 import { VisualFormatter } from './services/visual-formatter';
@@ -12,14 +12,14 @@ export class MCPServer {
   public readonly version = '0.2.0';
   
   private conversionService: ConversionService;
-  private llmService: LLMService;
+  private llmService: any;
   private fileWriterService: FileWriterService;
   private stateManager: StateManager;
   private formatter: VisualFormatter;
   
   constructor() {
     this.conversionService = new ConversionService();
-    this.llmService = new LLMService();
+    this.llmService = getLLMProvider('claude');
     this.fileWriterService = new FileWriterService();
     this.stateManager = new StateManager();
     this.formatter = new VisualFormatter();
@@ -139,7 +139,7 @@ export class MCPServer {
     }
 
     // Step 3: Generate icon using LLM with SVG references, prompt, and optional style
-    const llmResponse = await this.llmService.generateSVG(request.prompt, svgReferences, request.style);
+    const llmResponse = await this.llmService.generate(request.prompt, svgReferences, request.style);
 
     // Step 4: Determine output filename
     const outputFilename = request.output_name || llmResponse.filename;

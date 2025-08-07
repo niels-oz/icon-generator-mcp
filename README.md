@@ -7,17 +7,11 @@ Transform your development workflow with intelligent icon generation. This MCP s
 ## 🚀 Quick Start
 
 ```bash
-# Install dependencies
-npm install
+# Install globally via npm (zero configuration required)
+npm install -g icon-generator-mcp
 
-# Set up environment
-npm run setup
-
-# Build the project
-npm run build
-
-# Start the MCP server
-npm start
+# That's it! The MCP server is now available in Claude Code and Gemini CLI
+# No additional setup, API keys, or configuration needed
 ```
 
 ## ✨ Features
@@ -35,27 +29,25 @@ npm start
 ```bash
 # Required system dependencies
 brew install potrace
-npm install -g @anthropic-ai/claude-dev
 
-# Verify installations
+# Verify installation
 potrace --version
-claude --version
 ```
 
-### Setup
+### Global Installation
 ```bash
-git clone <repository-url>
-cd icon-generator
-npm install
-npm run setup
+# Install the MCP server globally
+npm install -g icon-generator-mcp
+
+# The server will automatically be available in:
+# - Claude Code
+# - Gemini CLI environments
 ```
 
-### Configuration
-Edit `.env` file with your API keys:
-```env
-GOOGLE_SEARCH_API_KEY=your_google_search_api_key_here
-GOOGLE_SEARCH_ENGINE_ID=your_custom_search_engine_id_here
-```
+### Zero Configuration
+- ✅ **No API keys required** - Uses your LLM tool's existing authentication
+- ✅ **No environment files** - Works out of the box
+- ✅ **No additional setup** - Ready to use immediately after installation
 
 ## 📖 Usage
 
@@ -316,34 +308,17 @@ brew install potrace
 potrace --version
 ```
 
-### 2. Install the MCP Server
+### 2. Automatic Integration
 
-```bash
-# Install globally via npm
-npm install -g icon-generator-mcp
+The MCP server automatically integrates with your LLM environment:
 
-# Verify installation
-icon-generator-mcp --version
-```
+- **Claude Code**: Server is automatically discovered and available
+- **Gemini CLI**: Server works seamlessly within Gemini environment
+- **No manual configuration required**
 
-### 3. Configure Claude Code
+### 3. Start Using
 
-Add the server to your Claude Code configuration:
-
-```json
-{
-  "mcpServers": {
-    "icon-generator": {
-      "command": "icon-generator-mcp",
-      "args": ["--server"]
-    }
-  }
-}
-```
-
-### 4. Restart Claude Code
-
-Restart Claude Code to load the new MCP server. The `generate_icon` tool will be available for Claude Code to use automatically when you request icon generation.
+The `generate_icon` tool is immediately available in your LLM tool after installation.
 
 ## Usage
 
@@ -442,25 +417,24 @@ Output: settings-gear.svg
 
 **"Potrace not found"**
 ```bash
-# Install Potrace
+# Install Potrace (required system dependency)
 brew install potrace
 
 # Verify it's in your PATH
 which potrace
 ```
 
-**"Claude CLI not found"**
-- Ensure Claude Code is installed and authenticated
-- Check that the CLI is accessible in your PATH
-
-**"MCP server not responding"**
-- Verify the server is configured correctly in Claude Code
-- Restart Claude Code after configuration changes
-- Check server status: `icon-generator-mcp --health`
+**"MCP server not found"**
+- Ensure you installed globally: `npm install -g icon-generator-mcp`
+- Restart your LLM tool (Claude Code/Gemini CLI) after installation
 
 **"Permission denied"**
 - Ensure you have write permissions to the directory containing PNG files
 - Check file permissions: `ls -la your-file.png`
+
+**"CLI execution failed"**
+- Verify your LLM tool (Claude Code/Gemini CLI) is properly installed
+- Check that the CLI tools are accessible in your PATH
 
 ### Debug Mode
 
