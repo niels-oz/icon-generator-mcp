@@ -4,7 +4,7 @@
   "description": "Zero-config MCP server for AI-powered SVG icon generation - works seamlessly within Claude Code and Gemini CLI environments",
   "main": "dist/server.js",
   "bin": {
-    "icon-generator-mcp": "bin/mcp-server-proper.js"
+    "icon-generator-mcp": "bin/mcp-server-simple.js"
   },
   "scripts": {
     "build": "tsc",

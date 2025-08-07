@@ -6,8 +6,8 @@ const readline = require('readline');
 console.log('🧪 Testing MCP Server Communication...\n');
 
 // Spawn the MCP server
-const server = spawn('node', ['bin/mcp-server-proper.js'], {
-  stdio: ['pipe', 'pipe', 'inherit']
+const server = spawn('node', ['bin/mcp-server-simple.js'], {
+  stdio: ['pipe', 'pipe', 'pipe']
 });
 
 // Create readline interface for pretty output
@@ -71,9 +71,11 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
-server.stderr.on('data', (data) => {
-  console.error('❌ Server error:', data.toString());
-});
+if (server.stderr) {
+  server.stderr.on('data', (data) => {
+    console.error('❌ Server error:', data.toString());
+  });
+}
 
 // Start by initializing
 console.log('🚀 Starting MCP protocol test...\n');
