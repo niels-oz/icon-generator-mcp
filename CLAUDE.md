@@ -208,17 +208,10 @@ npm test -- --testNamePattern="claude|gemini"
 - State management with session isolation
 - Visual formatting for user feedback
 
-## Performance Benchmarks
-- **Test Suite**: 81 tests in ~42 seconds
-- **Single Generation**: 8-15 seconds (prompt-only)
-- **PNG Conversion**: 3-8 seconds (with reference files)
-- **Regression Tests**: 25-30 seconds per advanced test
-- **Memory**: Efficient session cleanup after 5s timeout
-
 ## Current Status
 - ✅ **Multi-LLM Support**: Claude + Gemini providers
 - ✅ **Phase-Based Pipeline**: 6-step generation process with state management
-- ✅ **Comprehensive Testing**: 81 tests with regression validation
+- ✅ **Comprehensive Testing**: 31 tests with regression validation
 - ✅ **Visual Feedback**: Real-time progress display
 - ✅ **Error Handling**: Phase-specific error context
 - ✅ **File Management**: Smart naming and conflict resolution
