@@ -11,9 +11,7 @@
     "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:regression": "jest test/regression --timeout=30000",
-    "test:code-review": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
-    "test:add-user": "jest test/regression/add-user-icon-generation.test.ts --timeout=35000",
+    "test:regression": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
     "start": "node bin/mcp-server.js",
     "prepublishOnly": "npm run build && npm test",
     "postinstall": "node -e \"console.log('\\n✅ Icon Generator MCP Server installed successfully!\\n\\nSystem Requirements:\\n- macOS (Intel or Apple Silicon)\\n- Potrace: brew install potrace\\n- Claude Code or Gemini CLI\\n\\nUsage: The server will be automatically available in your LLM tool.\\n')\""

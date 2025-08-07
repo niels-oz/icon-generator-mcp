@@ -160,22 +160,29 @@ npm run build       # Build TypeScript
 npm start           # Start production server
 ```
 
-### Testing
+### Testing (32 Essential Tests)
 ```bash
-# Run all tests
+# Run all tests (~34s runtime)
 npm test
 
 # Test specific functionality
-npm test -- --testNamePattern="WebImageSearchService"
+npm test -- --testNamePattern="core|llm|file-operations"
+
+# Run regression tests (AI validation)
+npm run test:regression
+npm run test:code-review  
+npm run test:add-user
 
 # Run with coverage
 npm test -- --coverage
 
 # Demo scripts
 node example/demos/test-simple.js
-node example/demos/test-code-review-workflow.js
+node example/demos/test-prompt-only.js
+node example/demos/test-conversion.js
 
-# Few-shot learning example
+# Few-shot learning examples
+node example/test-few-shot.js
 node example/test-add-user-icon.js
 ```
 

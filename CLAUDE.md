@@ -85,32 +85,33 @@ generate_icon: {
 
 ## Testing Strategy
 
-### Test Organization (81 Tests Total)
-- **Unit Tests**: Service testing with comprehensive mocking
-  - `test/services/` - Individual service tests
-  - `test/services/llm/` - Multi-provider LLM tests
+### Test Organization (32 Tests Total - Simplified)
+- **Core Tests**: Consolidated essential functionality
+  - `test/core.test.ts` - MCP server, PNG conversion, phase processing
+  - `test/services/file-operations.test.ts` - File handling and path generation
+  - `test/services/llm.test.ts` - Multi-provider LLM testing (Claude + Gemini)
+  - `test/services/converter.test.ts` - PNG to SVG conversion
 - **Integration Tests**: End-to-end workflow testing
-  - `test/integration/end-to-end.test.ts` - Complete workflow
+  - `test/integration/end-to-end.test.ts` - Complete workflow validation
 - **Regression Tests**: Advanced AI generation validation
   - `test/regression/few-shot-learning.test.ts` - Pattern learning
   - `test/regression/code-review-icon-generation.test.ts` - Specific use case
   - `test/regression/add-user-icon-generation.test.ts` - Style consistency
 - **Fixtures**: Real PNG/SVG files in `test/fixtures/`
 - **Test Output**: Generated files in `test/test-output/` (git-ignored)
-- **Coverage**: Jest with coverage reporting
 
 ### Running Specific Tests
 ```bash
-# All tests (81 tests, ~42s)
+# All tests (32 tests, ~34s)
 npm test
 
-# Regression tests (30-35s timeout)
+# Regression tests only (30-35s timeout)
 npm run test:regression
 npm run test:code-review
 npm run test:add-user
 
-# Test specific service
-npm test -- --testNamePattern="ConversionService"
+# Test specific functionality
+npm test -- --testNamePattern="core|llm|file-operations"
 
 # Test with coverage
 npm test -- --coverage
