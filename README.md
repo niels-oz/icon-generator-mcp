@@ -1,6 +1,6 @@
 # Icon Generator MCP Server
 
-> **AI-powered SVG icon generation for developers** - Generate professional icons instantly using Claude Desktop MCP integration
+> **AI-powered SVG icon generation for developers** - Generate professional icons instantly using Claude Code MCP integration
 
 Transform your development workflow with intelligent icon generation. This MCP server combines PNG-to-SVG conversion, AI creativity, and style consistency to produce clean, scalable icons in seconds.
 
@@ -10,7 +10,7 @@ Transform your development workflow with intelligent icon generation. This MCP s
 # Install globally via npm (zero configuration required)
 npm install -g icon-generator-mcp
 
-# That's it! The MCP server is now available in Claude Desktop
+# That's it! The MCP server is now available in Claude Code
 # No additional setup, API keys, or configuration needed
 ```
 
@@ -38,8 +38,30 @@ potrace --version
 # Install the MCP server globally
 npm install -g icon-generator-mcp
 
-# Configure Claude Desktop (see Configuration section)
+# Verify installation
+icon-generator-mcp --version
 ```
+
+### Claude Code Setup
+1. **Add MCP Server to Configuration**
+   
+   Edit `~/.claude/claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "icon-generator": {
+         "command": "icon-generator-mcp"
+       }
+     }
+   }
+   ```
+
+2. **Test Installation** - In Claude Code, try:
+   ```
+   Generate a simple star icon in black and white flat style
+   ```
+
+That's it! No API keys or additional configuration needed.
 
 ## 📖 Usage Examples
 
@@ -47,7 +69,7 @@ npm install -g icon-generator-mcp
 
 Generate icons from descriptive text prompts without any reference images.
 
-**In Claude Desktop:**
+**In Claude Code:**
 ```
 Create a simple star icon with clean lines and sharp points
 ```
@@ -72,7 +94,7 @@ Convert existing PNG images to clean SVG icons with AI enhancement.
 ls my-logo.png
 ```
 
-**In Claude Desktop:**
+**In Claude Code:**
 ```
 Convert my-logo.png to SVG and make it more minimalist for web use
 ```
@@ -242,19 +264,6 @@ The system learns from built-in examples to maintain consistency:
 - **Path Intelligence**: Saves to logical locations based on context
 
 ## 🔧 Configuration
-
-### Claude Desktop Setup
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "icon-generator": {
-      "command": "icon-generator-mcp"
-    }
-  }
-}
-```
 
 ### Environment Variables (Optional)
 ```env
