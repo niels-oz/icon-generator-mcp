@@ -15,7 +15,7 @@ describe('MCPServer', () => {
 
     it('should have the correct name and version', () => {
       expect(server.name).toBe('icon-generator-mcp');
-      expect(server.version).toBe('0.1.0');
+      expect(server.version).toBe('0.2.0');
     });
   });
 
@@ -89,7 +89,7 @@ describe('MCPServer', () => {
       const response = await server.handleToolCall('generate_icon', request);
       
       expect(response.success).toBe(false);
-      expect(response.error).toContain('prompt');
+      expect(response.error).toContain('prompt is required');
     });
 
     it('should fail when both png_paths and prompt are empty', async () => {
@@ -101,7 +101,7 @@ describe('MCPServer', () => {
       const response = await server.handleToolCall('generate_icon', request);
       
       expect(response.success).toBe(false);
-      expect(response.error).toContain('prompt');
+      expect(response.error).toContain('prompt is required');
     });
 
     it('should handle unknown tools', async () => {

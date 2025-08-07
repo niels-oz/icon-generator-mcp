@@ -56,7 +56,8 @@ describe('End-to-End Integration', () => {
 
     // Mock PNG file exists and file operations
     mockFs.existsSync
-      .mockReturnValueOnce(true)  // PNG file exists (for conversion)
+      .mockReturnValueOnce(true)  // PNG file exists (for validation phase)
+      .mockReturnValueOnce(true)  // PNG file exists (for conversion phase)
       .mockReturnValueOnce(false) // Temp file cleanup check
       .mockReturnValueOnce(true)  // PNG file exists (for file writer validation)
       .mockReturnValueOnce(false); // No conflict with output file
@@ -90,6 +91,8 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     expect(response.message).toMatch(/Icon generated successfully|Generated \d+ variations/);
     expect(response.message).toContain('simple-test-icon.svg');
     expect(response.processing_time).toBeDefined();
+    expect(response.steps).toBeDefined();
+    expect(Array.isArray(response.steps)).toBe(true);
   });
 
   it('should handle prompt-only generation (no PNG files)', async () => {
@@ -119,6 +122,8 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     expect(response.message).toContain('blue-circle-icon.svg');
     expect(response.output_path).toContain('blue-circle-icon.svg');
     expect(response.processing_time).toBeDefined();
+    expect(response.steps).toBeDefined();
+    expect(Array.isArray(response.steps)).toBe(true);
   });
 
   it('should handle validation errors gracefully', async () => {
@@ -132,6 +137,8 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     expect(response.success).toBe(false);
     expect(response.error).toBeDefined();
     expect(response.processing_time).toBeDefined();
+    expect(response.steps).toBeDefined();
+    expect(Array.isArray(response.steps)).toBe(true);
   });
 
   it('should handle unknown tools', async () => {

@@ -12,5 +12,8 @@ module.exports = {
     '!src/**/*.d.ts',
   ],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  testTimeout: 10000
+  testTimeout: 10000,
+  moduleNameMapper: {
+    '^chalk$': '<rootDir>/test/__mocks__/chalk.js'
+  }
 };
