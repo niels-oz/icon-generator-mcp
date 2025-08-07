@@ -21,11 +21,21 @@ describe('Add User Icon Generation Regression Test', () => {
   let server: MCPServer;
   const testOutputDir = path.join(__dirname, '../test-output');
 
+  // Get LLM provider from command line arguments (defaults to 'claude')
+  const getLLMProvider = (): 'claude' | 'gemini' => {
+    const args = process.argv.slice(2);
+    const llmArg = args.find(arg => arg === 'claude' || arg === 'gemini');
+    return (llmArg as 'claude' | 'gemini') || 'claude';
+  };
+
+  const llmProvider = getLLMProvider();
+
   beforeAll(() => {
     server = new MCPServer();
     if (!fs.existsSync(testOutputDir)) {
       fs.mkdirSync(testOutputDir, { recursive: true });
     }
+    console.log(`🔧 Using LLM provider: ${llmProvider}`);
   });
 
   it('should generate an add user icon using few-shot learning patterns', async () => {
@@ -45,12 +55,13 @@ describe('Add User Icon Generation Regression Test', () => {
       style: 'black-white-flat',
       output_name: 'test-add-user-icon-regression',
       output_path: testOutputDir,
-      llm_provider: 'gemini' // Use gemini as it seems to be working in the other test
+      llm_provider: llmProvider
     };
 
     console.log(`\n📋 Add User Icon Generation Request:`);
     console.log(`  Prompt: ${newIconRequest.prompt.substring(0, 100)}...`);
     console.log(`  Style: ${newIconRequest.style}`);
+    console.log(`  LLM Provider: ${llmProvider}`);
     console.log(`  Output path: ${outputPath}`);
     console.log('');
 

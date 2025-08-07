@@ -20,12 +20,22 @@ describe('Code Review Icon Generation Regression Test', () => {
   let server: MCPServer;
   const testOutputDir = path.join(__dirname, '../test-output');
 
+  // Get LLM provider from command line arguments (defaults to 'claude')
+  const getLLMProvider = (): 'claude' | 'gemini' => {
+    const args = process.argv.slice(2);
+    const llmArg = args.find(arg => arg === 'claude' || arg === 'gemini');
+    return (llmArg as 'claude' | 'gemini') || 'claude';
+  };
+
+  const llmProvider = getLLMProvider();
+
   beforeAll(() => {
     server = new MCPServer();
     // Ensure test output directory exists
     if (!fs.existsSync(testOutputDir)) {
       fs.mkdirSync(testOutputDir, { recursive: true });
     }
+    console.log(`🔧 Using LLM provider: ${llmProvider}`);
   });
 
   it('should generate code review icons using few-shot learning patterns', async () => {
@@ -118,12 +128,13 @@ Now create a NEW code review icon that shows a document with code lines and a re
       prompt: codeReviewPrompt,
       output_name: 'test-code-review-badge-regression',
       output_path: testOutputDir,
-      llm_provider: 'gemini'
+      llm_provider: llmProvider
     };
     
     console.log(`\n📋 Code Review Icon Generation Request:`);
     console.log(`  Subject: Code Review Badge/Stamp Icon`);
     console.log(`  Prompt length: ${newIconRequest.prompt.length} characters`);
+    console.log(`  LLM Provider: ${llmProvider}`);
     console.log(`  Output path: ${outputPath}`);
     console.log('');
 

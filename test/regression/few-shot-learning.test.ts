@@ -7,12 +7,22 @@ describe('Few-Shot Learning Regression Test', () => {
   let server: MCPServer;
   const testOutputDir = path.join(__dirname, '../test-output');
 
+  // Get LLM provider from command line arguments (defaults to 'claude')
+  const getLLMProvider = (): 'claude' | 'gemini' => {
+    const args = process.argv.slice(2);
+    const llmArg = args.find(arg => arg === 'claude' || arg === 'gemini');
+    return (llmArg as 'claude' | 'gemini') || 'claude';
+  };
+
+  const llmProvider = getLLMProvider();
+
   beforeAll(() => {
     server = new MCPServer();
     // Ensure test output directory exists
     if (!fs.existsSync(testOutputDir)) {
       fs.mkdirSync(testOutputDir, { recursive: true });
     }
+    console.log(`🔧 Using LLM provider: ${llmProvider}`);
   });
 
   it('should generate monstera plant icon using few-shot learning patterns', async () => {
@@ -73,12 +83,14 @@ describe('Few-Shot Learning Regression Test', () => {
       png_paths: [],
       prompt: housePlantPrompt,
       output_name: 'test-monstera-few-shot-regression',
-      output_path: testOutputDir
+      output_path: testOutputDir,
+      llm_provider: llmProvider
     };
     
     console.log(`\n📋 Icon Generation Request:`);
     console.log(`  Subject: Shadow Silhouette Monstera Plant`);
     console.log(`  Prompt length: ${newIconRequest.prompt.length} characters`);
+    console.log(`  LLM Provider: ${llmProvider}`);
     console.log(`  Output path: ${outputPath}`);
     console.log('');
 
