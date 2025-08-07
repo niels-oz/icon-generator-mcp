@@ -14,7 +14,7 @@ export class LLMService {
   constructor(config?: Partial<LLMConfig>) {
     this.config = {
       timeout: 60000, // 60 seconds
-      maxPromptLength: 2000,
+      maxPromptLength: 8192,
       cliCommand: 'claude',
       ...config
     };
