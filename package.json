@@ -60,11 +60,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/icon-generator-mcp.git"
+    "url": "https://github.com/niels-oz/icon-generator-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/icon-generator-mcp/issues"
+    "url": "https://github.com/niels-oz/icon-generator-mcp/issues"
   },
-  "homepage": "https://github.com/your-org/icon-generator-mcp#readme",
+  "homepage": "https://github.com/niels-oz/icon-generator-mcp#readme",
   "preferGlobal": true
 }
