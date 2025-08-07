@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { execSync } from 'child_process';
-import { LLMService } from '../../src/services/llm';
+import { ClaudeService } from '../../../src/services/llm/claude';
 
 // Only mock the edge dependency (external process execution)
 jest.mock('child_process', () => ({
@@ -9,11 +9,11 @@ jest.mock('child_process', () => ({
 
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
 
-describe('LLMService', () => {
-  let service: LLMService;
+describe('LLMService with Few-Shot Learning', () => {
+  let service: ClaudeService;
 
   beforeEach(() => {
-    service = new LLMService();
+    service = new ClaudeService();
     jest.clearAllMocks();
   });
 
@@ -49,7 +49,7 @@ describe('LLMService', () => {
     });
 
     it('should reject prompts that are too long', () => {
-      const longPrompt = 'a'.repeat(2001);
+      const longPrompt = 'a'.repeat(8193);
       
       expect(() => service.validatePrompt(longPrompt)).toThrow('Prompt too long');
     });
@@ -83,7 +83,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
         .mockReturnValueOnce(mockResponse); // Second call: claude execution (success)
 
       const svgReferences = ['<svg><circle fill="blue"/></svg>'];
-      const result = await service.generateSVG('Change blue to red', svgReferences);
+      const result = await service.generate('Change blue to red', svgReferences);
 
       expect(result.svg).toContain('<svg');
       expect(result.svg).toContain('fill="red"');
@@ -102,7 +102,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
         .mockReturnValueOnce(mockResponse); // Second call: claude execution (success)
 
       const svgReferences = ['<svg><circle fill="blue"/></svg>'];
-      const result = await service.generateSVG('Change blue to red', svgReferences);
+      const result = await service.generate('Change blue to red', svgReferences);
 
       expect(result.svg).toContain('<svg');
       expect(result.filename).toBe('generated-icon');
@@ -117,7 +117,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
 
       const svgReferences = ['<svg><circle fill="blue"/></svg>'];
       
-      await expect(service.generateSVG('test prompt', svgReferences))
+      await expect(service.generate('test prompt', svgReferences))
         .rejects.toThrow('Claude CLI execution failed');
     });
 
@@ -128,7 +128,7 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
 
       const svgReferences = ['<svg><circle fill="blue"/></svg>'];
       
-      await expect(service.generateSVG('test prompt', svgReferences))
+      await expect(service.generate('test prompt', svgReferences))
         .rejects.toThrow('Invalid response format from Claude CLI');
     });
   });
@@ -253,12 +253,12 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     });
 
     it('should respect custom timeout', () => {
-      const customService = new LLMService({ timeout: 30000 });
+      const customService = new ClaudeService({ timeout: 30000 });
       expect(customService.getTimeout()).toBe(30000);
     });
 
-    it('should use default max prompt length of 2000 characters', () => {
-      expect(service.getMaxPromptLength()).toBe(2000);
+    it('should use default max prompt length of 8192 characters', () => {
+      expect(service.getMaxPromptLength()).toBe(8192);
     });
   });
 });

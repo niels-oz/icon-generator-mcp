@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
-import { LLMResponse } from '../types';
-import { StyleConfig, getStyleConfig } from '../styles/few-shot-examples';
+import { LLMResponse } from '../../types';
+import { LLM } from './types';
+import { StyleConfig, getStyleConfig } from '../../styles/few-shot-examples';
 
 export interface LLMConfig {
   timeout: number;
@@ -8,7 +9,7 @@ export interface LLMConfig {
   cliCommand: string;
 }
 
-export class LLMService {
+export class ClaudeService implements LLM {
   private config: LLMConfig;
 
   constructor(config?: Partial<LLMConfig>) {
@@ -101,7 +102,7 @@ ${styleConfig.description}
 
 Here are examples of this style:
 
-${styleConfig.examples.map((example, index) => `Example ${index + 1}:
+${styleConfig.examples.map((example: any, index: number) => `Example ${index + 1}:
 Prompt: "${example.prompt}"
 Description: ${example.description}
 SVG:
@@ -171,7 +172,7 @@ Requirements:
   /**
    * Generate SVG icon using Claude CLI with optional style guidance
    */
-  async generateSVG(prompt: string, svgReferences: string[] = [], styleName?: string): Promise<LLMResponse> {
+  async generate(prompt: string, svgReferences: string[] = [], styleName?: string): Promise<LLMResponse> {
     // Validate input
     this.validatePrompt(prompt);
 

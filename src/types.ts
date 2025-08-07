@@ -6,6 +6,7 @@ export interface IconGenerationRequest {
   output_name?: string;
   output_path?: string;
   style?: string;
+  llm_provider?: 'claude' | 'gemini';
 }
 
 export interface IconGenerationResponse {

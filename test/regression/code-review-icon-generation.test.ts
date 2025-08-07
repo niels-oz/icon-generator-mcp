@@ -3,6 +3,19 @@ import { MCPServer } from '../../src/server';
 import * as fs from 'fs';
 import * as path from 'path';
 
+async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0) {
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+}
+
 describe('Code Review Icon Generation Regression Test', () => {
   let server: MCPServer;
   const testOutputDir = path.join(__dirname, '../test-output');
@@ -78,7 +91,7 @@ describe('Code Review Icon Generation Regression Test', () => {
     console.log('\n═'.repeat(80));
     console.log('\n🔍 Expected Code Review Icon Characteristics:');
     console.log('   • Consistent structure: viewBox="0 0 24 24"');
-    console.log('   • Style constraints: "black and white", "simple flat design"');
+    console.log('   • Style: black-white-flat');
     console.log('   • Visual elements: documents, code lines, review indicators');
     console.log('   • Technical specs: stroke="black", fill="white", stroke-width="2"');
     console.log('   • Review concepts: comparison, examination, approval, analysis');
@@ -104,7 +117,8 @@ Now create a NEW code review icon that shows a document with code lines and a re
       png_paths: [],
       prompt: codeReviewPrompt,
       output_name: 'test-code-review-badge-regression',
-      output_path: testOutputDir
+      output_path: testOutputDir,
+      llm_provider: 'gemini'
     };
     
     console.log(`\n📋 Code Review Icon Generation Request:`);
@@ -114,7 +128,7 @@ Now create a NEW code review icon that shows a document with code lines and a re
     console.log('');
 
     const startTime = Date.now();
-    const response = await server.handleToolCall('generate_icon', newIconRequest);
+    const response = await retry(() => server.handleToolCall('generate_icon', newIconRequest));
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     // Log full response for debugging before assertions
@@ -167,6 +181,7 @@ Now create a NEW code review icon that shows a document with code lines and a re
     console.log(`  • Has review elements: ${hasReviewElement ? '✅' : '❌'}`);
     
     // Quality assertions specific to code review icons
+    console.log(svgContent);
     expect(hasViewBox).toBe(true);
     expect(hasProperNamespace).toBe(true);
     expect(hasBlackStroke).toBe(true);
