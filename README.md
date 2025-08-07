@@ -533,4 +533,4 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
 
 ---
 
-**Built with ❤️ for developers who need quick, AI-powered icon generation in their workflow.**
+**Built with ❤️ for developers who need intelligent, AI-powered icon generation with Sequential Thinking architecture.**
