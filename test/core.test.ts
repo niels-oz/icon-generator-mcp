@@ -14,7 +14,7 @@ describe('Core Functionality (Consolidated)', () => {
   describe('MCP Server', () => {
     it('should initialize correctly', () => {
       expect(server.name).toBe('icon-generator-mcp');
-      expect(server.version).toBe('0.2.0');
+      expect(server.version).toBe('0.3.1');
     });
 
     it('should register generate_icon tool with correct schema', () => {

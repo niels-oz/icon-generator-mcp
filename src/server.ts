@@ -8,9 +8,21 @@ import { VisualFormatter } from './services/visual-formatter';
 import * as path from 'path';
 import * as fs from 'fs';
 
+// Read version from package.json to maintain single source of truth
+function getVersion(): string {
+  try {
+    const packagePath = path.join(__dirname, '../package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+    return packageJson.version;
+  } catch (error) {
+    // Fallback for tests or other environments where package.json might not be accessible
+    return '0.3.1';
+  }
+}
+
 export class MCPServer {
   public readonly name = 'icon-generator-mcp';
-  public readonly version = '0.2.0';
+  public readonly version = getVersion();
   
   private conversionService: ConversionService;
   private llmService: LLM;
@@ -78,8 +90,7 @@ export class MCPServer {
       // Create generation session with phase-based state management
       const state = this.stateManager.createSession(validatedRequest);
       
-      // Always use Claude since this is running inside Claude Code
-      this.llmService = getLLMProvider('claude');
+      // Use the configured LLM provider (respects constructor parameter)
 
       try {
         // Execute generation with step-by-step tracking

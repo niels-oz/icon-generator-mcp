@@ -5,10 +5,24 @@ All notable changes to the Icon Generator MCP Server will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-08-07 (Beta)
+
+### Fixed
+- **Version Consistency**: Unified version handling across server, CLI, and package.json
+- **LLM Provider Selection**: Removed hard-coded Claude override, now respects constructor parameter
+- **Directory Creation**: FileWriterService now creates missing output directories automatically
+- **Dependency Cleanup**: Removed unused node-fetch and @types/node-fetch dependencies
+- **CLI Consolidation**: Removed duplicate CLI entry point to prevent drift
+
+### Technical Improvements
+- Server and CLI now read version from package.json at runtime for single source of truth
+- Enhanced error messages for directory creation failures
+- Improved provider selection respects multi-LLM architecture promises
+
 ## [0.3.0] - 2025-08-07 (Beta)
 
 ### Added
-- **Multi-LLM Architecture**: Added support for both Claude and Gemini providers via factory pattern
+- **Multi-LLM Architecture**: Added support for both Claude and Gemini providers via factory pattern (Note: Provider selection currently defaults to Claude but can be overridden via constructor)
 - **Phase-based Generation Pipeline**: Implemented 6-step generation process with state management
 - **Visual Progress Feedback**: Real-time progress display during icon generation
 - **Comprehensive Test Suite**: 31 tests covering core functionality, regression testing, and integration

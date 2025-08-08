@@ -98,13 +98,20 @@ export class FileWriterService {
   }
 
   /**
-   * Check if directory is writable
+   * Ensure directory exists and is writable, creating it if necessary
    */
-  private checkDirectoryWritable(dirPath: string): void {
+  private ensureDirectoryWritable(dirPath: string): void {
     try {
+      // Check if directory exists
+      if (!fs.existsSync(dirPath)) {
+        // Create directory recursively
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      
+      // Check write permissions
       fs.accessSync(dirPath, fs.constants.W_OK);
     } catch (error) {
-      throw new Error(`Cannot write to directory: ${dirPath}`);
+      throw new Error(`Cannot create or write to directory: ${dirPath}. ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -114,8 +121,8 @@ export class FileWriterService {
   async saveGeneratedSVG(outputPath: string, svgContent: string): Promise<void> {
     const dir = path.dirname(outputPath);
     
-    // Check directory write permissions
-    this.checkDirectoryWritable(dir);
+    // Ensure directory exists and is writable
+    this.ensureDirectoryWritable(dir);
     
     try {
       fs.writeFileSync(outputPath, svgContent, 'utf8');
