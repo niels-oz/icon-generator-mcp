@@ -161,8 +161,8 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     
     // Assertions
     expect(response.success).toBe(true);
-    expect(response.output_path).toBeDefined();
-    expect(response.message).toMatch(/Icon generated successfully|Generated.*variations/);
+    expect(response.generation_context).toBeDefined();
+    expect(response.message).toMatch(/Generation context prepared successfully/);
     expect(response.processing_time).toBeDefined();
     expect(response.steps).toBeDefined();
     expect(Array.isArray(response.steps)).toBe(true);
@@ -170,62 +170,44 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     console.log('📊 Generation Results:');
     console.log(`  Success: ${response.success}`);
     console.log(`  Message: ${response.message}`);
-    console.log(`  Output path: ${response.output_path}`);
+    console.log(`  Context prepared: ${response.generation_context ? 'Yes' : 'No'}`);
     console.log(`  Processing time: ${processingTime}ms`);
     console.log(`  Steps completed: ${response.steps!.length}`);
     if (response.error) {
       console.error(`  Error: ${response.error}`);
     }
     
-    // Verify file was created
-    expect(fs.existsSync(response.output_path!)).toBe(true);
+    // Verify context was prepared
+    expect(response.generation_context).toBeDefined();
     
-    // Analyze generated SVG content
-    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
-    expect(svgContent.length).toBeGreaterThan(100);
+    // Analyze prepared generation context
+    expect(response.generation_context.prompt.length).toBeGreaterThan(500);
+    expect(response.generation_context.prompt).toContain('expert SVG icon designer');
     
-    console.log(`  SVG file size: ${svgContent.length} characters`);
-    console.log(`  SVG elements: ${extractSVGElements(svgContent)}`);
+    console.log(`  Context size: ${response.generation_context.prompt.length} characters`);
     
-    // Code Review Icon specific pattern adherence analysis
-    const hasViewBox = svgContent.includes('viewBox="0 0 24 24"');
-    const hasProperNamespace = svgContent.includes('xmlns="http://www.w3.org/2000/svg"');
-    const hasBlackStroke = svgContent.includes('stroke="black"');
-    const hasWhiteFill = svgContent.includes('fill="white"');
-    const hasCodeLines = svgContent.includes('<line') && svgContent.split('<line').length > 2;
-    const hasMagnifyingGlass = svgContent.includes('<circle') && (svgContent.includes('<line') || svgContent.includes('<rect'));
+    // Code Review Icon specific context analysis
+    const hasExamples = response.generation_context.prompt.includes('EXAMPLE');
+    const hasStyleGuide = response.generation_context.prompt.includes('consistent style patterns');
+    const hasRequirements = response.generation_context.prompt.includes('viewBox="0 0 24 24"');
     
     console.log('\n🔍 Cross-Domain Style Transfer Analysis:');
     console.log('─'.repeat(50));
-    console.log('STYLE PATTERN ADHERENCE:');
-    console.log(`  • Standard viewBox (0 0 24 24): ${hasViewBox ? '✅' : '❌'}`);
-    console.log(`  • Proper SVG namespace: ${hasProperNamespace ? '✅' : '❌'}`);
-    console.log(`  • Black stroke styling: ${hasBlackStroke ? '✅' : '❌'}`);
-    console.log(`  • White fill styling: ${hasWhiteFill ? '✅' : '❌'}`);
-    console.log('DOMAIN-SPECIFIC ELEMENTS:');
-    console.log(`  • Contains code/document lines: ${hasCodeLines ? '✅' : '❌'}`);
-    console.log(`  • Has magnifying glass: ${hasMagnifyingGlass ? '✅' : '❌'}`);
+    console.log('CONTEXT PREPARATION:');
+    console.log(`  • Few-shot examples: ${hasExamples ? '✅' : '❌'}`);
+    console.log(`  • Style guidelines: ${hasStyleGuide ? '✅' : '❌'}`);
+    console.log(`  • Technical requirements: ${hasRequirements ? '✅' : '❌'}`);
     
-    // Quality assertions specific to code review icons
-    console.log(svgContent);
-    expect(hasViewBox).toBe(true);
-    expect(hasProperNamespace).toBe(true);
-    expect(hasBlackStroke).toBe(true);
-    expect(hasWhiteFill).toBe(true);
-    expect(hasCodeLines).toBe(true);
-    expect(hasMagnifyingGlass).toBe(true);
+    // Quality assertions for context preparation
+    expect(hasExamples).toBe(true);
+    expect(hasStyleGuide).toBe(true);
+    expect(hasRequirements).toBe(true);
     
-    // Preview generated content
-    const preview = svgContent.length > 300 
-      ? svgContent.substring(0, 300) + '...' 
-      : svgContent;
-    console.log(`\n📄 Generated Code Review Icon SVG Preview:\n${preview}`);
-    
-    console.log('\n🎉 Cross-Domain Few-Shot Learning Test Complete!');
-    console.log(`✅ Generated: ${path.basename(response.output_path!)}`);
-    console.log('✅ Style patterns successfully transferred across domains');
-    console.log('✅ Domain-specific elements (magnifying glass + code) properly incorporated');
-    console.log('✅ Visual consistency maintained from source examples');
+    console.log('\n🎉 Cross-Domain Context Preparation Test Complete!');
+    console.log('✅ Context prepared for LLM generation');
+    console.log('✅ Style patterns included in context for domain transfer');
+    console.log('✅ Technical requirements specified for code review domain');
+    console.log('✅ Few-shot examples provided for consistent generation');
     
   }, 30000); // 30 second timeout for AI generation
 

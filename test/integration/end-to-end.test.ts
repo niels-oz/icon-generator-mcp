@@ -122,9 +122,8 @@ SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     const response = await server.handleToolCall('generate_icon', request);
     
     expect(response.success).toBe(true);
-    expect(response.message).toMatch(/Icon generated successfully|Generated \d+ variations/);
-    expect(response.message).toContain('blue-circle-icon.svg');
-    expect(response.output_path).toContain('blue-circle-icon.svg');
+    expect(response.message).toMatch(/Generation context prepared successfully/);
+    expect(response.generation_context).toBeDefined();
     expect(response.processing_time).toBeDefined();
     expect(response.steps).toBeDefined();
     expect(Array.isArray(response.steps)).toBe(true);

@@ -10,6 +10,7 @@ export interface IconGenerationRequest {
 
 export interface IconGenerationResponse {
   success: boolean;
+  generation_context?: any; // Context prepared for LLM generation
   output_path?: string;
   message: string;
   processing_time?: number;
@@ -61,5 +62,6 @@ export interface GenerationContext {
   generatedSvg?: string;
   suggestedFilename?: string;
   outputPath?: string;
+  generationContext?: any; // Context prepared for LLM
   errors: string[];
 }

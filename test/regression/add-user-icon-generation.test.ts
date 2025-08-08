@@ -75,8 +75,8 @@ describe('Add User Icon Generation Regression Test', () => {
     console.log('---------------------');
 
     expect(response.success).toBe(true);
-    expect(response.output_path).toBeDefined();
-    expect(response.message).toMatch(/Icon generated successfully/);
+    expect(response.generation_context).toBeDefined();
+    expect(response.message).toMatch(/Generation context prepared successfully/);
     expect(response.processing_time).toBeDefined();
     
     console.log('📊 Generation Results:');
@@ -85,28 +85,28 @@ describe('Add User Icon Generation Regression Test', () => {
     console.log(`  Output path: ${response.output_path}`);
     console.log(`  Processing time: ${processingTime}ms`);
     
-    expect(fs.existsSync(response.output_path!)).toBe(true);
+    expect(response.generation_context).toBeDefined();
     
-    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
-    expect(svgContent.length).toBeGreaterThan(100);
+    // Context analysis instead of file system checks
+    expect(response.generation_context.prompt.length).toBeGreaterThan(500);
 
-    const hasViewBox = svgContent.includes('viewBox="0 0 24 24"');
-    const hasProperNamespace = svgContent.includes('xmlns="http://www.w3.org/2000/svg"');
-    const hasBlackStroke = svgContent.includes('stroke="black"');
-    const hasWhiteFill = svgContent.includes('fill="white"');
+    const hasViewBox = response.generation_context.prompt.includes('viewBox="0 0 24 24"');
+    const hasProperNamespace = response.generation_context.prompt.includes('xmlns="http://www.w3.org/2000/svg"');
+    const hasBlackStroke = response.generation_context.prompt.includes('stroke="black"');
+    const hasWhiteFill = response.generation_context.prompt.includes('fill="white"');
 
-    console.log('\n🔍 Add User Icon Pattern Adherence Analysis:');
-    console.log(`  • Uses standard viewBox (0 0 24 24): ${hasViewBox ? '✅' : '❌'}`);
-    console.log(`  • Proper SVG namespace: ${hasProperNamespace ? '✅' : '❌'}`);
-    console.log(`  • Black stroke styling: ${hasBlackStroke ? '✅' : '❌'}`);
-    console.log(`  • White fill styling: ${hasWhiteFill ? '✅' : '❌'}`);
+    console.log('\n🔍 Add User Icon Context Quality Analysis:');
+    console.log(`  • ViewBox instruction: ${hasViewBox ? '✅' : '❌'}`);
+    console.log(`  • SVG namespace instruction: ${hasProperNamespace ? '✅' : '❌'}`);
+    console.log(`  • Black stroke instruction: ${hasBlackStroke ? '✅' : '❌'}`);
+    console.log(`  • White fill instruction: ${hasWhiteFill ? '✅' : '❌'}`);
 
     expect(hasViewBox).toBe(true);
     expect(hasProperNamespace).toBe(true);
     expect(hasBlackStroke).toBe(true);
     expect(hasWhiteFill).toBe(true);
 
-    console.log('\n🎉 Add User Icon Generation Regression Test Complete!');
-    console.log(`✅ Generated: ${path.basename(response.output_path!)}`);
+    console.log('\n🎉 Add User Icon Context Preparation Test Complete!');
+    console.log(`✅ Context prepared for LLM generation with proper quality instructions`);
   }, 35000); // 35 second timeout
 });

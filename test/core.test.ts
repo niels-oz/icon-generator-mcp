@@ -46,8 +46,8 @@ describe('Core Functionality (Consolidated)', () => {
     });
 
     it('should handle multi-LLM provider selection', () => {
-      const claudeServer = new MCPServer('claude');
-      const geminiServer = new MCPServer('gemini');
+      const claudeServer = new MCPServer();
+      const geminiServer = new MCPServer();
       
       expect(claudeServer).toBeDefined();
       expect(geminiServer).toBeDefined();

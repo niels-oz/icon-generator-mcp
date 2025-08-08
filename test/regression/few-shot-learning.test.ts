@@ -101,8 +101,8 @@ describe('Few-Shot Learning Regression Test', () => {
     
     // Assertions
     expect(response.success).toBe(true);
-    expect(response.output_path).toBeDefined();
-    expect(response.message).toMatch(/Icon generated successfully|Generated.*variations/);
+    expect(response.generation_context).toBeDefined();
+    expect(response.message).toMatch(/Generation context prepared successfully/);
     expect(response.processing_time).toBeDefined();
     expect(response.steps).toBeDefined();
     expect(Array.isArray(response.steps)).toBe(true);
@@ -115,41 +115,41 @@ describe('Few-Shot Learning Regression Test', () => {
     console.log(`  Steps completed: ${response.steps!.length}`);
     
     // Verify file was created
-    expect(fs.existsSync(response.output_path!)).toBe(true);
+    expect(response.generation_context).toBeDefined();
     
     // Analyze generated SVG content
-    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
-    expect(svgContent.length).toBeGreaterThan(100);
+    // Context quality validation - ensure context instructs LLM properly for quality SVG generation
+    expect(response.generation_context.prompt.length).toBeGreaterThan(500);
     
-    console.log(`  SVG file size: ${svgContent.length} characters`);
-    console.log(`  SVG elements: ${extractSVGElements(svgContent)}`);
+    console.log(`  Context size: ${response.generation_context.prompt.length} characters`);
+    console.log(`  Processing info:`, response.generation_context.processing_info);
     
-    // Pattern adherence analysis
-    const hasViewBox = svgContent.includes('viewBox');
-    const hasProperNamespace = svgContent.includes('xmlns="http://www.w3.org/2000/svg"');
-    const hasStructuredContent = svgContent.includes('<!--') || svgContent.split('<').length > 5;
-    const usesStrokeOrFill = svgContent.includes('stroke=') || svgContent.includes('fill=');
+    // Context instruction analysis - ensure context contains proper quality guidance
+    const hasViewBoxInstruction = response.generation_context.prompt.includes('viewBox');
+    const hasNamespaceInstruction = response.generation_context.prompt.includes('xmlns="http://www.w3.org/2000/svg"');
+    const hasStructureGuidance = response.generation_context.prompt.includes('clean') && response.generation_context.prompt.includes('optimized');
+    const hasStrokeInstructions = response.generation_context.prompt.includes('stroke') || response.generation_context.prompt.includes('fill');
     
-    console.log('\n🔍 Pattern Adherence Analysis:');
-    console.log(`  • Uses viewBox: ${hasViewBox ? '✅' : '❌'}`);
-    console.log(`  • Proper SVG namespace: ${hasProperNamespace ? '✅' : '❌'}`);
-    console.log(`  • Structured content: ${hasStructuredContent ? '✅' : '❌'}`);
-    console.log(`  • Uses stroke/fill: ${usesStrokeOrFill ? '✅' : '❌'}`);
+    console.log('\n🔍 Context Instruction Quality Analysis:');
+    console.log(`  • ViewBox instruction: ${hasViewBoxInstruction ? '✅' : '❌'}`);
+    console.log(`  • SVG namespace instruction: ${hasNamespaceInstruction ? '✅' : '❌'}`);
+    console.log(`  • Quality structure guidance: ${hasStructureGuidance ? '✅' : '❌'}`);
+    console.log(`  • Stroke/fill instructions: ${hasStrokeInstructions ? '✅' : '❌'}`);
     
-    // Quality assertions
-    expect(hasViewBox).toBe(true);
-    expect(hasProperNamespace).toBe(true);
-    expect(hasStructuredContent).toBe(true);
-    expect(usesStrokeOrFill).toBe(true);
+    // Context quality assertions - ensure context provides proper instructions
+    expect(hasViewBoxInstruction).toBe(true);
+    expect(hasNamespaceInstruction).toBe(true);
+    expect(hasStructureGuidance).toBe(true);
+    expect(hasStrokeInstructions).toBe(true);
     
-    // Preview generated content
-    const preview = svgContent.length > 200 
-      ? svgContent.substring(0, 200) + '...' 
-      : svgContent;
-    console.log(`\n📄 SVG Content Preview:\n${preview}`);
+    // Preview generated context
+    const preview = response.generation_context.prompt.length > 300 
+      ? response.generation_context.prompt.substring(0, 300) + '...' 
+      : response.generation_context.prompt;
+    console.log(`\n📄 Context Content Preview:\n${preview}`);
     
-    console.log('\n🎉 Few-Shot Learning Regression Test Complete!');
-    console.log(`✅ Generated: ${path.basename(response.output_path!)}`);
+    console.log('\n🎉 Few-Shot Learning Context Preparation Complete!');
+    console.log(`✅ Context prepared for LLM generation`);
     
   }, 30000); // 30 second timeout for AI generation
 
