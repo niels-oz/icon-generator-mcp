@@ -101,8 +101,7 @@ describe('Few-Shot Learning Regression Test', () => {
     
     // Assertions
     expect(response.success).toBe(true);
-    expect(response.generation_context).toBeDefined();
-    expect(response.message).toMatch(/Generation context prepared successfully/);
+    expect(response.message).toMatch(/Icon generated successfully/);
     expect(response.processing_time).toBeDefined();
     expect(response.steps).toBeDefined();
     expect(Array.isArray(response.steps)).toBe(true);
@@ -114,42 +113,38 @@ describe('Few-Shot Learning Regression Test', () => {
     console.log(`  Processing time: ${processingTime}ms`);
     console.log(`  Steps completed: ${response.steps!.length}`);
     
-    // Verify file was created
-    expect(response.generation_context).toBeDefined();
+    // Verify the SVG file was created and has proper structure
+    expect(response.output_path).toBeDefined();
+    expect(fs.existsSync(response.output_path!)).toBe(true);
+    
+    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
+    expect(svgContent.length).toBeGreaterThan(100);
+    
+    console.log(`  SVG file size: ${svgContent.length} characters`);
     
     // Analyze generated SVG content
-    // Context quality validation - ensure context instructs LLM properly for quality SVG generation
-    expect(response.generation_context.prompt.length).toBeGreaterThan(500);
+    const hasViewBox = svgContent.includes('viewBox');
+    const hasNamespace = svgContent.includes('xmlns="http://www.w3.org/2000/svg"');
+    const hasStructure = svgContent.includes('<') && svgContent.includes('>');
     
-    console.log(`  Context size: ${response.generation_context.prompt.length} characters`);
-    console.log(`  Processing info:`, response.generation_context.processing_info);
+    console.log('\n🔍 SVG Quality Analysis:');
+    console.log(`  • ViewBox: ${hasViewBox ? '✅' : '❌'}`);
+    console.log(`  • SVG namespace: ${hasNamespace ? '✅' : '❌'}`);
+    console.log(`  • Proper structure: ${hasStructure ? '✅' : '❌'}`);
     
-    // Context instruction analysis - ensure context contains proper quality guidance
-    const hasViewBoxInstruction = response.generation_context.prompt.includes('viewBox');
-    const hasNamespaceInstruction = response.generation_context.prompt.includes('xmlns="http://www.w3.org/2000/svg"');
-    const hasStructureGuidance = response.generation_context.prompt.includes('clean') && response.generation_context.prompt.includes('optimized');
-    const hasStrokeInstructions = response.generation_context.prompt.includes('stroke') || response.generation_context.prompt.includes('fill');
+    // SVG quality assertions
+    expect(hasViewBox).toBe(true);
+    expect(hasNamespace).toBe(true);
+    expect(hasStructure).toBe(true);
     
-    console.log('\n🔍 Context Instruction Quality Analysis:');
-    console.log(`  • ViewBox instruction: ${hasViewBoxInstruction ? '✅' : '❌'}`);
-    console.log(`  • SVG namespace instruction: ${hasNamespaceInstruction ? '✅' : '❌'}`);
-    console.log(`  • Quality structure guidance: ${hasStructureGuidance ? '✅' : '❌'}`);
-    console.log(`  • Stroke/fill instructions: ${hasStrokeInstructions ? '✅' : '❌'}`);
+    // Preview generated SVG
+    const preview = svgContent.length > 200 
+      ? svgContent.substring(0, 200) + '...' 
+      : svgContent;
+    console.log(`\n📄 SVG Content Preview:\n${preview}`);
     
-    // Context quality assertions - ensure context provides proper instructions
-    expect(hasViewBoxInstruction).toBe(true);
-    expect(hasNamespaceInstruction).toBe(true);
-    expect(hasStructureGuidance).toBe(true);
-    expect(hasStrokeInstructions).toBe(true);
-    
-    // Preview generated context
-    const preview = response.generation_context.prompt.length > 300 
-      ? response.generation_context.prompt.substring(0, 300) + '...' 
-      : response.generation_context.prompt;
-    console.log(`\n📄 Context Content Preview:\n${preview}`);
-    
-    console.log('\n🎉 Few-Shot Learning Context Preparation Complete!');
-    console.log(`✅ Context prepared for LLM generation`);
+    console.log('\n🎉 Few-Shot Learning Icon Generation Complete!');
+    console.log(`✅ Monstera icon generated successfully`);
     
   }, 30000); // 30 second timeout for AI generation
 

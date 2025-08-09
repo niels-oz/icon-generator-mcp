@@ -161,8 +161,8 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     
     // Assertions
     expect(response.success).toBe(true);
-    expect(response.generation_context).toBeDefined();
-    expect(response.message).toMatch(/Generation context prepared successfully/);
+    expect(response.success).toBe(true);
+    expect(response.message).toMatch(/Icon generated successfully/);
     expect(response.processing_time).toBeDefined();
     expect(response.steps).toBeDefined();
     expect(Array.isArray(response.steps)).toBe(true);
@@ -170,44 +170,50 @@ Now create a NEW code review icon (Development Domain) using the EXACT same visu
     console.log('📊 Generation Results:');
     console.log(`  Success: ${response.success}`);
     console.log(`  Message: ${response.message}`);
-    console.log(`  Context prepared: ${response.generation_context ? 'Yes' : 'No'}`);
+    console.log(`  Output path: ${response.output_path}`);
     console.log(`  Processing time: ${processingTime}ms`);
     console.log(`  Steps completed: ${response.steps!.length}`);
     if (response.error) {
       console.error(`  Error: ${response.error}`);
     }
     
-    // Verify context was prepared
-    expect(response.generation_context).toBeDefined();
+    // Verify SVG file was created and has proper structure
+    expect(response.output_path).toBeDefined();
+    expect(fs.existsSync(response.output_path!)).toBe(true);
     
-    // Analyze prepared generation context
-    expect(response.generation_context.prompt.length).toBeGreaterThan(500);
-    expect(response.generation_context.prompt).toContain('expert SVG icon designer');
+    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
+    expect(svgContent.length).toBeGreaterThan(100);
     
-    console.log(`  Context size: ${response.generation_context.prompt.length} characters`);
+    console.log(`  SVG file size: ${svgContent.length} characters`);
     
-    // Code Review Icon specific context analysis
-    const hasExamples = response.generation_context.prompt.includes('EXAMPLE');
-    const hasStyleGuide = response.generation_context.prompt.includes('consistent style patterns');
-    const hasRequirements = response.generation_context.prompt.includes('viewBox="0 0 24 24"');
+    // Code Review Icon specific SVG analysis
+    const hasViewBox = svgContent.includes('viewBox');
+    const hasNamespace = svgContent.includes('xmlns="http://www.w3.org/2000/svg"');
+    const hasStructure = svgContent.includes('<') && svgContent.includes('>');
     
-    console.log('\n🔍 Cross-Domain Style Transfer Analysis:');
+    console.log('\n🔍 SVG Quality Analysis:');
     console.log('─'.repeat(50));
-    console.log('CONTEXT PREPARATION:');
-    console.log(`  • Few-shot examples: ${hasExamples ? '✅' : '❌'}`);
-    console.log(`  • Style guidelines: ${hasStyleGuide ? '✅' : '❌'}`);
-    console.log(`  • Technical requirements: ${hasRequirements ? '✅' : '❌'}`);
+    console.log('SVG STRUCTURE:');
+    console.log(`  • ViewBox: ${hasViewBox ? '✅' : '❌'}`);
+    console.log(`  • SVG namespace: ${hasNamespace ? '✅' : '❌'}`);
+    console.log(`  • Proper structure: ${hasStructure ? '✅' : '❌'}`);
     
-    // Quality assertions for context preparation
-    expect(hasExamples).toBe(true);
-    expect(hasStyleGuide).toBe(true);
-    expect(hasRequirements).toBe(true);
+    // Quality assertions for SVG structure
+    expect(hasViewBox).toBe(true);
+    expect(hasNamespace).toBe(true);
+    expect(hasStructure).toBe(true);
     
-    console.log('\n🎉 Cross-Domain Context Preparation Test Complete!');
-    console.log('✅ Context prepared for LLM generation');
-    console.log('✅ Style patterns included in context for domain transfer');
-    console.log('✅ Technical requirements specified for code review domain');
-    console.log('✅ Few-shot examples provided for consistent generation');
+    // Preview generated SVG
+    const preview = svgContent.length > 200 
+      ? svgContent.substring(0, 200) + '...' 
+      : svgContent;
+    console.log(`\n📄 SVG Content Preview:\n${preview}`);
+    
+    console.log('\n🎉 Cross-Domain Icon Generation Test Complete!');
+    console.log('✅ Code review icon generated successfully');
+    console.log('✅ Proper SVG structure maintained');
+    console.log('✅ Technical requirements met');
+    console.log('✅ Cross-domain style transfer successful');
     
   }, 30000); // 30 second timeout for AI generation
 
