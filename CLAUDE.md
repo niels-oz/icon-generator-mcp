@@ -133,10 +133,10 @@ node example/demos/test-code-review-regression.js
 node example/test-few-shot.js
 node example/test-add-user-icon.js
 
-# Regression test scripts
-./scripts/run-regression-test.sh
-./scripts/run-code-review-regression-test.sh
-./scripts/run-add-user-regression-test.sh
+# Regression test scripts available via npm
+npm run test:regression
+npm run test:code-review
+npm run test:add-user
 ```
 
 ## Key Implementation Details
