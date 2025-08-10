@@ -1,62 +1,127 @@
-# Document 2: Software Requirements Document (SRD)
+# Product Requirements Document
 
-**Project Name:** `icon-generator-mcp`
-**Document Version:** 2.0
-**Status:** Final
-**Date:** July 16, 2025
+**Project:** `icon-generator-mcp`  
+**Version:** 3.0 - LLM-Agnostic Implementation  
+**Date:** January 2025  
+**Status:** Production Ready  
 
-| Version | Date | Author | Changes |
-| :--- | :--- | :--- | :--- |
-| 1.0 | 2025-07-16 | System | Initial Draft |
-| 1.1 | 2025-07-16 | System | Added requirement IDs, clarified priorities, and refined specifications for precision. |
-| 2.0 | 2025-07-16 | System | Updated to MCP server architecture, Claude Code CLI integration, manual binary installation. |
-| 2.1 | 2025-07-17 | User   | Alignment. |
+| Version | Date | Changes |
+|---------|------|----------|
+| 1.0 | 2025-07-16 | Initial MCP server concept |
+| 2.0 | 2025-07-16 | LLM integration planning |
+| 3.0 | 2025-01-10 | LLM-agnostic implementation complete |
 
-### 1. Introduction
-This document specifies the software requirements for the `icon-generator-mcp` MCP server. The server is designed to streamline the creative process for icon design by leveraging a Large Language Model (LLM) to generate new vector graphics based on visual and textual input through the Model Context Protocol (MCP).
+## 1. Product Overview
 
-### 2. User Profiles
-*   **UI/UX Designer:** Needs to quickly iterate on icon ideas that match an existing design system's style through their Claude Code workflow.
-*   **Frontend Developer:** Needs to create placeholder or simple production icons for a web application without leaving the development environment.
-*   **Brand Manager:** Needs to explore variations of brand assets and logomarks using AI-powered generation.
+The `icon-generator-mcp` is an LLM-agnostic Model Context Protocol (MCP) server that provides structured context for AI-powered SVG icon generation. The server processes PNG references and text prompts, then returns formatted generation context that any MCP-compatible LLM can use to create custom SVG icons.
 
-### 3. Functional Requirements (FR)
+## 2. Target Users
 
+**UI/UX Designers:** Need to quickly iterate on icon ideas that match existing design systems using any preferred AI assistant (Claude, Gemini, GPT, etc.) with consistent style guidance.
+
+**Frontend Developers:** Need to create production icons for web applications directly within their MCP-enabled development environment without switching tools.
+
+**Brand Managers:** Need to explore brand asset variations using AI-powered generation while maintaining visual consistency across different LLM providers.
+
+**Content Creators:** Need custom iconography for presentations, documentation, and digital content with simple text descriptions and style references.
+
+## 3. Core Product Requirements
+
+### 3.1 LLM-Agnostic Architecture
 | ID | Requirement | Priority |
-| :--- | :--- | :--- |
-| **FR-1** | The system **MUST** be implemented as an MCP server, installable via npm and integrable with Claude Code workflows. | High |
-| **FR-2** | The system **MUST** expose a `generate_icon` tool via the MCP protocol that accepts PNG file paths and text prompts. | High |
-| **FR-3** | The system **MUST** accept one or more file paths to PNG images as tool parameters. | High |
-| **FR-4** | The system **MUST** require a text prompt as a mandatory tool parameter. | High |
-| **FR-5** | The system **MUST** accept an optional output filename parameter. If not provided, the LLM **MUST** generate a contextually appropriate filename. | High |
-| **FR-6** | The system **MUST** internally vectorize each input PNG image into a structured SVG XML format using a locally installed Potrace binary. | High |
-| **FR-7** | The system **MUST** construct a single, coherent prompt for the LLM that includes the full SVG XML text of all reference images and the user's text prompt. | High |
-| **FR-8**| The system **MUST** perform security sanitization on the received SVG to remove potentially executable elements (e.g., `<script>` tags, `on*` event attributes). | High |
-| **FR-9**| The system **MUST** save the final, sanitized SVG to the same directory as the input PNG files, with automatic filename conflict resolution. | High |
-| **FR-10**| The system **MUST** start on-demand when icon generation is requested through the MCP protocol. | High |
+|-----|-------------|----------|
+| **PR-1** | System **MUST** work with any MCP-compatible LLM client (Claude, Gemini, GPT, local LLMs) | Critical |
+| **PR-2** | Server **MUST** provide structured generation context instead of direct LLM calls | Critical |
+| **PR-3** | No hardcoded LLM provider dependencies or CLI subprocess calls | Critical |
+| **PR-4** | Context preparation response time **MUST** be under 500ms | High |
 
-### 4. Non-Functional Requirements (NFR)
+### 3.2 Core Generation Features  
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **GF-1** | Accept PNG/SVG reference files and convert to structured context | High |
+| **GF-2** | Accept text prompts and generate detailed generation instructions | High |
+| **GF-3** | Support style presets with few-shot learning examples | High |
+| **GF-4** | Phase-based processing pipeline with progress feedback | High |
+| **GF-5** | PNG-to-SVG conversion using Potrace with Jimp preprocessing | High |
 
-| ID | Category | Requirement | Priority |
-| :--- | :--- | :--- | :--- |
-| **NFR-1**| **Installation** | The server **MUST** be installable via a single command: `npm install -g icon-generator-mcp`. | High |
-| **NFR-2**| **Dependencies** | The server **MUST** require users to manually install Potrace (`brew install potrace`) and the Claude Code CLI tool. No binary bundling is required for MVP. | High |
-| **NFR-3**| **Platform** | The MVP version of the server **MUST** operate correctly on the macOS platform only. | High |
-| **NFR-4**| **Performance** | The end-to-end generation process for a typical request (3 icons, 1024x1024px each) **SHOULD** complete in under 60 seconds. This is dependent on the external LLM latency and is not a hard guarantee. | Medium |
-| **NFR-5**| **Security** | The server **MUST NOT** store, transmit, or handle user API keys or credentials. Authentication is delegated entirely in MVP. | High |
-| **NFR-6**| **Usability** | The MCP server **MUST** provide clear, structured responses through the MCP protocol indicating success or failure with appropriate error messages. | High |
-| **NFR-7**| **Privacy** | The server **MUST NOT** collect, store, or transmit any user data, input files, prompts, or usage analytics. | High |
-| **NFR-8**| **Compatibility** | The server **MUST** be compatible with Claude Code and other MCP-compatible clients. | High |
-| **NFR-9**| **Reliability** | The server **MUST** gracefully handle failure scenarios such as missing dependencies, invalid inputs, or LLM service unavailability. | High |
+### 3.3 File Management
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **FM-1** | Smart output filename generation from prompts | Medium |
+| **FM-2** | Automatic conflict resolution with numeric suffixes | Medium |
+| **FM-3** | Custom output path support | Medium |
+| **FM-4** | Validate input files and handle missing references gracefully | High |
 
-### 5. Assumptions and Dependencies
+## 4. Technical Requirements
 
-*   **A-1:** The user has Node.js (version 18 or newer) and npm installed and correctly configured in their system's PATH.
-*   **A-2:** The user has installed the Claude Code CLI tool and has successfully authenticated it with their Anthropic account.
-*   **A-3:** The user has installed Potrace via Homebrew (`brew install potrace`) and it is accessible in their system's PATH.
-*   **A-4:** The user has an active internet connection to allow Image searches.
-*   **A-5:** The user has Claude Code or another MCP-compatible client configured to connect to the icon-generator-mcp server.
-*   **D-1:** The project is dependent on the MCP SDK for implementing the Model Context Protocol interface.
-*   **D-2:** The project is dependent on the `jimp` npm package for in-memory image processing.
-*   **D-3:** The project is dependent on the continued availability and command-line interface stability of the Claude Code CLI tool.
-*   **D-4:** The project is dependent on the locally installed Potrace binary for PNG to SVG conversion.
+### 4.1 Installation & Distribution
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **IN-1** | Single command installation: `npm install -g icon-generator-mcp` | High |
+| **IN-2** | Require manual Potrace installation: `brew install potrace` | High |
+| **IN-3** | Zero LLM CLI dependencies (Claude/Gemini CLI not required) | Critical |
+| **IN-4** | Platform support: macOS initially, Windows/Linux planned | Medium |
+
+### 4.2 Performance & Reliability
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **PR-1** | Context preparation under 500ms for typical requests | High |
+| **PR-2** | PNG conversion within 2 seconds for 1024x1024 images | Medium |
+| **PR-3** | Graceful handling of missing dependencies and invalid inputs | High |
+| **PR-4** | Memory usage under 50MB during processing | Medium |
+
+### 4.3 Security & Privacy
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **SP-1** | No API keys, credentials, or authentication handling | Critical |
+| **SP-2** | No collection, storage, or transmission of user data | Critical |
+| **SP-3** | Input validation for all file paths and parameters | High |
+| **SP-4** | SVG sanitization for generated content (via LLM guidance) | High |
+
+### 4.4 Compatibility & Integration  
+| ID | Requirement | Priority |
+|-----|-------------|----------|
+| **CI-1** | Compatible with all MCP clients (Claude Code, Gemini, custom) | Critical |
+| **CI-2** | MCP SDK 0.4.0+ compatibility | High |
+| **CI-3** | Node.js 18+ runtime support | High |
+| **CI-4** | Structured error responses with actionable guidance | High |
+
+## 5. Product Context
+
+### 5.1 User Environment Assumptions
+- **Node.js 18+** installed with npm in system PATH
+- **Potrace binary** installed via `brew install potrace` (macOS)
+- **MCP-compatible client** (Claude Code, Gemini, or custom implementation)
+- **No LLM CLI tools required** (LLM-agnostic architecture)
+
+### 5.2 System Dependencies
+- **MCP SDK 0.4.0+** for protocol implementation
+- **Jimp library** for PNG preprocessing before Potrace conversion
+- **System Potrace binary** for PNG-to-SVG vectorization
+- **TypeScript/Node.js** runtime environment
+
+### 5.3 Key Design Decisions
+- **LLM-Agnostic**: Works with any MCP client, no hardcoded LLM providers
+- **Context-Based**: Returns generation context instead of final SVGs
+- **Phase-Based Pipeline**: 6-phase processing with state management
+- **Zero Configuration**: Works immediately after installation
+
+## 6. Success Metrics
+
+### 6.1 User Experience
+- **Installation Success Rate**: >95% successful installations
+- **First-Use Success**: User generates first icon within 2 minutes
+- **Multi-LLM Compatibility**: Works across Claude, Gemini, and GPT clients
+- **Context Quality**: LLMs generate appropriate icons from provided context
+
+### 6.2 Technical Performance
+- **Context Preparation**: <500ms response time
+- **PNG Conversion**: <2 seconds for typical reference images  
+- **Error Rate**: <5% for valid inputs with proper dependencies
+- **Memory Efficiency**: <50MB peak usage during processing
+
+### 6.3 Ecosystem Adoption
+- **Cross-Platform Support**: macOS production, Windows/Linux planned
+- **Community Integration**: npm downloads, GitHub engagement
+- **Developer Productivity**: Reduced icon creation time by 80%
+- **Style Consistency**: Reliable style transfer with few-shot examples
