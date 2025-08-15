@@ -1,7 +1,7 @@
 {
   "name": "icon-generator-mcp",
-  "version": "0.3.1",
-  "description": "Zero-config MCP server for AI-powered SVG icon generation",
+  "version": "0.4.0",
+  "description": "Zero-dependency MCP server for AI-powered SVG icon generation with multimodal LLM support",
   "main": "dist/server.js",
   "bin": {
     "icon-generator-mcp": "bin/mcp-server.js"
@@ -14,12 +14,11 @@
     "test:regression": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
     "start": "node bin/mcp-server.js",
     "prepublishOnly": "npm run build && npm test",
-    "postinstall": "node -e \"console.log('\\n✅ Icon Generator MCP Server installed successfully!\\n\\nSystem Requirements:\\n- macOS (Intel or Apple Silicon)\\n- Potrace: brew install potrace\\n- Claude Code or Gemini CLI\\n\\nUsage: The server will be automatically available in your LLM tool.\\n')\""
+    "postinstall": "node -e \"console.log('\\n✅ Icon Generator MCP Server installed successfully!\\n\\nZero Dependencies - No System Requirements!\\n- Works with multimodal LLMs (Claude Code, Gemini Pro Vision, GPT-4V)\\n- PNG visual context support (no conversion needed)\\n- SVG text reference support\\n\\nUsage: The server will be automatically available in your LLM tool.\\n')\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.4.0",
-    "chalk": "^5.5.0",
-    "jimp": "^0.22.0"
+    "chalk": "^5.5.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
@@ -31,9 +30,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "os": [
-    "darwin"
-  ],
   "files": [
     "dist/",
     "bin/",
@@ -50,9 +46,10 @@
     "generator",
     "developer-tools",
     "automation",
-    "zero-config",
-    "png-to-svg",
-    "potrace"
+    "zero-dependency",
+    "multimodal",
+    "visual-context",
+    "png-support"
   ],
   "author": "Icon Generator MCP Team",
   "license": "MIT",

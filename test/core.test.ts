@@ -1,20 +1,17 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MCPServer } from '../src/server';
-import { ConversionService } from '../src/services/converter';
 
 describe('Core Functionality (Consolidated)', () => {
   let server: MCPServer;
-  let converter: ConversionService;
 
   beforeEach(() => {
     server = new MCPServer();
-    converter = new ConversionService();
   });
 
   describe('MCP Server', () => {
     it('should initialize correctly', () => {
       expect(server.name).toBe('icon-generator-mcp');
-      expect(server.version).toBe('0.3.1');
+      expect(server.version).toBe('0.4.0');
     });
 
     it('should register generate_icon tool with correct schema', () => {
@@ -54,8 +51,8 @@ describe('Core Functionality (Consolidated)', () => {
     });
   });
 
-  describe('PNG Conversion', () => {
-    it('should validate PNG file paths', async () => {
+  describe('PNG Visual Context (No Conversion)', () => {
+    it('should validate PNG file paths for visual context', async () => {
       const validPath = 'test/fixtures/test.png';
       const invalidPath = 'nonexistent.png';
       
@@ -64,12 +61,10 @@ describe('Core Functionality (Consolidated)', () => {
       expect(invalidPath.endsWith('.png')).toBe(true);
     });
 
-    it('should handle conversion errors gracefully', async () => {
-      try {
-        await converter.convertPNGToSVG('nonexistent.png');
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-      }
+    it('should handle multimodal detection gracefully', () => {
+      // Test multimodal detection (this is now handled by MultimodalDetector)
+      const isMultimodal = server.isMultimodalLLMAvailable();
+      expect(typeof isMultimodal).toBe('boolean');
     });
   });
 

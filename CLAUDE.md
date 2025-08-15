@@ -4,14 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Tech Stack
 - **Language**: TypeScript with strict mode (ES2020 target)
-- **Platform**: macOS (Intel and Apple Silicon)  
+- **Platform**: Cross-platform (Windows, macOS, Linux)  
 - **Runtime**: Node.js v18+
-- **Testing**: Jest with ts-jest (22 tests, 7 test suites)
-- **Dependencies**: MCP SDK v0.4.0, chalk
-- **Architecture**: LLM-agnostic MCP Server with context-based generation
+- **Testing**: Jest with ts-jest (51 tests, 9 test suites)
+- **Dependencies**: MCP SDK v0.4.0, chalk (zero system dependencies)
+- **Architecture**: Zero-dependency MCP Server with multimodal LLM support
 
 ## Prerequisites
 ```bash
+# Zero system dependencies required!
+# No Potrace, Jimp, or platform-specific tools needed
+
 # Global installation
 npm install -g icon-generator-mcp
 
@@ -30,7 +33,7 @@ npm run build
 # Development with auto-rebuild
 npm run dev
 
-# Run tests (22 tests, ~3s runtime)
+# Run tests (51 tests, ~2s runtime)
 npm test
 
 # Run tests in watch mode
@@ -48,21 +51,19 @@ npm start
 ## Project Architecture
 
 ### Core Components
-- **MCPServer** (`src/server.ts`) - Main orchestrator with phase-based generation pipeline
-- **ConversionService** (`src/services/converter.ts`) - PNG→SVG conversion using Potrace + Jimp preprocessing
-- **ContextBuilder** (`src/context-builder.ts`) - LLM-agnostic context preparation for generation
+- **MCPServer** (`src/server.ts`) - Main orchestrator with 5-phase generation pipeline
+- **MultimodalDetector** (`src/services/multimodal-detector.ts`) - Detects multimodal LLM capabilities for PNG support
 - **FileWriterService** (`src/services/file-writer.ts`) - Output management with conflict resolution
 - **StateManager** (`src/services/state-manager.ts`) - Phase-based state tracking and progress management
 - **VisualFormatter** (`src/services/visual-formatter.ts`) - Progress visualization
 - **CLI** (`src/bin/cli.ts`) - Command-line interface
 
-### Phase-Based Generation Pipeline
-1. **Validation** - Input validation and file checking
-2. **Analysis** - Prompt and reference analysis
-3. **Conversion** - PNG→SVG conversion (if needed)
-4. **Generation** - AI-powered SVG creation
-5. **Refinement** - Quality enhancement (planned)
-6. **Output** - File writing with smart naming
+### 5-Phase Generation Pipeline
+1. **Validation** - Input validation, file checking, and multimodal capability detection
+2. **Analysis** - Prompt and reference analysis with visual/text categorization
+3. **Generation** - AI-powered SVG creation using visual context (PNG) or text references (SVG)
+4. **Refinement** - Quality enhancement (optional)
+5. **Output** - File writing with smart naming
 
 ### MCP Tool Schema
 ```typescript
@@ -77,11 +78,14 @@ generate_icon: {
 
 ## Testing Strategy
 
-### Test Organization (22 Tests Total - Simplified)
-- **Core Tests**: Consolidated essential functionality
-  - `test/core.test.ts` - MCP server, PNG conversion, phase processing
+### Test Organization (51 Tests Total - Comprehensive)
+- **Core Tests**: Essential functionality
+  - `test/core.test.ts` - MCP server, multimodal detection, 5-phase processing
   - `test/services/file-operations.test.ts` - File handling and path generation
-  - `test/services/converter.test.ts` - PNG to SVG conversion testing
+- **New Architecture Tests**: Visual context and multimodal support
+  - `test/multimodal-detection.test.ts` - Multimodal LLM capability detection
+  - `test/visual-context.test.ts` - PNG visual context processing (no conversion)
+  - `test/five-phase-pipeline.test.ts` - Updated 5-phase pipeline validation
 - **Integration Tests**: End-to-end workflow testing
   - `test/integration/end-to-end.test.ts` - Complete workflow validation
 - **Regression Tests**: Advanced AI generation validation
@@ -93,7 +97,7 @@ generate_icon: {
 
 ### Running Specific Tests
 ```bash
-# All tests (22 tests, ~3s)
+# All tests (51 tests, ~2s)
 npm test
 
 # Regression tests only (30-35s timeout)
@@ -102,7 +106,7 @@ npm run test:code-review
 npm run test:add-user
 
 # Test specific functionality
-npm test -- --testNamePattern="core|llm|file-operations"
+npm test -- --testNamePattern="core|multimodal|visual-context|file-operations"
 
 # Test with coverage
 npm test -- --coverage
@@ -117,7 +121,7 @@ npm run test:watch
 node example/demos/test-simple.js
 node example/demos/test-prompt-only.js
 node example/demos/test-output-path.js
-node example/demos/test-conversion.js
+node example/demos/test-visual-context.js  # NEW: PNG visual context demo
 node example/demos/test-code-review-regression.js
 
 # Few-shot learning examples
@@ -132,75 +136,85 @@ npm run test:add-user
 
 ## Key Implementation Details
 
-### LLM-Agnostic Architecture
-- **Context Preparation**: Structures generation instructions for any MCP-compatible LLM
-- **Universal Compatibility**: Works with Claude, Gemini, GPT, and local LLMs
-- **No Provider Dependencies**: Eliminates CLI tool requirements and API integrations
+### Multimodal LLM Architecture
+- **Visual Context Processing**: PNG files passed directly to multimodal LLMs as visual references
+- **Text Reference Processing**: SVG files processed as text content for all LLMs
+- **Automatic Detection**: Smart detection of multimodal LLM capabilities
+- **Graceful Fallback**: Clear error messages for non-multimodal LLMs with helpful alternatives
 
 ### State Management Implementation
 - **Session Tracking**: Comprehensive state management
-- **Phase Progression**: 6-step generation process
+- **Phase Progression**: 5-step generation process (validation → analysis → generation → refinement → output)
 - **Visual Feedback**: Real-time progress display
 - **Error Context**: Phase-specific error reporting
 - **Processing Time**: Detailed timing metrics
 
 ### Security Features
-- SVG sanitization in LLM services
+- SVG sanitization for safe output
 - Input validation for all file paths
-- No credential handling (delegates to CLI tools)
+- Zero external dependencies eliminates attack vectors
 - Path traversal protection
 
 ### Error Handling
 - Structured error responses with step context
-- Graceful fallbacks for missing dependencies
+- Zero-dependency architecture eliminates system dependency failures
 - Proper cleanup of temporary files
 - Session-based error tracking
+- Multimodal capability detection with helpful alternatives
 
 ### File Management
 - Smart naming with conflict resolution (numeric suffixes)
 - Flexible output directory support  
-- PNG preprocessing with Jimp before Potrace conversion
+- Zero-copy PNG processing (passed as visual context, not converted)
+- Direct SVG text processing for all LLMs
 - Support for both PNG and SVG input files
 
 ### Generation Modes
-- **PNG/SVG-based**: Uses reference files + descriptive prompt
-- **Prompt-only**: Pure text-based generation
+- **Visual Context (PNG)**: Multimodal LLMs process PNG files directly as visual references
+- **Text References (SVG)**: SVG files processed as text content for pattern learning
+- **Mixed References**: Combination of PNG visual context and SVG text references
+- **Prompt-only**: Pure text-based generation (works with all LLMs)
 - **Style-guided**: Consistent styling with presets
-- **Multi-variation**: Automatic variation generation for style keywords
 
 ## Debugging
 ```bash
 # Enable MCP debug logging
 DEBUG=mcp:* npm run dev
 
-# Check system dependencies
-which potrace
-
-# Check build status
+# Check build status (no system dependencies to verify!)
 npm run build
 
 # Validate MCP server
 node bin/mcp-server.js
 
 # Test specific functionality
-npm test -- --testNamePattern="core|converter|file-operations"
+npm test -- --testNamePattern="core|multimodal|visual-context|file-operations"
+
+# Test multimodal detection specifically
+npm test -- --testNamePattern="multimodal"
+
+# Test visual context processing
+npm test -- --testNamePattern="visual-context"
 ```
 
 ## Code Conventions
 - TypeScript strict mode enabled (ES2020 target)
 - Error-first callback pattern for services
 - Comprehensive input validation
-- No external API keys (LLM-agnostic context preparation)
-- Phase-based processing patterns
-- Context-based pattern for LLM-agnostic generation
+- Zero external dependencies approach
+- 5-phase processing patterns
+- Multimodal LLM detection and visual context processing
 - State management with session isolation
 - Visual formatting for user feedback
 
-## Current Status
-- ✅ **LLM-Agnostic Architecture**: Works with any MCP-compatible LLM client
-- ✅ **Phase-Based Pipeline**: 6-step context preparation process with state management  
-- ✅ **Comprehensive Testing**: 22 tests with regression validation
-- ✅ **Visual Feedback**: Real-time progress display
-- ✅ **Error Handling**: Phase-specific error context
+## Current Status (v0.4.0)
+- ✅ **Zero Dependencies**: No system requirements, cross-platform compatibility
+- ✅ **Multimodal Support**: PNG visual context + SVG text references
+- ✅ **5-Phase Pipeline**: Streamlined validation → analysis → generation → refinement → output  
+- ✅ **Comprehensive Testing**: 51 tests with full visual context validation
+- ✅ **Visual Feedback**: Real-time progress display with 5-phase tracking
+- ✅ **Error Handling**: Multimodal detection with helpful alternatives
 - ✅ **File Management**: Smart naming and conflict resolution
+- ✅ **Cross-Platform**: Works on Windows, macOS, Linux
+- ✅ **Performance**: Faster processing without conversion overhead
 - ✅ **Global Distribution**: npm package ready

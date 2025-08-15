@@ -26,7 +26,7 @@ export class StateManager {
     };
 
     // Initialize all steps as pending
-    const phases: GenerationPhase[] = ['validation', 'analysis', 'conversion', 'generation', 'refinement', 'output'];
+    const phases: GenerationPhase[] = ['validation', 'analysis', 'generation', 'refinement', 'output'];
     phases.forEach(phase => {
       state.steps.push({
         step: phase,
@@ -146,27 +146,38 @@ export class StateManager {
   }
 
   startAnalysis(sessionId: string): void {
-    this.transitionPhase(sessionId, 'validation', 'analysis');
+    const state = this.sessions.get(sessionId);
+    if (!state) return;
+    
+    // Update current phase without overriding validation message
+    state.currentPhase = 'analysis';
     this.updateStep(sessionId, 'analysis', 'in_progress', 'Analyzing input files...');
   }
 
-  startConversion(sessionId: string): void {
-    this.transitionPhase(sessionId, 'analysis', 'conversion');
-    this.updateStep(sessionId, 'conversion', 'in_progress', 'Converting PNG files to SVG references...');
-  }
-
   startGeneration(sessionId: string): void {
-    this.transitionPhase(sessionId, 'conversion', 'generation');
-    this.updateStep(sessionId, 'generation', 'in_progress', 'Generating SVG with AI...');
+    const state = this.sessions.get(sessionId);
+    if (!state) return;
+    
+    // Update current phase without overriding analysis message
+    state.currentPhase = 'generation';
+    this.updateStep(sessionId, 'generation', 'in_progress', 'Generating SVG with visual context...');
   }
 
   startRefinement(sessionId: string): void {
-    this.transitionPhase(sessionId, 'generation', 'refinement');
+    const state = this.sessions.get(sessionId);
+    if (!state) return;
+    
+    // Update current phase without overriding generation message
+    state.currentPhase = 'refinement';
     this.updateStep(sessionId, 'refinement', 'in_progress', 'Refining generated SVG...');
   }
 
   startOutput(sessionId: string): void {
-    this.transitionPhase(sessionId, 'refinement', 'output');
+    const state = this.sessions.get(sessionId);
+    if (!state) return;
+    
+    // Update current phase without overriding refinement message
+    state.currentPhase = 'output';
     this.updateStep(sessionId, 'output', 'in_progress', 'Saving output file...');
   }
 }

@@ -5,7 +5,6 @@ export class VisualFormatter {
   private static readonly PHASE_ICONS = {
     validation: '🔍',
     analysis: '📊',
-    conversion: '🔄',
     generation: '🎨',
     refinement: '✨',
     output: '💾'
@@ -14,7 +13,6 @@ export class VisualFormatter {
   private static readonly PHASE_COLORS = {
     validation: chalk.blue,
     analysis: chalk.cyan,
-    conversion: chalk.yellow,
     generation: chalk.magenta,
     refinement: chalk.green,
     output: chalk.blue
@@ -50,7 +48,7 @@ export class VisualFormatter {
   }
 
   formatProgress(state: GenerationState): string {
-    const totalSteps = 6; // Number of phases
+    const totalSteps = 5; // Number of phases (validation, analysis, generation, refinement, output)
     const completedSteps = state.steps.filter(s => s.status === 'completed').length;
     const progress = Math.round((completedSteps / totalSteps) * 100);
     

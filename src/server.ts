@@ -1,8 +1,8 @@
 import { IconGenerationRequest, IconGenerationResponse, GenerationPhase } from './types';
-import { ConversionService } from './services/converter';
 import { FileWriterService } from './services/file-writer';
 import { StateManager } from './services/state-manager';
 import { VisualFormatter } from './services/visual-formatter';
+import { MultimodalDetector } from './services/multimodal-detector';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -14,7 +14,7 @@ function getVersion(): string {
     return packageJson.version;
   } catch (error) {
     // Fallback for tests or other environments where package.json might not be accessible
-    return '0.3.1';
+    return '0.4.0';
   }
 }
 
@@ -22,23 +22,23 @@ export class MCPServer {
   public readonly name = 'icon-generator-mcp';
   public readonly version = getVersion();
   
-  private conversionService: ConversionService;
   private fileWriterService: FileWriterService;
   private stateManager: StateManager;
   private formatter: VisualFormatter;
+  private multimodalDetector: MultimodalDetector;
   
   constructor() {
-    this.conversionService = new ConversionService();
     this.fileWriterService = new FileWriterService();
     this.stateManager = new StateManager();
     this.formatter = new VisualFormatter();
+    this.multimodalDetector = new MultimodalDetector();
   }
 
   getTools() {
     return [
       {
         name: 'generate_icon',
-        description: 'Generate SVG icon from PNG/SVG references and/or text prompt with step-by-step visual feedback',
+        description: 'Generate SVG icon from SVG references and/or text prompt with step-by-step visual feedback. PNG files supported with multimodal LLMs.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -68,6 +68,13 @@ export class MCPServer {
         }
       }
     ];
+  }
+
+  /**
+   * Check if multimodal LLM is available for PNG visual processing
+   */
+  isMultimodalLLMAvailable(): boolean {
+    return this.multimodalDetector.isMultimodalLLMAvailable();
   }
 
   async handleToolCall(toolName: string, request: any): Promise<IconGenerationResponse> {
@@ -172,16 +179,13 @@ export class MCPServer {
       // Phase 2: Analysis  
       await this.executeAnalysisPhase(sessionId);
       
-      // Phase 3: Conversion
-      await this.executeConversionPhase(sessionId);
-      
-      // Phase 4: Generation
+      // Phase 3: Generation (now handles visual context directly)
       await this.executeGenerationPhase(sessionId);
       
-      // Phase 5: Refinement (optional)
+      // Phase 4: Refinement (optional)
       await this.executeRefinementPhase(sessionId);
       
-      // Phase 6: Output
+      // Phase 5: Output
       const result = await this.executeOutputPhase(sessionId);
       
       return result;
@@ -205,16 +209,31 @@ export class MCPServer {
       
       // Validate reference files if provided
       const validatedFiles: string[] = [];
+      let requiresMultimodal = false;
+      
       if (state.request.reference_paths && state.request.reference_paths.length > 0) {
         for (const filePath of state.request.reference_paths) {
           if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
           }
-          if (!filePath.toLowerCase().endsWith('.png') && !filePath.toLowerCase().endsWith('.svg')) {
+          
+          const ext = path.extname(filePath).toLowerCase();
+          if (ext !== '.png' && ext !== '.svg') {
             throw new Error(`Unsupported file format: ${filePath}. Only PNG and SVG files are supported.`);
           }
+          
+          // Check if PNG requires multimodal LLM
+          if (ext === '.png') {
+            requiresMultimodal = true;
+          }
+          
           validatedFiles.push(filePath);
         }
+      }
+      
+      // Validate LLM capability for PNG references
+      if (requiresMultimodal && !this.isMultimodalLLMAvailable()) {
+        throw new Error(this.multimodalDetector.getMultimodalRequiredError());
       }
       
       this.stateManager.updateContext(sessionId, { validatedFiles });
@@ -255,37 +274,6 @@ export class MCPServer {
     }
   }
   
-  private async executeConversionPhase(sessionId: string): Promise<void> {
-    const state = this.stateManager.getSession(sessionId)!;
-    
-    if (state.context.validatedFiles.length === 0) {
-      this.stateManager.skipPhase(sessionId, 'conversion', 'No input files to convert');
-      return;
-    }
-    
-    this.stateManager.startConversion(sessionId);
-    
-    const progress = this.formatter.formatProgress(state);
-    console.log('\n' + progress);
-    
-    try {
-      const svgReferences: string[] = [];
-      
-      for (const filePath of state.context.validatedFiles) {
-        const svgContent = await this.convertImageToSVG(filePath);
-        svgReferences.push(svgContent);
-      }
-      
-      this.stateManager.updateContext(sessionId, { svgReferences });
-      this.stateManager.updateStep(sessionId, 'conversion', 'completed',
-        `Converted ${svgReferences.length} files to SVG references`);
-      
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Conversion failed';
-      this.stateManager.addError(sessionId, 'conversion', errorMsg);
-      throw error;
-    }
-  }
   
   private async executeGenerationPhase(sessionId: string): Promise<void> {
     const state = this.stateManager.getSession(sessionId)!;
@@ -295,16 +283,46 @@ export class MCPServer {
     console.log('\n' + progress);
     
     try {
-      // Generate SVG based on prompt and references
-      const generatedSvg = this.generateSimpleSVG(state.request.prompt, state.context.svgReferences);
+      // Categorize references into visual (PNG) and text (SVG) types
+      const visualReferences: string[] = [];
+      const textReferences: string[] = [];
+      
+      for (const filePath of state.context.validatedFiles) {
+        const ext = path.extname(filePath).toLowerCase();
+        if (ext === '.png') {
+          // PNG files are passed as visual context (file paths)
+          visualReferences.push(filePath);
+        } else if (ext === '.svg') {
+          // SVG files are read as text content
+          const svgContent = fs.readFileSync(filePath, 'utf8');
+          textReferences.push(svgContent);
+        }
+      }
+      
+      // Generate SVG using visual context for PNGs and text for SVGs
+      const generatedSvg = this.generateSimpleSVG(
+        state.request.prompt, 
+        textReferences, 
+        visualReferences
+      );
       const suggestedFilename = this.generateFilename(state.request.prompt);
+      
+      // Log generation approach for user feedback
+      let approach = 'prompt-based generation';
+      if (visualReferences.length > 0 && textReferences.length > 0) {
+        approach = `visual context (${visualReferences.length} PNG) + text references (${textReferences.length} SVG)`;
+      } else if (visualReferences.length > 0) {
+        approach = `visual context (${visualReferences.length} PNG files)`;
+      } else if (textReferences.length > 0) {
+        approach = `text references (${textReferences.length} SVG files)`;
+      }
       
       this.stateManager.updateContext(sessionId, { 
         generatedSvg: generatedSvg,
         suggestedFilename: suggestedFilename
       });
       this.stateManager.updateStep(sessionId, 'generation', 'completed',
-        `Generated SVG icon (${generatedSvg.length} characters)`);
+        `Generated SVG using ${approach} (${generatedSvg.length} characters)`);
       
     } catch (error) {
       const specificErrorMessage = error instanceof Error ? error.message : 'SVG generation failed';
@@ -365,30 +383,11 @@ export class MCPServer {
     }
   }
 
-  /**
-   * Convert image file to SVG based on file format
-   */
-  private async convertImageToSVG(imagePath: string): Promise<string> {
-    const ext = path.extname(imagePath).toLowerCase();
-    
-    switch (ext) {
-      case '.svg':
-        // SVG files can be used directly
-        return fs.readFileSync(imagePath, 'utf8');
-      
-      case '.png':
-        // PNG files need conversion via Potrace
-        return await this.conversionService.convertPNGToSVG(imagePath);
-      
-      default:
-        throw new Error(`Unsupported image format: ${ext}. Only SVG and PNG are supported.`);
-    }
-  }
 
   /**
-   * Generate simple SVG based on prompt and references
+   * Generate simple SVG based on prompt, text references (SVG), and visual references (PNG)
    */
-  private generateSimpleSVG(prompt: string, _references: string[] = []): string {
+  private generateSimpleSVG(prompt: string, _textReferences: string[] = [], _visualReferences: string[] = []): string {
     // For now, create a basic star SVG based on the prompt
     // This is a simplified implementation - in production you'd want AI generation
     if (prompt.toLowerCase().includes('star')) {

@@ -18,10 +18,6 @@ export interface IconGenerationResponse {
   steps?: GenerationStep[];
 }
 
-export interface ConversionResult {
-  svg: string;
-  filename: string;
-}
 
 export interface LLMResponse {
   svg: string;
@@ -40,7 +36,6 @@ export interface GenerationStep {
 export type GenerationPhase = 
   | 'validation'
   | 'analysis'
-  | 'conversion'
   | 'generation'
   | 'refinement'
   | 'output';
