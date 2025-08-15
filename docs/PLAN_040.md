@@ -130,14 +130,15 @@ interface GenerationContext {
   textReferences: string[];      // SVG file contents
   style?: string;
   outputConfig: OutputConfig;
+  requiresMultimodal: boolean;   // Flag for LLM capability check
 }
 ```
 
 ### 5. Validation Updates
 
-#### Enhanced File Type Validation
+#### Enhanced File Type Validation with Multimodal Detection
 ```typescript
-// Updated validation logic
+// Updated validation logic with LLM capability checking
 for (const filePath of referencePaths) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`);
@@ -151,10 +152,20 @@ for (const filePath of referencePaths) {
   // Categorize by type for processing
   if (ext === '.png') {
     visualReferences.push(filePath);
+    requiresMultimodal = true;  // Flag that PNG requires multimodal LLM
   } else if (ext === '.svg') {
     const svgContent = fs.readFileSync(filePath, 'utf8');
     textReferences.push(svgContent);
   }
+}
+
+// Validate LLM capability for PNG references
+if (requiresMultimodal && !this.isMultimodalLLMAvailable()) {
+  throw new Error(
+    'PNG references require a multimodal LLM for visual processing. ' +
+    'Please upgrade to a multimodal LLM (Claude Code, Gemini, GPT-4V) or use SVG references instead. ' +
+    'Learn more: https://docs.anthropic.com/claude-code/multimodal'
+  );
 }
 ```
 
@@ -170,8 +181,9 @@ for (const filePath of referencePaths) {
 ### Phase 2: Implement Visual Context Handling
 1. **Update Generation Phase** - Handle PNG files as visual references
 2. **Enhance Context Building** - Separate visual and text references
-3. **Update File Processing** - Direct PNG file path passing
-4. **Maintain SVG Processing** - Keep existing SVG text handling
+3. **Add Multimodal Detection** - Validate LLM capabilities for PNG references
+4. **Update File Processing** - Direct PNG file path passing
+5. **Maintain SVG Processing** - Keep existing SVG text handling
 
 ### Phase 3: Update Platform Support
 1. **Remove Platform Restrictions** - Update package.json OS constraints
@@ -182,22 +194,26 @@ for (const filePath of referencePaths) {
 ### Phase 4: Testing and Validation
 1. **Update Test Suite** - Remove conversion tests
 2. **Add Visual Context Tests** - Test PNG file handling
-3. **Cross-Platform Testing** - Validate on Windows/Linux
-4. **Performance Testing** - Measure improvement without conversion
+3. **Add Multimodal Detection Tests** - Test LLM capability validation
+4. **Cross-Platform Testing** - Validate on Windows/Linux
+5. **Performance Testing** - Measure improvement without conversion
 
 ## File Changes Checklist
 
 ### Source Code
 - [ ] `src/services/converter.ts` - DELETE FILE
-- [ ] `src/server.ts` - Remove ConversionService integration
+- [ ] `src/server.ts` - Remove ConversionService integration + Add multimodal detection
 - [ ] `src/types.ts` - Update phase definitions (remove 'conversion')
 - [ ] `src/services/state-manager.ts` - Update phase tracking
 - [ ] `src/services/visual-formatter.ts` - Remove conversion phase display
+- [ ] `src/services/multimodal-detector.ts` - NEW FILE for LLM capability detection
 
 ### Tests
 - [ ] `test/services/converter.test.ts` - DELETE FILE
 - [ ] `test/core.test.ts` - Remove PNG conversion tests
+- [ ] `test/multimodal-detection.test.ts` - NEW FILE for LLM capability tests
 - [ ] Add visual context tests for PNG handling
+- [ ] Add tests for non-multimodal LLM error handling
 - [ ] Update integration tests for 5-phase pipeline
 
 ### Configuration
@@ -215,6 +231,54 @@ for (const filePath of referencePaths) {
 - [ ] Create `docs/MIGRATION_040.md` - Migration guide
 
 ## Enhanced Generation Logic
+
+### Multimodal LLM Detection
+```typescript
+// New service for detecting LLM capabilities
+export class MultimodalDetector {
+  /**
+   * Detect if the current MCP client supports multimodal (visual) inputs
+   * This is crucial for PNG reference handling
+   */
+  isMultimodalLLMAvailable(): boolean {
+    // Check MCP client capabilities
+    const clientCapabilities = this.getMCPClientCapabilities();
+    
+    // Check for multimodal indicators
+    const indicators = [
+      'vision', 'multimodal', 'image', 'visual',
+      'claude-3', 'gpt-4v', 'gemini-pro-vision'
+    ];
+    
+    return indicators.some(indicator => 
+      clientCapabilities.model?.toLowerCase().includes(indicator) ||
+      clientCapabilities.features?.includes('vision')
+    );
+  }
+  
+  /**
+   * Get helpful error message for non-multimodal scenarios
+   */
+  getMultimodalRequiredError(): string {
+    return [
+      'PNG references require a multimodal LLM for visual processing.',
+      '',
+      'Compatible LLMs:',
+      '  • Claude Code (claude-3-sonnet, claude-3-opus)',
+      '  • Gemini Pro Vision',
+      '  • GPT-4 Vision',
+      '  • Other vision-capable models',
+      '',
+      'Alternatives:',
+      '  • Use SVG references instead of PNG',
+      '  • Upgrade to a multimodal LLM client',
+      '  • Use prompt-only generation',
+      '',
+      'Learn more: https://docs.anthropic.com/claude-code/multimodal'
+    ].join('\n');
+  }
+}
+```
 
 ### Visual Context Integration
 ```typescript
@@ -280,6 +344,54 @@ export class ContextBuilder {
 ```
 
 ## Documentation Updates
+
+### User Education: Visual Context Magic
+```markdown
+## How PNG References Work (New in v0.4.0)
+
+We've revolutionized how PNG references are handled! Instead of converting your PNG files to SVG (which often loses quality), we now pass them directly to multimodal LLMs as **visual context**.
+
+### The Magic Behind the Scenes
+
+**Old Approach (v0.3.x):**
+```
+Your PNG → Potrace conversion → SVG text → LLM
+```
+- Required system dependencies (Potrace)
+- Lossy conversion process
+- Quality degradation
+- Platform limitations
+
+**New Approach (v0.4.0+):**
+```
+Your PNG → Visual context → Multimodal LLM
+```
+- Zero system dependencies
+- Native visual understanding
+- Higher quality results
+- Works everywhere
+
+### Why This is Better
+
+1. **Higher Quality**: The LLM sees your PNG exactly as you intended
+2. **Faster Processing**: No conversion time needed
+3. **Better Understanding**: Visual context provides richer information than converted SVG
+4. **Universal Compatibility**: Works on all platforms without dependencies
+
+### Requirements
+
+- **Multimodal LLM**: Claude Code, Gemini Pro Vision, GPT-4V, or similar
+- **For Non-Multimodal LLMs**: Use SVG references instead, or upgrade your LLM
+
+### Example
+```bash
+# This now works better than ever:
+icon-generator-mcp --reference logo.png --prompt "Create a modern, minimalist version"
+
+# The LLM sees logo.png visually and creates something inspired by it
+# Instead of working from a lossy SVG conversion
+```
+```
 
 ### Installation Simplification
 ```diff
@@ -370,12 +482,33 @@ Memory usage: ~30MB peak
 ### Compatibility Assurance
 - **API Schema**: No changes to public interface
 - **Reference Handling**: PNG files processed differently but transparently
-- **Error Handling**: Maintain clear error messages
+- **Error Handling**: Clear, helpful error messages for non-multimodal LLMs
+- **Graceful Fallbacks**: Suggest alternatives when multimodal support unavailable
 - **Rollback Plan**: Previous version remains available if needed
+
+### Non-Multimodal LLM Support
+```typescript
+// Graceful error handling with helpful alternatives
+if (requiresMultimodal && !this.multimodalDetector.isMultimodalLLMAvailable()) {
+  const errorMessage = this.multimodalDetector.getMultimodalRequiredError();
+  
+  // Also suggest practical alternatives
+  const alternatives = [
+    'You can still use this tool by:',
+    '1. Using SVG reference files instead of PNG',
+    '2. Using prompt-only generation (no reference files)',
+    '3. Converting PNG to SVG with online tools first',
+    '4. Upgrading to a multimodal LLM for the best experience'
+  ].join('\n');
+  
+  throw new Error(`${errorMessage}\n\n${alternatives}`);
+}
+```
 
 ### Quality Validation
 - **Visual Quality**: PNG visual context > converted SVG quality
 - **LLM Compatibility**: Works with all major multimodal LLMs
+- **Backward Compatibility**: Non-multimodal users get helpful guidance
 - **Test Coverage**: Comprehensive test suite for new approach
 
 ## Timeline Estimate
