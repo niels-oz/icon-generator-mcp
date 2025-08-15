@@ -6,20 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Language**: TypeScript with strict mode (ES2020 target)
 - **Platform**: macOS (Intel and Apple Silicon)  
 - **Runtime**: Node.js v18+
-- **Testing**: Jest with ts-jest (81 tests, 10 test suites)
-- **Dependencies**: MCP SDK v0.4.0, Potrace, Jimp, chalk, node-fetch
-- **Architecture**: MCP Server with multi-LLM support (Claude + Gemini)
+- **Testing**: Jest with ts-jest (22 tests, 7 test suites)
+- **Dependencies**: MCP SDK v0.4.0, chalk
+- **Architecture**: LLM-agnostic MCP Server with context-based generation
 
 ## Prerequisites
 ```bash
-# Required system dependencies
-brew install potrace
-
-# Global installation (preferred)
+# Global installation
 npm install -g icon-generator-mcp
 
-# Verify installations
-potrace --version
+# Verify installation
 icon-generator-mcp --version
 ```
 
@@ -34,7 +30,7 @@ npm run build
 # Development with auto-rebuild
 npm run dev
 
-# Run tests (81 tests, ~42s runtime)
+# Run tests (22 tests, ~3s runtime)
 npm test
 
 # Run tests in watch mode
@@ -54,10 +50,7 @@ npm start
 ### Core Components
 - **MCPServer** (`src/server.ts`) - Main orchestrator with phase-based generation pipeline
 - **ConversionService** (`src/services/converter.ts`) - PNG→SVG conversion using Potrace + Jimp preprocessing
-- **LLM Services** (`src/services/llm/`) - Multi-provider architecture (Claude + Gemini)
-  - **Factory** (`factory.ts`) - LLM provider selection
-  - **Claude** (`claude.ts`) - Claude CLI integration
-  - **Gemini** (`gemini.ts`) - Gemini CLI integration
+- **ContextBuilder** (`src/context-builder.ts`) - LLM-agnostic context preparation for generation
 - **FileWriterService** (`src/services/file-writer.ts`) - Output management with conflict resolution
 - **StateManager** (`src/services/state-manager.ts`) - Phase-based state tracking and progress management
 - **VisualFormatter** (`src/services/visual-formatter.ts`) - Progress visualization
@@ -79,18 +72,16 @@ generate_icon: {
   style?: string           // Optional: Style preset (e.g., "black-white-flat")
   output_name?: string     // Optional: Custom filename
   output_path?: string     // Optional: Custom output directory
-  llm_provider?: 'claude' | 'gemini'  // Optional: LLM provider selection
 }
 ```
 
 ## Testing Strategy
 
-### Test Organization (32 Tests Total - Simplified)
+### Test Organization (22 Tests Total - Simplified)
 - **Core Tests**: Consolidated essential functionality
   - `test/core.test.ts` - MCP server, PNG conversion, phase processing
   - `test/services/file-operations.test.ts` - File handling and path generation
-  - `test/services/llm.test.ts` - Multi-provider LLM testing (Claude + Gemini)
-  - `test/services/converter.test.ts` - PNG to SVG conversion
+  - `test/services/converter.test.ts` - PNG to SVG conversion testing
 - **Integration Tests**: End-to-end workflow testing
   - `test/integration/end-to-end.test.ts` - Complete workflow validation
 - **Regression Tests**: Advanced AI generation validation
@@ -102,7 +93,7 @@ generate_icon: {
 
 ### Running Specific Tests
 ```bash
-# All tests (32 tests, ~34s)
+# All tests (22 tests, ~3s)
 npm test
 
 # Regression tests only (30-35s timeout)
@@ -141,11 +132,10 @@ npm run test:add-user
 
 ## Key Implementation Details
 
-### Multi-LLM Architecture
-- **Provider Factory**: Dynamic LLM provider selection
-- **Claude Integration**: Uses `claude` CLI with proper authentication
-- **Gemini Integration**: Uses `gemini` CLI with proper authentication
-- **Fallback Support**: Graceful handling of provider unavailability
+### LLM-Agnostic Architecture
+- **Context Preparation**: Structures generation instructions for any MCP-compatible LLM
+- **Universal Compatibility**: Works with Claude, Gemini, GPT, and local LLMs
+- **No Provider Dependencies**: Eliminates CLI tool requirements and API integrations
 
 ### State Management Implementation
 - **Session Tracking**: Comprehensive state management
@@ -185,8 +175,6 @@ DEBUG=mcp:* npm run dev
 
 # Check system dependencies
 which potrace
-which claude
-which gemini
 
 # Check build status
 npm run build
@@ -194,24 +182,24 @@ npm run build
 # Validate MCP server
 node bin/mcp-server.js
 
-# Test specific LLM provider
-npm test -- --testNamePattern="claude|gemini"
+# Test specific functionality
+npm test -- --testNamePattern="core|converter|file-operations"
 ```
 
 ## Code Conventions
 - TypeScript strict mode enabled (ES2020 target)
 - Error-first callback pattern for services
 - Comprehensive input validation
-- No external API keys (uses CLI authentication)
+- No external API keys (LLM-agnostic context preparation)
 - Phase-based processing patterns
-- Factory pattern for multi-provider support
+- Context-based pattern for LLM-agnostic generation
 - State management with session isolation
 - Visual formatting for user feedback
 
 ## Current Status
-- ✅ **Multi-LLM Support**: Claude + Gemini providers
-- ✅ **Phase-Based Pipeline**: 6-step generation process with state management
-- ✅ **Comprehensive Testing**: 31 tests with regression validation
+- ✅ **LLM-Agnostic Architecture**: Works with any MCP-compatible LLM client
+- ✅ **Phase-Based Pipeline**: 6-step context preparation process with state management  
+- ✅ **Comprehensive Testing**: 22 tests with regression validation
 - ✅ **Visual Feedback**: Real-time progress display
 - ✅ **Error Handling**: Phase-specific error context
 - ✅ **File Management**: Smart naming and conflict resolution
