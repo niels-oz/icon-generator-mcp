@@ -300,12 +300,13 @@ export class MCPServer {
       }
       
       // Generate SVG using visual context for PNGs and text for SVGs
-      const generatedSvg = this.generateSimpleSVG(
+      const llmResponse = this.generateSimpleSVG(
         state.request.prompt, 
         textReferences, 
         visualReferences
       );
-      const suggestedFilename = this.generateFilename(state.request.prompt);
+      const generatedSvg = llmResponse.svg;
+      const suggestedFilename = llmResponse.filename;
       
       // Log generation approach for user feedback
       let approach = 'prompt-based generation';
@@ -387,34 +388,42 @@ export class MCPServer {
   /**
    * Generate simple SVG based on prompt, text references (SVG), and visual references (PNG)
    */
-  private generateSimpleSVG(prompt: string, _textReferences: string[] = [], _visualReferences: string[] = []): string {
+  private generateSimpleSVG(prompt: string, _textReferences: string[] = [], _visualReferences: string[] = []): { svg: string, filename: string } {
     // For now, create a basic star SVG based on the prompt
     // This is a simplified implementation - in production you'd want AI generation
     if (prompt.toLowerCase().includes('star')) {
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      return {
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <!-- Five-pointed star -->
   <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="white" stroke="black" stroke-width="2"/>
-</svg>`;
+</svg>`,
+        filename: 'star-icon'
+      };
     } else if (prompt.toLowerCase().includes('circle')) {
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      return {
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
   <circle cx="12" cy="12" r="10" fill="white" stroke="black"/>
-</svg>`;
+</svg>`,
+        filename: 'circle-icon'
+      };
+    } else if (prompt.toLowerCase().includes('user') || prompt.toLowerCase().includes('profile')) {
+      return {
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="12" cy="8" r="4" fill="white" stroke="black"/>
+  <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" fill="white" stroke="black"/>
+</svg>`,
+        filename: 'user-profile-icon'
+      };
     } else {
       // Default to a simple geometric icon
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      return {
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
   <rect x="3" y="3" width="18" height="18" rx="2" fill="white" stroke="black"/>
   <circle cx="12" cy="12" r="3" fill="black"/>
-</svg>`;
+</svg>`,
+        filename: 'generated-icon'
+      };
     }
   }
 
-  /**
-   * Generate filename from prompt
-   */
-  private generateFilename(prompt: string): string {
-    return prompt.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, '-')
-      .substring(0, 30) || 'generated-icon';
-  }
 }
