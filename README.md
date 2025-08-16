@@ -173,31 +173,40 @@ npm run dev
 npm test -- --testNamePattern="multimodal|visual-context"
 ```
 
-### 🔗 Direct Linking for Development & Testing
+### 📦 Local Package Testing (Recommended)
 
-For local development and testing of unreleased versions:
+For testing unreleased versions exactly as users will experience them:
 
 ```bash
-# In the icon-generator project directory
+# 1. Build and package your development version
 npm run build
-npm link
+npm pack
+# Creates: icon-generator-mcp-0.4.0.tgz
 
-# This creates a global symlink to your local development version
-# Now you can use it in any MCP client as if it was globally installed
+# 2. Install globally from the package (like users would)
+npm install -g ./icon-generator-mcp-0.4.0.tgz
 ```
 
-**Test the linked version:**
+**Test the installed package:**
 ```bash
-# Verify linking worked
-npm list -g icon-generator-mcp
-# Should show: icon-generator-mcp@0.4.0 -> ../../../path/to/your/local/repo
+# Test CLI binary
+icon-generator-mcp --version
+# Should show: 0.4.0
 
-# Test basic functionality
+# Test programmatic usage
 node -e "
 const { MCPServer } = require('icon-generator-mcp');
 const server = new MCPServer();
-console.log('✅ Linked version:', server.version);
+console.log('✅ Package version:', server.version);
 console.log('✅ Zero dependencies verified');
+"
+
+# Test actual icon generation
+node -e "
+const { MCPServer } = require('icon-generator-mcp');
+new MCPServer().handleToolCall('generate_icon', {
+  prompt: 'Create a test star icon'
+}).then(r => console.log('✅ Generation test:', r.success ? 'PASSED' : 'FAILED'));
 "
 ```
 
@@ -212,12 +221,13 @@ console.log('✅ Zero dependencies verified');
 }
 ```
 
-**Unlink when done:**
+**Clean up when done:**
 ```bash
-npm unlink -g icon-generator-mcp
+npm uninstall -g icon-generator-mcp
+rm icon-generator-mcp-0.4.0.tgz
 ```
 
-This allows you to test development versions directly in your MCP environment before publishing to npm.
+This approach tests the **exact package** that would be published to npm, ensuring binary scripts, file inclusion, and module resolution work correctly for real users.
 
 ## 🤝 Contributing
 

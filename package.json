@@ -11,6 +11,7 @@
     "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:verbose": "VERBOSE_TESTS=1 jest",
     "test:regression": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
     "start": "node bin/mcp-server.js",
     "prepublishOnly": "npm run build && npm test",

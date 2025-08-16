@@ -1,11 +1,12 @@
 import { MCPServer } from '../src/server';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TEST_PATHS, TEST_PROMPTS, TEST_LLM_RESPONSES } from './test-constants';
 
 describe('Multimodal LLM Detection and Error Handling', () => {
   let server: MCPServer;
-  const testPngPath = 'test/fixtures/test-multimodal.png';
-  const testSvgPath = 'test/fixtures/blue-square.svg';
+  const testPngPath = TEST_PATHS.OUTPUT.TEMP_PNG;
+  const testSvgPath = TEST_PATHS.FIXTURES.SVG_FILE;
 
   beforeEach(() => {
     server = new MCPServer();
@@ -37,7 +38,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testPngPath],
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
@@ -55,7 +56,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testPngPath],
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
@@ -73,7 +74,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testPngPath],
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
@@ -108,7 +109,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testSvgPath, testPngPath], // SVG first, then PNG
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
@@ -123,7 +124,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testSvgPath],
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
@@ -174,7 +175,7 @@ describe('Multimodal LLM Detection and Error Handling', () => {
 
       const request = {
         reference_paths: [testPngPath],
-        prompt: 'Create an icon'
+        prompt: TEST_PROMPTS.SIMPLE
       };
 
       const response = await server.handleToolCall('generate_icon', request);
