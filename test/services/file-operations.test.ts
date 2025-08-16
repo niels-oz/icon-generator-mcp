@@ -68,14 +68,14 @@ describe('File Operations (Consolidated)', () => {
   });
 
   describe('tool schema integration', () => {
-    it('should include output_path parameter in MCP tool schema', () => {
+    it('should include output_path parameter in save_icon tool schema', () => {
       const tools = server.getTools();
-      const generateIconTool = tools.find(tool => tool.name === 'generate_icon');
+      const saveIconTool = tools.find(tool => tool.name === 'save_icon');
       
-      expect(generateIconTool).toBeDefined();
-      expect(generateIconTool!.inputSchema.properties.output_path).toBeDefined();
-      expect(generateIconTool!.inputSchema.properties.output_path.type).toBe('string');
-      expect(generateIconTool!.inputSchema.required).not.toContain('output_path');
+      expect(saveIconTool).toBeDefined();
+      expect(saveIconTool!.inputSchema.properties.output_path).toBeDefined();
+      expect((saveIconTool!.inputSchema.properties.output_path as any).type).toBe('string');
+      expect(saveIconTool!.inputSchema.required).not.toContain('output_path');
     });
   });
 

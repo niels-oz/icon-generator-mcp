@@ -15,34 +15,26 @@ describe('End-to-End Integration', () => {
     }
   });
 
-  it('should handle prompt-only generation (no PNG files)', async () => {
+  it('should handle context preparation for simple prompts', async () => {
     const request = {
-      reference_paths: [],
       prompt: 'Create a simple blue circle icon',
-      output_name: 'test-integration-blue-circle',
-      output_path: testOutputDir
+      style: 'black-white-flat'
     };
 
-    const response = await server.handleToolCall('generate_icon', request);
+    const response = await server.handleToolCall('prepare_icon_context', request);
     
-    if (!response.success) {
-      console.log('Integration test error:', response.error);
-    }
-    
-    expect(response.success).toBe(true);
-    expect(response.message).toMatch(/Icon generated successfully/);
-    expect(response.processing_time).toBeDefined();
-    expect(response.steps).toBeDefined();
-    expect(Array.isArray(response.steps)).toBe(true);
-  }, 35000); // 35 second timeout for real generation
+    expect(response).toHaveProperty('expert_prompt');
+    expect(response).toHaveProperty('metadata');
+    expect(response.type).toBe('generation_context');
+    expect(response.metadata.suggested_filename).toBeDefined();
+  });
 
   it('should handle validation errors gracefully', async () => {
     const request = {
-      reference_paths: [],
       prompt: ''
     };
 
-    const response = await server.handleToolCall('generate_icon', request);
+    const response = await server.handleToolCall('prepare_icon_context', request);
     
     expect(response.success).toBe(false);
     expect(response.error).toBeDefined();

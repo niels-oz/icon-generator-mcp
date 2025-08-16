@@ -8,43 +8,51 @@ describe('Filename Generation Fix', () => {
     server = new MCPServer();
   });
 
-  describe('generateSimpleSVG method', () => {
+  describe('prepare_icon_context filename generation', () => {
     it('should extract keywords for long prompts', async () => {
-      const result = await (server as any).generateSimpleSVG('please generate a minimalist dog silhouette icon with black and white flat design elements');
+      const response = await server.handleToolCall('prepare_icon_context', {
+        prompt: 'please generate a minimalist dog silhouette icon with black and white flat design elements'
+      });
       
-      expect(result).toHaveProperty('svg');
-      expect(result).toHaveProperty('filename');
-      expect(result.filename).toBe('dog-silhouette'); // Should extract meaningful keywords, not "please-generate"
+      expect(response).toHaveProperty('metadata');
+      expect(response.metadata.suggested_filename).toBe('dog-silhouette'); // Should extract meaningful keywords, not "please-generate"
     });
 
     it('should handle simple prompts', async () => {
-      const result = await (server as any).generateSimpleSVG('user profile');
+      const response = await server.handleToolCall('prepare_icon_context', {
+        prompt: 'user profile'
+      });
       
-      expect(result.filename).toBe('user-profile');
+      expect(response.metadata.suggested_filename).toBe('user-profile');
     });
 
     it('should fallback to generated-icon for empty/filtered prompts', async () => {
-      const result = await (server as any).generateSimpleSVG('create a the and');
+      const response = await server.handleToolCall('prepare_icon_context', {
+        prompt: 'create a the and'
+      });
       
-      expect(result.filename).toBe('generated-icon');
+      expect(response.metadata.suggested_filename).toBe('generated-icon');
     });
   });
 
   describe('End-to-end filename generation', () => {
     it('should generate semantic filenames for complex prompts', async () => {
-      const request = {
-        prompt: 'please generate a minimalist dog silhouette icon with black and white flat design elements',
-        reference_paths: [],
-        style: undefined,
-        output_name: undefined,
-        output_path: undefined
-      };
-
-      const response = await server.handleToolCall('generate_icon', request);
+      const contextResponse = await server.handleToolCall('prepare_icon_context', {
+        prompt: 'please generate a minimalist dog silhouette icon with black and white flat design elements'
+      });
       
-      expect(response.success).toBe(true);
-      expect(response.output_path).toContain('dog-silhouette'); // Should NOT contain "please-generate-a-minimalist-d"
-      expect(response.output_path).not.toMatch(/please-generate.*\.svg$/);
+      expect(contextResponse.metadata.suggested_filename).toBe('dog-silhouette'); // Should NOT contain "please-generate-a-minimalist-d"
+      expect(contextResponse.metadata.suggested_filename).not.toMatch(/please-generate/);
+      
+      // Test full workflow with save_icon
+      const mockSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+      const saveResponse = await server.handleToolCall('save_icon', {
+        svg: mockSvg,
+        filename: contextResponse.metadata.suggested_filename
+      });
+      
+      expect(saveResponse.success).toBe(true);
+      expect(saveResponse.output_path).toContain('dog-silhouette');
     });
   });
 });

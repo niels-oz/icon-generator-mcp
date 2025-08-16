@@ -66,7 +66,23 @@ describe('Add User Icon Generation Regression Test', () => {
     console.log('');
 
     const startTime = Date.now();
-    const response = await retry(() => server.handleToolCall('generate_icon', newIconRequest));
+    // Test the new two-tool workflow
+    const contextResponse = await retry(() => server.handleToolCall('prepare_icon_context', {
+      prompt: newIconRequest.prompt,
+      style: newIconRequest.style
+    }));
+    
+    expect(contextResponse).toHaveProperty('expert_prompt');
+    expect(contextResponse).toHaveProperty('metadata');
+    
+    // For testing, simulate SVG generation (in real usage, the LLM would generate this)
+    const mockSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+    
+    const response = await server.handleToolCall('save_icon', {
+      svg: mockSvg,
+      filename: contextResponse.metadata.suggested_filename,
+      output_path: newIconRequest.output_path
+    });
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     
@@ -75,20 +91,20 @@ describe('Add User Icon Generation Regression Test', () => {
     console.log('---------------------');
 
     expect(response.success).toBe(true);
-    expect(response.message).toMatch(/Icon generated successfully/);
-    expect(response.processing_time).toBeDefined();
+    expect(response.filename).toBeDefined();
+    expect(response.path).toBeDefined();
     
     console.log('📊 Generation Results:');
     console.log(`  Success: ${response.success}`);
-    console.log(`  Message: ${response.message}`);
-    console.log(`  Output path: ${response.output_path}`);
+    console.log(`  Filename: ${response.filename}`);
+    console.log(`  Output path: ${response.path}`);
     console.log(`  Processing time: ${processingTime}ms`);
     
     // Verify the SVG file was created and has proper structure
-    expect(response.output_path).toBeDefined();
-    expect(fs.existsSync(response.output_path!)).toBe(true);
+    expect(response.path).toBeDefined();
+    expect(fs.existsSync(response.path!)).toBe(true);
     
-    const svgContent = fs.readFileSync(response.output_path!, 'utf8');
+    const svgContent = fs.readFileSync(response.path!, 'utf8');
     expect(svgContent.length).toBeGreaterThan(100);
 
     const hasViewBox = svgContent.includes('viewBox="0 0 24 24"');

@@ -5,6 +5,36 @@ All notable changes to the Icon Generator MCP Server will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-08-16
+
+### BREAKING CHANGES
+- Single `generate_icon` tool replaced with two-tool workflow
+- Host LLM now orchestrates generation instead of MCP server doing generation directly
+
+### Added
+- `prepare_icon_context` tool: Returns expert prompts with few-shot examples and style guidance
+- `save_icon` tool: Handles file operations for generated SVG content with smart naming
+- Expert prompt engineering with style-specific few-shot examples
+- Semantic keyword extraction for filename generation
+
+### Changed
+- Generation pipeline from monolithic tool to two-step context-return pattern
+- Expert prompts now include detailed few-shot examples for style consistency
+- File operations separated into dedicated tool with enhanced smart naming
+- State management adapted for context preparation workflow
+
+### Removed
+- Hardcoded pattern matching and simulation code
+- All-in-one `generate_icon` tool
+- Placeholder logic and keyword-based responses
+
+### Migration from v0.4.x
+```bash
+npm update -g icon-generator-mcp
+```
+
+---
+
 ## [0.4.0] - 2025-08-15 (Major Release) 🚀
 
 ### 🎯 **BREAKING CHANGES**

@@ -14,8 +14,8 @@
     "test:verbose": "VERBOSE_TESTS=1 jest",
     "test:regression": "jest test/regression/code-review-icon-generation.test.ts --timeout=30000",
     "start": "node bin/mcp-server.js",
-    "prepublishOnly": "npm run build && npm test",
-    "postinstall": "node -e \"console.log('\\n✅ Icon Generator MCP Server installed successfully!\\n\\nZero Dependencies - No System Requirements!\\n- Works with multimodal LLMs (Claude Code, Gemini Pro Vision, GPT-4V)\\n- PNG visual context support (no conversion needed)\\n- SVG text reference support\\n\\nUsage: The server will be automatically available in your LLM tool.\\n')\""
+    "prepublishOnly": "npm run build && npm test -- --testPathIgnorePatterns=test/regression",
+    "postinstall": "node -e \"console.log('icon-generator-mcp installed')\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.4.0",

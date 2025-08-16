@@ -36,7 +36,7 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
       expect(response.success).toBe(false);
       expect(response.error).toContain(TEST_LLM_RESPONSES.ERROR_MESSAGES.PNG_NOT_SUPPORTED);
@@ -55,9 +55,9 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
-      expect(response.success).toBe(true);
+      expect(response).toHaveProperty('expert_prompt');
     });
   });
 
@@ -71,9 +71,9 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
-      expect(response.success).toBe(true);
+      expect(response).toHaveProperty('expert_prompt');
       
       // Should handle both types appropriately
       if (response.steps) {
@@ -94,7 +94,7 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
       expect(response.success).toBe(false);
       expect(response.error).toContain(TEST_LLM_RESPONSES.ERROR_MESSAGES.PNG_NOT_SUPPORTED);
@@ -109,9 +109,9 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
-      expect(response.success).toBe(true);
+      expect(response).toHaveProperty('expert_prompt');
     });
   });
 
@@ -124,9 +124,9 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
-      expect(response.success).toBe(true);
+      expect(response).toHaveProperty('expert_prompt');
     });
 
     it('should provide comprehensive error message with helpful alternatives', async () => {
@@ -137,7 +137,7 @@ describe('Multimodal LLM Detection and Handling', () => {
         prompt: TEST_PROMPTS.SIMPLE
       };
 
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
 
       expect(response.success).toBe(false);
       expect(response.error).toContain('You can still use this tool by');

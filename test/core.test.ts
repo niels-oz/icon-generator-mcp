@@ -12,23 +12,19 @@ describe('MCP Server Core Interface', () => {
   describe('Server Initialization', () => {
     it('should initialize correctly', () => {
       expect(server.name).toBe('icon-generator-mcp');
-      expect(server.version).toBe('0.4.4');
+      expect(server.version).toBe('0.5.0');
     });
 
-    it('should register generate_icon tool with correct schema', () => {
+    it('should register two tools with correct schema', () => {
       const tools = server.getTools();
-      const generateIconTool = tools[0];
+      const prepareContextTool = tools[0];
+      const saveIconTool = tools[1];
       
-      expect(tools).toHaveLength(1);
-      expect(generateIconTool.name).toBe('generate_icon');
-      expect(generateIconTool.inputSchema.required).toEqual(['prompt']);
-      expect(generateIconTool.inputSchema.properties).toMatchObject({
-        reference_paths: { type: 'array' },
-        prompt: { type: 'string' },
-        output_name: { type: 'string' },
-        output_path: { type: 'string' },
-        style: { type: 'string' }
-      });
+      expect(tools).toHaveLength(2);
+      expect(prepareContextTool.name).toBe('prepare_icon_context');
+      expect(prepareContextTool.inputSchema.required).toEqual(['prompt']);
+      expect(saveIconTool.name).toBe('save_icon');
+      expect(saveIconTool.inputSchema.required).toEqual(['svg', 'filename']);
     });
   });
 
@@ -37,22 +33,23 @@ describe('MCP Server Core Interface', () => {
       const validRequest = { prompt: TEST_PROMPTS.SIMPLE };
       const invalidRequest = { prompt: '' };
       
-      const validResponse = await server.handleToolCall('generate_icon', validRequest);
-      const invalidResponse = await server.handleToolCall('generate_icon', invalidRequest);
+      const validResponse = await server.handleToolCall('prepare_icon_context', validRequest);
+      const invalidResponse = await server.handleToolCall('prepare_icon_context', invalidRequest);
       
-      expect(validResponse).toHaveProperty('success');
+      expect(validResponse).toHaveProperty('expert_prompt');
+      expect(validResponse).toHaveProperty('metadata');
       expect(invalidResponse.success).toBe(false);
       expect(invalidResponse.error).toContain('prompt is required');
     });
 
-    it('should provide processing time metrics', async () => {
+    it('should return expert prompt and metadata', async () => {
       const request = { prompt: TEST_PROMPTS.SIMPLE };
-      const response = await server.handleToolCall('generate_icon', request);
+      const response = await server.handleToolCall('prepare_icon_context', request);
       
-      expect(response).toHaveProperty('processing_time');
-      if (typeof response.processing_time === 'number') {
-        expect(response.processing_time).toBeGreaterThanOrEqual(0);
-      }
+      expect(response).toHaveProperty('expert_prompt');
+      expect(response).toHaveProperty('metadata');
+      expect(response).toHaveProperty('instructions');
+      expect(response.type).toBe('generation_context');
     });
   });
 
@@ -64,17 +61,14 @@ describe('MCP Server Core Interface', () => {
       expect(response.error).toContain('Unknown tool');
     });
 
-    it('should track processing phases', async () => {
-      const request = { prompt: TEST_PROMPTS.SIMPLE };
-      const response = await server.handleToolCall('generate_icon', request);
+    it('should test save_icon tool', async () => {
+      const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+      const request = { svg: svgContent, filename: 'test-icon' };
+      const response = await server.handleToolCall('save_icon', request);
       
-      if (response.steps) {
-        const phases = response.steps.map((step: any) => step.step);
-        expect(phases).toContain('validation');
-        expect(phases).toContain('analysis');
-        expect(phases).toContain('generation');
-        expect(phases).toContain('output');
-      }
+      expect(response.success).toBe(true);
+      expect(response).toHaveProperty('message');
+      expect(response).toHaveProperty('output_path');
     });
   });
 });
