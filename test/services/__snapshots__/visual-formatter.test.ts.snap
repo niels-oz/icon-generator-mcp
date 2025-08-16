@@ -1,28 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Visual Formatter Service Box Formatting Helper should create properly formatted boxes 1`] = `
-"[BLUE]┌───────────────┐
-[/BLUE][BLUE]│ Test Title    │
-[/BLUE][BLUE]├───────────────┤
-[/BLUE][BLUE]│[/BLUE] Line 1        [BLUE]│
-[/BLUE][BLUE]│[/BLUE] Line 2        [BLUE]│
-[/BLUE][BLUE]│[/BLUE] Longer line 3 [BLUE]│
-[/BLUE][BLUE]└───────────────┘[/BLUE]"
+exports[`Visual Formatter Service Core Formatting Behaviors should format a single step correctly 1`] = `
+"🔍 ✅ [BLUE]VALIDATION[/BLUE] - [GREEN]COMPLETED[/GREEN] [GRAY]12:00:00 PM[/GRAY]
+   [WHITE]Validated 2 input files and prompt[/WHITE]"
 `;
 
-exports[`Visual Formatter Service Final Result Formatting should format failed result correctly 1`] = `
-"💥 [RED_BOLD]FAILED[/RED_BOLD] 💥
-[GRAY]Duration: 1m 0s[/GRAY]
-[BOLD_RED]❌ Final Error:[/BOLD_RED] Critical error"
+exports[`Visual Formatter Service Core Formatting Behaviors should format the final generation summary for a failed run 1`] = `
+"[BOLD_BLUE]📋 Generation Summary[/BOLD_BLUE]
+[GRAY]Session: test-session-123[/GRAY]
+
+🔍 ✅ [BLUE]VALIDATION[/BLUE] - [GREEN]COMPLETED[/GREEN] [GRAY]12:00:00 PM[/GRAY]
+   [WHITE]Validated 2 input files and prompt[/WHITE]
+
+[BOLD]📁 Input Files:[/BOLD]
+   • /test/file1.png
+   • /test/file2.svg
+
+[BOLD_RED]⚠️ Errors:[/BOLD_RED]
+   • File not found
+   • LLM generation failed"
 `;
 
-exports[`Visual Formatter Service Final Result Formatting should format successful result correctly 1`] = `
-"🎉 [GREEN_BOLD]SUCCESS[/GREEN_BOLD] 🎉
-[GRAY]Duration: 1m 0s[/GRAY]
-[BOLD_GREEN]📁 Saved to:[/BOLD_GREEN] [UNDERLINE]/test/output/star-icon.svg[/UNDERLINE]"
-`;
-
-exports[`Visual Formatter Service Generation Summary Formatting should format basic summary correctly 1`] = `
+exports[`Visual Formatter Service Core Formatting Behaviors should format the final generation summary for a successful run 1`] = `
 "[BOLD_BLUE]📋 Generation Summary[/BOLD_BLUE]
 [GRAY]Session: test-session-123[/GRAY]
 
@@ -34,17 +33,22 @@ exports[`Visual Formatter Service Generation Summary Formatting should format ba
    • /test/file2.svg"
 `;
 
-exports[`Visual Formatter Service Phase Transition Formatting should format phase transitions correctly 1`] = `"🔍 [BLUE]validation[/BLUE] [GRAY]→[/GRAY] 📊 [CYAN]analysis[/CYAN]"`;
+exports[`Visual Formatter Service Core Formatting Behaviors should format the final result message (success and failure) 1`] = `
+"🎉 [GREEN_BOLD]SUCCESS[/GREEN_BOLD] 🎉
+[GRAY]Duration: 1m 0s[/GRAY]
+[BOLD_GREEN]📁 Saved to:[/BOLD_GREEN] [UNDERLINE]/test/output/star-icon.svg[/UNDERLINE]"
+`;
 
-exports[`Visual Formatter Service Progress Formatting should format progress with correct percentage calculation 1`] = `
+exports[`Visual Formatter Service Core Formatting Behaviors should format the final result message (success and failure) 2`] = `
+"💥 [RED_BOLD]FAILED[/RED_BOLD] 💥
+[GRAY]Duration: 1m 0s[/GRAY]
+[BOLD_RED]❌ Final Error:[/BOLD_RED] Critical error"
+`;
+
+exports[`Visual Formatter Service Core Formatting Behaviors should format the overall progress display 1`] = `
 "[BOLD_BLUE]🎯 Icon Generation Progress[/BOLD_BLUE]
 [GREEN]████████████[/GREEN][GRAY]░░░░░░░░[/GRAY] [BOLD]60%[/BOLD]
 [GRAY]Current Phase: [BLUE]VALIDATION[/BLUE][/GRAY]
 [GRAY]Session: test-session-123[/GRAY]
 [GRAY]Elapsed: 1m 0s[/GRAY]"
-`;
-
-exports[`Visual Formatter Service Step Formatting should format a completed validation step correctly 1`] = `
-"🔍 ✅ [BLUE]VALIDATION[/BLUE] - [GREEN]COMPLETED[/GREEN] [GRAY]12:00:00 PM[/GRAY]
-   [WHITE]Validated 2 input files and prompt[/WHITE]"
 `;
