@@ -37,8 +37,8 @@ export class MCPServer {
   getTools() {
     return [
       {
-        name: 'generate_icon',
-        description: 'Generate SVG icon from SVG references and/or text prompt with step-by-step visual feedback. PNG files supported with multimodal LLMs.',
+        name: 'prepare_icon_context',
+        description: 'Prepares expert prompt and context for AI icon generation. Returns structured generation instructions.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -51,20 +51,38 @@ export class MCPServer {
               type: 'string',
               description: 'Text description of the desired icon'
             },
-            output_name: { 
-              type: 'string',
-              description: 'Optional custom output filename'
-            },
-            output_path: { 
-              type: 'string',
-              description: 'Optional custom output directory path'
-            },
             style: { 
               type: 'string',
               description: 'Optional style preset for consistent icon generation (e.g., "black-white-flat")'
             },
           },
           required: ['prompt']
+        }
+      },
+      {
+        name: 'save_icon',
+        description: 'Saves generated SVG icon to file with smart naming and path resolution.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            svg: {
+              type: 'string',
+              description: 'The SVG content to save'
+            },
+            filename: {
+              type: 'string', 
+              description: 'Suggested filename (without extension)'
+            },
+            output_name: {
+              type: 'string',
+              description: 'Optional custom output filename'
+            },
+            output_path: {
+              type: 'string',
+              description: 'Optional custom output directory path'
+            }
+          },
+          required: ['svg', 'filename']
         }
       }
     ];
@@ -77,76 +95,99 @@ export class MCPServer {
     return this.multimodalDetector.isMultimodalLLMAvailable();
   }
 
-  async handleToolCall(toolName: string, request: any): Promise<IconGenerationResponse> {
-    if (toolName !== 'generate_icon') {
+  async handleToolCall(toolName: string, request: any): Promise<any> {
+    if (toolName === 'prepare_icon_context') {
+      return await this.handlePrepareIconContext(request);
+    } else if (toolName === 'save_icon') {
+      return await this.handleSaveIcon(request);
+    } else {
       return {
         success: false,
         message: 'Tool not found',
-        error: `Unknown tool: ${toolName}`
-      };
-    }
-
-    try {
-      // Validate request first
-      const validatedRequest = this.validateRequest(request);
-      
-      // Create generation session with phase-based state management
-      const state = this.stateManager.createSession(validatedRequest);
-      
-      // Use the configured LLM provider (respects constructor parameter)
-
-      try {
-        // Execute generation with step-by-step tracking
-        const result = await this.executeSequentialGeneration(state.sessionId);
-        
-        // Generate final visual summary
-        const summary = this.formatter.formatGenerationSummary(state);
-        const finalResult = this.formatter.formatFinalResult(state, result.success);
-        
-        console.log('\n' + summary);
-        console.log('\n' + finalResult);
-        
-        return {
-          ...result,
-          processing_time: this.stateManager.getProcessingTime(state.sessionId),
-          steps: this.stateManager.getAllSteps(state.sessionId)
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        this.stateManager.addError(state.sessionId, state.currentPhase, errorMessage);
-        
-        const summary = this.formatter.formatGenerationSummary(state);
-        const finalResult = this.formatter.formatFinalResult(state, false);
-        
-        console.log('\n' + summary);
-        console.log('\n' + finalResult);
-        
-        return {
-          success: false,
-          message: 'Icon generation failed',
-          error: errorMessage,
-          processing_time: this.stateManager.getProcessingTime(state.sessionId),
-          steps: this.stateManager.getAllSteps(state.sessionId)
-        };
-      } finally {
-        // Clean up session after completion
-        const cleanup = setTimeout(() => this.stateManager.cleanupSession(state.sessionId), 5000);
-        cleanup.unref();
-      }
-    } catch (validationError) {
-      // Handle validation errors before session creation
-      const errorMessage = validationError instanceof Error ? validationError.message : 'Unknown validation error';
-      return {
-        success: false,
-        message: 'Request validation failed',
-        error: errorMessage,
-        processing_time: 0,
-        steps: []
+        error: `Unknown tool: ${toolName}. Available tools: prepare_icon_context, save_icon`
       };
     }
   }
 
-  private validateRequest(request: any): IconGenerationRequest {
+  /**
+   * Prepare expert context for icon generation
+   */
+  async handlePrepareIconContext(request: any): Promise<any> {
+    try {
+      // Validate request first
+      const validatedRequest = this.validateContextRequest(request);
+      
+      // Create generation session with phase-based state management
+      const state = this.stateManager.createSession(validatedRequest);
+      
+      // Execute context preparation with phase tracking
+      const result = await this.executeContextPreparation(state.sessionId);
+      
+      return {
+        type: 'generation_context',
+        expert_prompt: result.expert_prompt,
+        metadata: {
+          suggested_filename: result.suggested_filename,
+          style: validatedRequest.style,
+          references_processed: result.references_processed
+        },
+        instructions: "Use the expert_prompt to generate SVG, then call save_icon tool with the result"
+      };
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Context preparation failed';
+      return {
+        success: false,
+        message: 'Context preparation failed',
+        error: errorMessage
+      };
+    }
+  }
+
+  /**
+   * Save generated SVG icon to file
+   */
+  async handleSaveIcon(request: any): Promise<any> {
+    try {
+      // Validate save request
+      if (!request.svg || typeof request.svg !== 'string') {
+        throw new Error('svg content is required');
+      }
+      if (!request.filename || typeof request.filename !== 'string') {
+        throw new Error('filename is required');
+      }
+
+      // Determine final filename
+      const outputFilename = request.output_name || request.filename;
+      
+      // Save using file writer service
+      const saveResult = await this.fileWriterService.saveGeneratedIcon(
+        outputFilename,
+        request.output_path,
+        request.svg
+      );
+      
+      if (!saveResult.success) {
+        throw new Error(saveResult.error || 'Failed to save icon');
+      }
+      
+      return {
+        success: true,
+        output_path: saveResult.outputPath,
+        message: `Icon saved successfully: ${path.basename(saveResult.outputPath!)}`
+      };
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Save failed';
+      return {
+        success: false,
+        message: 'Failed to save icon',
+        error: errorMessage
+      };
+    }
+  }
+
+  private validateContextRequest(request: any): any {
     // Validate prompt (always required)
     if (!request.prompt || typeof request.prompt !== 'string' || request.prompt.trim() === '') {
       throw new Error('prompt is required and must be a non-empty string');
@@ -161,45 +202,36 @@ export class MCPServer {
       referencePaths = request.reference_paths;
     }
 
-
     return {
       reference_paths: referencePaths,
       prompt: request.prompt.trim(),
-      output_name: request.output_name,
-      output_path: request.output_path,
       style: request.style
     };
   }
 
-  private async executeSequentialGeneration(sessionId: string): Promise<IconGenerationResponse> {
-    try {
-      // Phase 1: Validation
-      await this.executeValidationPhase(sessionId);
-      
-      // Phase 2: Analysis  
-      await this.executeAnalysisPhase(sessionId);
-      
-      // Phase 3: Generation (now handles visual context directly)
-      await this.executeGenerationPhase(sessionId);
-      
-      // Phase 4: Refinement (optional)
-      await this.executeRefinementPhase(sessionId);
-      
-      // Phase 5: Output
-      const result = await this.executeOutputPhase(sessionId);
-      
-      return result;
-    } catch (error) {
-      throw error;
-    }
+  private async executeContextPreparation(sessionId: string): Promise<any> {
+    const state = this.stateManager.getSession(sessionId)!;
+    
+    // Phase 1: Validation
+    await this.executeValidationPhase(sessionId);
+    
+    // Phase 2: Analysis  
+    await this.executeAnalysisPhase(sessionId);
+    
+    // Phase 3: Context Building (replacement for generation)
+    await this.executeContextBuilding(sessionId);
+    
+    const contextState = this.stateManager.getSession(sessionId)!;
+    return {
+      expert_prompt: (contextState.context as any).expertPrompt,
+      suggested_filename: (contextState.context as any).suggestedFilename,
+      references_processed: contextState.context.validatedFiles.length
+    };
   }
 
   private async executeValidationPhase(sessionId: string): Promise<void> {
     const state = this.stateManager.getSession(sessionId)!;
     this.stateManager.startValidation(sessionId);
-    
-    const progress = this.formatter.formatProgress(state);
-    console.log('\n' + progress);
     
     try {
       // Validate prompt
@@ -251,9 +283,6 @@ export class MCPServer {
     const state = this.stateManager.getSession(sessionId)!;
     this.stateManager.startAnalysis(sessionId);
     
-    const progress = this.formatter.formatProgress(state);
-    console.log('\n' + progress);
-    
     try {
       let analysisMessage = `Analyzing prompt: "${state.request.prompt.substring(0, 50)}..."`;
       
@@ -274,180 +303,55 @@ export class MCPServer {
     }
   }
   
-  
-  private async executeGenerationPhase(sessionId: string): Promise<void> {
+  private async executeContextBuilding(sessionId: string): Promise<void> {
     const state = this.stateManager.getSession(sessionId)!;
     this.stateManager.startGeneration(sessionId);
     
-    const progress = this.formatter.formatProgress(state);
-    console.log('\n' + progress);
-    
     try {
       // Categorize references into visual (PNG) and text (SVG) types
-      const visualReferences: string[] = [];
       const textReferences: string[] = [];
       
       for (const filePath of state.context.validatedFiles) {
         const ext = path.extname(filePath).toLowerCase();
-        if (ext === '.png') {
-          // PNG files are passed as visual context (file paths)
-          visualReferences.push(filePath);
-        } else if (ext === '.svg') {
+        if (ext === '.svg') {
           // SVG files are read as text content
           const svgContent = fs.readFileSync(filePath, 'utf8');
           textReferences.push(svgContent);
         }
+        // PNG files are handled by multimodal LLM directly, not converted
       }
       
-      // Generate SVG using visual context for PNGs and text for SVGs
-      const llmResponse = await this.generateSimpleSVG(
-        state.request.prompt, 
-        textReferences, 
-        visualReferences,
-        state.request.style
-      );
-      const generatedSvg = llmResponse.svg;
-      const suggestedFilename = llmResponse.filename;
+      // Build expert prompt using context builder
+      const { buildGenerationContext } = await import('./context-builder');
+      const context = buildGenerationContext(state.request.prompt, textReferences, state.request.style);
       
-      // Log generation approach for user feedback
-      let approach = 'prompt-based generation';
-      if (visualReferences.length > 0 && textReferences.length > 0) {
-        approach = `visual context (${visualReferences.length} PNG) + text references (${textReferences.length} SVG)`;
-      } else if (visualReferences.length > 0) {
-        approach = `visual context (${visualReferences.length} PNG files)`;
-      } else if (textReferences.length > 0) {
-        approach = `text references (${textReferences.length} SVG files)`;
-      }
+      // Generate suggested filename
+      const stopWords = ['create', 'make', 'generate', 'icon', 'the', 'and', 'with', 'for', 'in', 'of', 'a', 'an', 'beautiful', 'minimalist', 'please', 'help', 'design', 'elements', 'modern', 'application', 'interface'];
+      
+      const keywords = state.request.prompt.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter(word => 
+          word.length > 2 && 
+          !stopWords.includes(word)
+        )
+        .slice(0, 2)
+        .join('-');
+      
+      const suggestedFilename = keywords || 'generated-icon';
       
       this.stateManager.updateContext(sessionId, { 
-        generatedSvg: generatedSvg,
+        expertPrompt: context.prompt,
         suggestedFilename: suggestedFilename
-      });
+      } as any);
       this.stateManager.updateStep(sessionId, 'generation', 'completed',
-        `Generated SVG using ${approach} (${generatedSvg.length} characters)`);
+        `Built expert prompt context (${context.prompt.length} characters)`);
       
     } catch (error) {
-      const specificErrorMessage = error instanceof Error ? error.message : 'SVG generation failed';
+      const specificErrorMessage = error instanceof Error ? error.message : 'Context building failed';
       this.stateManager.addError(sessionId, 'generation', specificErrorMessage);
       throw new Error(specificErrorMessage);
     }
-  }
-  
-  private async executeRefinementPhase(sessionId: string): Promise<void> {
-    // For now, skip refinement - could be enhanced with iterative improvement
-    this.stateManager.skipPhase(sessionId, 'refinement', 'Basic generation complete, no refinement needed');
-  }
-  
-  private async executeOutputPhase(sessionId: string): Promise<IconGenerationResponse> {
-    const state = this.stateManager.getSession(sessionId)!;
-    this.stateManager.startOutput(sessionId);
-    
-    const progress = this.formatter.formatProgress(state);
-    console.log('\n' + progress);
-    
-    try {
-      if (!state.context.generatedSvg) {
-        throw new Error('No SVG content to save');
-      }
-      
-      // Determine output filename - use suggested filename from generation if available
-      const outputFilename = state.request.output_name || 
-        (state.context.suggestedFilename ? `${state.context.suggestedFilename}.svg` : 'generated-icon.svg');
-      
-      // Save generated SVG to file
-      const referenceForLocation = state.request.output_path || 
-        (state.context.validatedFiles.length > 0 ? state.context.validatedFiles[0] : undefined);
-        
-      const saveResult = await this.fileWriterService.saveGeneratedIcon(
-        outputFilename,
-        referenceForLocation,
-        state.context.generatedSvg
-      );
-      
-      if (!saveResult.success) {
-        throw new Error(saveResult.error || 'Failed to save generated icon');
-      }
-      
-      this.stateManager.updateContext(sessionId, { outputPath: saveResult.outputPath });
-      this.stateManager.updateStep(sessionId, 'output', 'completed',
-        `Saved to: ${path.basename(saveResult.outputPath!)}`);
-      
-      return {
-        success: true,
-        output_path: saveResult.outputPath!,
-        message: `Icon generated successfully: ${path.basename(saveResult.outputPath!)}`
-      };
-      
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Output failed';
-      this.stateManager.addError(sessionId, 'output', errorMsg);
-      throw error;
-    }
-  }
-
-
-  /**
-   * Generate SVG using real LLM with expert prompt engineering
-   */
-  private async generateSimpleSVG(prompt: string, textReferences: string[] = [], visualReferences: string[] = [], style?: string): Promise<{ svg: string, filename: string }> {
-    try {
-      // Use expert prompt engineering from context-builder
-      const { buildGenerationContext } = await import('./context-builder');
-      const context = buildGenerationContext(prompt, textReferences, style);
-      
-      // Generate SVG using the expert prompt with Claude (this MCP host)
-      console.log('Using expert prompt for real AI generation...');
-      
-      // Use the expert prompt to generate SVG content
-      // Since we're running in Claude Code, we can leverage Claude's capabilities
-      const aiResponse = await this.generateSVGWithAI(context.prompt, prompt);
-      
-      return aiResponse;
-      
-    } catch (error) {
-      throw new Error(`SVG generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Generate SVG using real AI with expert prompt
-   */
-  private async generateSVGWithAI(expertPrompt: string, userPrompt: string): Promise<{ svg: string, filename: string }> {
-    // Extract meaningful keywords for semantic filename
-    const stopWords = ['create', 'make', 'generate', 'icon', 'the', 'and', 'with', 'for', 'in', 'of', 'a', 'an', 'beautiful', 'minimalist', 'please', 'help', 'design', 'elements', 'modern', 'application', 'interface'];
-    
-    const keywords = userPrompt.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
-      .split(/\s+/)
-      .filter(word => 
-        word.length > 2 && 
-        !stopWords.includes(word)
-      )
-      .slice(0, 2)
-      .join('-');
-    
-    const filename = keywords || 'generated-icon';
-    
-    // Generate real SVG using the expert prompt intelligently
-    // Parse the expert prompt to understand what the user wants
-    const result = await this.processExpertPrompt(expertPrompt, userPrompt);
-    
-    return { svg: result.svg, filename };
-  }
-
-  /**
-   * Process the expert prompt using real AI generation
-   */
-  private async processExpertPrompt(expertPrompt: string, userPrompt: string): Promise<{ svg: string }> {
-    // This is where we need to call Claude directly with the expert prompt
-    // Since we're running inside Claude Code MCP, we need to find a way to call the host LLM
-    
-    // TODO: Implement actual Claude/LLM API call here
-    // const response = await this.callClaudeAPI(expertPrompt);
-    // return this.parseSVGResponse(response);
-    
-    throw new Error(`REAL LLM CALL NEEDED: Must implement actual Claude API call for expert prompt. Cannot use hardcoded patterns for: "${userPrompt}"`);
-  }
   }
 
 }
