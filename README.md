@@ -173,6 +173,52 @@ npm run dev
 npm test -- --testNamePattern="multimodal|visual-context"
 ```
 
+### 🔗 Direct Linking for Development & Testing
+
+For local development and testing of unreleased versions:
+
+```bash
+# In the icon-generator project directory
+npm run build
+npm link
+
+# This creates a global symlink to your local development version
+# Now you can use it in any MCP client as if it was globally installed
+```
+
+**Test the linked version:**
+```bash
+# Verify linking worked
+npm list -g icon-generator-mcp
+# Should show: icon-generator-mcp@0.4.0 -> ../../../path/to/your/local/repo
+
+# Test basic functionality
+node -e "
+const { MCPServer } = require('icon-generator-mcp');
+const server = new MCPServer();
+console.log('✅ Linked version:', server.version);
+console.log('✅ Zero dependencies verified');
+"
+```
+
+**Use in MCP client configuration:**
+```json
+{
+  "mcpServers": {
+    "icon-generator": {
+      "command": "icon-generator-mcp"
+    }
+  }
+}
+```
+
+**Unlink when done:**
+```bash
+npm unlink -g icon-generator-mcp
+```
+
+This allows you to test development versions directly in your MCP environment before publishing to npm.
+
 ## 🤝 Contributing
 
 1. Fork the repository
