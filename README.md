@@ -1,6 +1,6 @@
 # Icon Generator MCP Server
 
-AI-powered SVG icon generation for MCP-compatible LLMs. Zero dependencies, cross-platform, with PNG visual context support.
+Generate clean, production-ready SVG icons from natural language prompts. Zero dependencies, supports PNG visual context for better consistency.
 
 ## Installation
 
@@ -19,7 +19,7 @@ Add to your MCP configuration:
 }
 ```
 
-## Usage
+## Quick Start
 
 ### Text-Only Generation
 ```
@@ -38,21 +38,23 @@ Create a user profile icon in black-white-flat style
 
 ## Tool Parameters
 
-| Parameter | Type | Required | Description |
+| Parameter | Type | Required / Optional | Description |
 |-----------|------|----------|-------------|
 | `prompt` | string | ✅ | Description of the desired icon |
-| `reference_paths` | array | ❌ | PNG/SVG reference files |
-| `style` | string | ❌ | Style preset |
-| `output_name` | string | ❌ | Custom filename |
-| `output_path` | string | ❌ | Custom output directory |
+| `reference_paths` | array | ⚪  | PNG/SVG reference files |
+| `style` | string | ⚪  | Style preset |
+| `output_name` | string | ⚪  | Custom filename |
+| `output_path` | string | ⚪  | Custom output directory |
 
 ## Features
 
-- **PNG Visual Context**: Multimodal LLMs process PNG files directly
-- **SVG Text References**: Pattern learning from SVG files  
-- **Zero Dependencies**: Works on Windows, macOS, Linux
+- **MCP‑native tool**: Exposes `generate_icon` with a clear JSON schema
+- **Visual Context (PNG/SVG)**: Includes PNG or SVG references for pattern matching.
 - **Smart Detection**: Automatic multimodal capability detection
-- **Style Consistency**: Built-in presets and pattern learning
+- **Smart Output**: Suggests a filename from the prompt
+- **Style Presets**: Optional `style` to enforce consistent icon families (e.g., `black-white-flat`).
+- **Robust Validation & Errors**: Checks file existence and formats (PNG/SVG). Clear and actionable errors guide you to alternatives.
+- **Zero Dependencies**: Pure Node.js (18+) server.
 
 ## Requirements
 
