@@ -197,6 +197,60 @@ npm test -- --testNamePattern="multimodal"
 npm test -- --testNamePattern="visual-context"
 ```
 
+## Local Installation Testing
+
+### ⚠️ Important: MCP Server vs CLI Tool Distinction
+
+The `icon-generator-mcp` binary is an **MCP server**, not a traditional CLI tool. This is a common source of confusion when testing.
+
+```bash
+# ❌ WRONG: These will hang because the binary expects MCP protocol input
+icon-generator-mcp --version
+icon-generator-mcp --help
+
+# ✅ CORRECT: Test as MCP server
+npm pack
+npm install -g ./icon-generator-mcp-0.4.0.tgz
+
+# Verify installation
+which icon-generator-mcp  # Should show: /opt/homebrew/bin/icon-generator-mcp
+npm list -g icon-generator-mcp  # Should show: icon-generator-mcp@0.4.0
+```
+
+### Proper MCP Client Testing
+
+The binary communicates via **JSON-RPC over stdio**, not CLI arguments:
+
+```json
+// Add to your MCP client configuration (e.g., Claude Code settings)
+{
+  "mcpServers": {
+    "icon-generator": {
+      "command": "icon-generator-mcp"
+    }
+  }
+}
+```
+
+### Understanding the Architecture
+
+- **Binary Purpose**: `bin/mcp-server.js` is a stdio-based MCP server
+- **Protocol**: Communicates via JSON-RPC messages, not CLI arguments
+- **Hanging Behavior**: Normal when run directly - it's waiting for MCP input
+- **Testing Method**: Must be tested within an MCP client environment
+
+### Development vs Production Testing
+
+```bash
+# Development: Direct server testing
+node bin/mcp-server.js  # Will wait for stdin input (expected)
+
+# Production: Test via MCP client
+# Use in Claude Code, Continue, or other MCP-compatible tools
+```
+
+This distinction is critical for understanding why traditional CLI testing methods don't apply to MCP servers.
+
 ## Code Conventions
 - TypeScript strict mode enabled (ES2020 target)
 - Error-first callback pattern for services
