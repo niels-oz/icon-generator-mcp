@@ -9,22 +9,22 @@ describe('Filename Generation Fix', () => {
   });
 
   describe('generateSimpleSVG method', () => {
-    it('should extract keywords for long prompts', () => {
-      const result = (server as any).generateSimpleSVG('please generate a minimalist dog silhouette icon with black and white flat design elements');
+    it('should extract keywords for long prompts', async () => {
+      const result = await (server as any).generateSimpleSVG('please generate a minimalist dog silhouette icon with black and white flat design elements');
       
       expect(result).toHaveProperty('svg');
       expect(result).toHaveProperty('filename');
       expect(result.filename).toBe('dog-silhouette'); // Should extract meaningful keywords, not "please-generate"
     });
 
-    it('should handle simple prompts', () => {
-      const result = (server as any).generateSimpleSVG('user profile');
+    it('should handle simple prompts', async () => {
+      const result = await (server as any).generateSimpleSVG('user profile');
       
       expect(result.filename).toBe('user-profile');
     });
 
-    it('should fallback to generated-icon for empty/filtered prompts', () => {
-      const result = (server as any).generateSimpleSVG('create a the and');
+    it('should fallback to generated-icon for empty/filtered prompts', async () => {
+      const result = await (server as any).generateSimpleSVG('create a the and');
       
       expect(result.filename).toBe('generated-icon');
     });

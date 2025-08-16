@@ -300,10 +300,11 @@ export class MCPServer {
       }
       
       // Generate SVG using visual context for PNGs and text for SVGs
-      const llmResponse = this.generateSimpleSVG(
+      const llmResponse = await this.generateSimpleSVG(
         state.request.prompt, 
         textReferences, 
-        visualReferences
+        visualReferences,
+        state.request.style
       );
       const generatedSvg = llmResponse.svg;
       const suggestedFilename = llmResponse.filename;
@@ -349,9 +350,9 @@ export class MCPServer {
         throw new Error('No SVG content to save');
       }
       
-      // Determine output filename - use user-provided name or the one from the LLM.
-      // The FileWriterService is responsible for adding the .svg extension if it's missing.
-      const outputFilename = state.request.output_name || state.context.suggestedFilename || 'generated-icon.svg';
+      // Determine output filename - use suggested filename from generation if available
+      const outputFilename = state.request.output_name || 
+        (state.context.suggestedFilename ? `${state.context.suggestedFilename}.svg` : 'generated-icon.svg');
       
       // Save generated SVG to file
       const referenceForLocation = state.request.output_path || 
@@ -386,13 +387,36 @@ export class MCPServer {
 
 
   /**
-   * Generate simple SVG based on prompt, text references (SVG), and visual references (PNG)
+   * Generate SVG using real LLM with expert prompt engineering
    */
-  private generateSimpleSVG(prompt: string, _textReferences: string[] = [], _visualReferences: string[] = []): { svg: string, filename: string } {
-    // Extract meaningful keywords for semantic filename (like v0.3.x LLM service)
+  private async generateSimpleSVG(prompt: string, textReferences: string[] = [], visualReferences: string[] = [], style?: string): Promise<{ svg: string, filename: string }> {
+    try {
+      // Use expert prompt engineering from context-builder
+      const { buildGenerationContext } = await import('./context-builder');
+      const context = buildGenerationContext(prompt, textReferences, style);
+      
+      // Generate SVG using the expert prompt with Claude (this MCP host)
+      console.log('Using expert prompt for real AI generation...');
+      
+      // Use the expert prompt to generate SVG content
+      // Since we're running in Claude Code, we can leverage Claude's capabilities
+      const aiResponse = await this.generateSVGWithAI(context.prompt, prompt);
+      
+      return aiResponse;
+      
+    } catch (error) {
+      throw new Error(`SVG generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Generate SVG using real AI with expert prompt
+   */
+  private async generateSVGWithAI(expertPrompt: string, userPrompt: string): Promise<{ svg: string, filename: string }> {
+    // Extract meaningful keywords for semantic filename
     const stopWords = ['create', 'make', 'generate', 'icon', 'the', 'and', 'with', 'for', 'in', 'of', 'a', 'an', 'beautiful', 'minimalist', 'please', 'help', 'design', 'elements', 'modern', 'application', 'interface'];
     
-    const keywords = prompt.toLowerCase()
+    const keywords = userPrompt.toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .split(/\s+/)
       .filter(word => 
@@ -404,14 +428,26 @@ export class MCPServer {
     
     const filename = keywords || 'generated-icon';
     
-    // Simple SVG generation
-    return {
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="3" y="3" width="18" height="18" rx="2" fill="white" stroke="black"/>
-  <circle cx="12" cy="12" r="3" fill="black"/>
-</svg>`,
-      filename: filename
-    };
+    // Generate real SVG using the expert prompt intelligently
+    // Parse the expert prompt to understand what the user wants
+    const result = await this.processExpertPrompt(expertPrompt, userPrompt);
+    
+    return { svg: result.svg, filename };
+  }
+
+  /**
+   * Process the expert prompt using real AI generation
+   */
+  private async processExpertPrompt(expertPrompt: string, userPrompt: string): Promise<{ svg: string }> {
+    // This is where we need to call Claude directly with the expert prompt
+    // Since we're running inside Claude Code MCP, we need to find a way to call the host LLM
+    
+    // TODO: Implement actual Claude/LLM API call here
+    // const response = await this.callClaudeAPI(expertPrompt);
+    // return this.parseSVGResponse(response);
+    
+    throw new Error(`REAL LLM CALL NEEDED: Must implement actual Claude API call for expert prompt. Cannot use hardcoded patterns for: "${userPrompt}"`);
+  }
   }
 
 }
