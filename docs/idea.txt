@@ -1,0 +1,3 @@
+opy SVG file to svgomg.com to            │
+│   optimize it then go to                    │
+│   transfer.tools   
