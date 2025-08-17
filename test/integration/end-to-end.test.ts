@@ -21,12 +21,12 @@ describe('End-to-End Integration', () => {
       style: 'black-white-flat'
     };
 
-    const response = await server.handleToolCall('prepare_icon_context', request);
+    const response = await server.handleToolCall('create_icon_prompt', request);
     
     expect(response).toHaveProperty('expert_prompt');
-    expect(response).toHaveProperty('metadata');
-    expect(response.type).toBe('generation_context');
-    expect(response.metadata.suggested_filename).toBeDefined();
+    expect(response).toHaveProperty('suggested_filename');
+    expect(response.type).toBe('prompt_created');
+    expect(response.suggested_filename).toBeDefined();
   });
 
   it('should handle validation errors gracefully', async () => {
@@ -34,7 +34,7 @@ describe('End-to-End Integration', () => {
       prompt: ''
     };
 
-    const response = await server.handleToolCall('prepare_icon_context', request);
+    const response = await server.handleToolCall('create_icon_prompt', request);
     
     expect(response.success).toBe(false);
     expect(response.error).toBeDefined();

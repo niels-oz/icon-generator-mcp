@@ -1,4 +1,4 @@
-import { IconGenerationRequest, IconGenerationResponse, GenerationPhase } from './types';
+import { IconGenerationRequest, IconGenerationResponse, GenerationPhase, TOOL_NAMES, PromptCreatedResponse, IconSavedResponse, ValidationFailedResponse } from './types';
 import { FileWriterService } from './services/file-writer';
 import { StateManager } from './services/state-manager';
 import { VisualFormatter } from './services/visual-formatter';
@@ -37,8 +37,8 @@ export class MCPServer {
   getTools() {
     return [
       {
-        name: 'prepare_icon_context',
-        description: 'Prepares expert prompt and context for AI icon generation. Returns structured generation instructions.',
+        name: TOOL_NAMES.CREATE_ICON_PROMPT,
+        description: 'Creates an expert prompt for AI icon generation. Call this first to get generation instructions.\n\nWORKFLOW: This is step 1 of 2\n1. Call this tool with your icon request\n2. Use the returned expert_prompt to generate SVG\n3. Call save_generated_icon with the generated SVG\n\nExample: create_icon_prompt({prompt: "cat on pillow", style: "black-white-flat"})',
         inputSchema: {
           type: 'object',
           properties: {
@@ -60,8 +60,8 @@ export class MCPServer {
         }
       },
       {
-        name: 'save_icon',
-        description: 'Saves generated SVG icon to file with smart naming and path resolution.',
+        name: TOOL_NAMES.SAVE_GENERATED_ICON,
+        description: 'Saves a generated SVG icon to file. Call this after generating SVG with the prompt.\n\nWORKFLOW: This is step 2 of 2\n1. Generate SVG using the expert_prompt from create_icon_prompt\n2. Call this tool with the generated SVG content\n\nExample: save_generated_icon({svg: "<svg>...</svg>", filename: "cat-pillow"})',
         inputSchema: {
           type: 'object',
           properties: {
@@ -96,23 +96,23 @@ export class MCPServer {
   }
 
   async handleToolCall(toolName: string, request: any): Promise<any> {
-    if (toolName === 'prepare_icon_context') {
-      return await this.handlePrepareIconContext(request);
-    } else if (toolName === 'save_icon') {
-      return await this.handleSaveIcon(request);
+    if (toolName === TOOL_NAMES.CREATE_ICON_PROMPT) {
+      return await this.handleCreateIconPrompt(request);
+    } else if (toolName === TOOL_NAMES.SAVE_GENERATED_ICON) {
+      return await this.handleSaveGeneratedIcon(request);
     } else {
       return {
         success: false,
         message: 'Tool not found',
-        error: `Unknown tool: ${toolName}. Available tools: prepare_icon_context, save_icon`
+        error: `Unknown tool: ${toolName}. Available tools: ${TOOL_NAMES.CREATE_ICON_PROMPT}, ${TOOL_NAMES.SAVE_GENERATED_ICON}`
       };
     }
   }
 
   /**
-   * Prepare expert context for icon generation
+   * Create expert prompt for icon generation
    */
-  async handlePrepareIconContext(request: any): Promise<any> {
+  async handleCreateIconPrompt(request: any): Promise<PromptCreatedResponse | ValidationFailedResponse> {
     try {
       // Validate request first
       const validatedRequest = this.validateContextRequest(request);
@@ -124,19 +124,25 @@ export class MCPServer {
       const result = await this.executeContextPreparation(state.sessionId);
       
       return {
-        type: 'generation_context',
+        type: 'prompt_created',
         expert_prompt: result.expert_prompt,
-        metadata: {
-          suggested_filename: result.suggested_filename,
-          style: validatedRequest.style,
-          references_processed: result.references_processed
-        },
-        instructions: "Use the expert_prompt to generate SVG, then call save_icon tool with the result"
+        suggested_filename: result.suggested_filename,
+        next_action: {
+          description: `Generate SVG with this prompt, then call ${TOOL_NAMES.SAVE_GENERATED_ICON}`,
+          tool_name: TOOL_NAMES.SAVE_GENERATED_ICON,
+          required_params: ['svg', 'filename'],
+          workflow_step: '2 of 2',
+          example_usage: {
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">...</svg>',
+            filename: result.suggested_filename
+          }
+        }
       };
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Context preparation failed';
       return {
+        type: 'validation_failed',
         success: false,
         message: 'Context preparation failed',
         error: errorMessage
@@ -147,7 +153,7 @@ export class MCPServer {
   /**
    * Save generated SVG icon to file
    */
-  async handleSaveIcon(request: any): Promise<any> {
+  async handleSaveGeneratedIcon(request: any): Promise<IconSavedResponse | ValidationFailedResponse> {
     try {
       // Validate save request
       if (!request.svg || typeof request.svg !== 'string') {
@@ -172,14 +178,16 @@ export class MCPServer {
       }
       
       return {
+        type: 'icon_saved',
         success: true,
-        output_path: saveResult.outputPath,
+        output_path: saveResult.outputPath!,
         message: `Icon saved successfully: ${path.basename(saveResult.outputPath!)}`
       };
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Save failed';
       return {
+        type: 'validation_failed',
         success: false,
         message: 'Failed to save icon',
         error: errorMessage

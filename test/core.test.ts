@@ -17,13 +17,13 @@ describe('MCP Server Core Interface', () => {
 
     it('should register two tools with correct schema', () => {
       const tools = server.getTools();
-      const prepareContextTool = tools[0];
+      const createPromptTool = tools[0];
       const saveIconTool = tools[1];
       
       expect(tools).toHaveLength(2);
-      expect(prepareContextTool.name).toBe('prepare_icon_context');
-      expect(prepareContextTool.inputSchema.required).toEqual(['prompt']);
-      expect(saveIconTool.name).toBe('save_icon');
+      expect(createPromptTool.name).toBe('create_icon_prompt');
+      expect(createPromptTool.inputSchema.required).toEqual(['prompt']);
+      expect(saveIconTool.name).toBe('save_generated_icon');
       expect(saveIconTool.inputSchema.required).toEqual(['svg', 'filename']);
     });
   });
@@ -33,23 +33,23 @@ describe('MCP Server Core Interface', () => {
       const validRequest = { prompt: TEST_PROMPTS.SIMPLE };
       const invalidRequest = { prompt: '' };
       
-      const validResponse = await server.handleToolCall('prepare_icon_context', validRequest);
-      const invalidResponse = await server.handleToolCall('prepare_icon_context', invalidRequest);
+      const validResponse = await server.handleToolCall('create_icon_prompt', validRequest);
+      const invalidResponse = await server.handleToolCall('create_icon_prompt', invalidRequest);
       
       expect(validResponse).toHaveProperty('expert_prompt');
-      expect(validResponse).toHaveProperty('metadata');
+      expect(validResponse).toHaveProperty('suggested_filename');
       expect(invalidResponse.success).toBe(false);
       expect(invalidResponse.error).toContain('prompt is required');
     });
 
-    it('should return expert prompt and metadata', async () => {
+    it('should return expert prompt and next_action', async () => {
       const request = { prompt: TEST_PROMPTS.SIMPLE };
-      const response = await server.handleToolCall('prepare_icon_context', request);
+      const response = await server.handleToolCall('create_icon_prompt', request);
       
       expect(response).toHaveProperty('expert_prompt');
-      expect(response).toHaveProperty('metadata');
-      expect(response).toHaveProperty('instructions');
-      expect(response.type).toBe('generation_context');
+      expect(response).toHaveProperty('suggested_filename');
+      expect(response).toHaveProperty('next_action');
+      expect(response.type).toBe('prompt_created');
     });
   });
 
@@ -61,12 +61,13 @@ describe('MCP Server Core Interface', () => {
       expect(response.error).toContain('Unknown tool');
     });
 
-    it('should test save_icon tool', async () => {
+    it('should test save_generated_icon tool', async () => {
       const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
       const request = { svg: svgContent, filename: 'test-icon' };
-      const response = await server.handleToolCall('save_icon', request);
+      const response = await server.handleToolCall('save_generated_icon', request);
       
       expect(response.success).toBe(true);
+      expect(response.type).toBe('icon_saved');
       expect(response).toHaveProperty('message');
       expect(response).toHaveProperty('output_path');
     });

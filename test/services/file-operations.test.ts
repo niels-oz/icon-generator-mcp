@@ -68,9 +68,9 @@ describe('File Operations (Consolidated)', () => {
   });
 
   describe('tool schema integration', () => {
-    it('should include output_path parameter in save_icon tool schema', () => {
+    it('should include output_path parameter in save_generated_icon tool schema', () => {
       const tools = server.getTools();
-      const saveIconTool = tools.find(tool => tool.name === 'save_icon');
+      const saveIconTool = tools.find(tool => tool.name === 'save_generated_icon');
       
       expect(saveIconTool).toBeDefined();
       expect(saveIconTool!.inputSchema.properties.output_path).toBeDefined();
