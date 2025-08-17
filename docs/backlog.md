@@ -260,4 +260,212 @@ When prioritizing these enhancements:
 
 ---
 
+## Key Improvements to Consider
+
+### 0. Better Two-Tool Architecture (Recommended Approach)
+The real problem isn't having two tools - it's the unclear naming and workflow guidance:
+
+**Current (unclear purpose):**
+```typescript
+- prepare_icon_context  // What does this do?
+- save_icon            // When do I use this?
+```
+
+**Better (action-oriented):**
+```typescript
+- create_icon_prompt   // Clear: creates a prompt for generation
+- save_generated_icon  // Clear: saves what was generated
+```
+
+**Tool Chaining Hints - Make workflow crystal clear:**
+```typescript
+// Tool 1 response includes next step guidance
+{
+  type: 'prompt_created',
+  expert_prompt: '...',
+  suggested_filename: 'cat-pillow',
+  next_action: {
+    description: 'Generate SVG with this prompt, then call save_generated_icon',
+    tool_name: 'save_generated_icon',
+    required_params: ['svg', 'filename'],
+    workflow_step: '2 of 2'
+  }
+}
+```
+
+**Benefits of keeping two tools:**
+- **Single responsibility** - Each tool has one clear purpose
+- **Easier testing** - Test prompt creation and file saving separately  
+- **Better error handling** - Failures isolated to specific phases
+- **Maintainable code** - Cleaner separation of concerns
+- **Debugging** - Clear boundaries for troubleshooting
+
+**Implementation plan:**
+1. Rename tools for clarity: `prepare_icon_context` → `create_icon_prompt`
+2. Add workflow hints in responses with `next_action` guidance
+3. Update tool descriptions with clear workflow examples
+4. Consider wrapper function for simplified high-level orchestration
+
+### 1. Single Tool with Smart Response Type (Alternative Approach)
+Instead of two separate tools, consider one tool that returns different response types based on the phase:
+
+```typescript
+async handleToolCall(toolName: 'generate_icon', request: any) {
+  // If request contains SVG, we're in save phase
+  if (request.svg) {
+    return {
+      type: 'icon_saved',
+      filepath: savedPath,
+      message: `Icon saved to ${savedPath}`
+    };
+  }
+  
+  // Otherwise, we're in context generation phase
+  return {
+    type: 'generation_required',
+    expert_prompt: expertPrompt,
+    continue_with: {
+      tool: 'generate_icon',
+      include_fields: ['svg', 'filename']
+    }
+  };
+}
+```
+
+This makes the flow more intuitive - one tool, Claude Code automatically understands to continue.
+
+### 2. Add SVG Validation in Save Phase
+```typescript
+// Before saving, validate the generated SVG
+private validateSVG(svg: string): { valid: boolean; issues?: string[] } {
+  // Check for valid SVG structure
+  // Verify viewBox exists
+  // Ensure it's actually an icon (reasonable dimensions)
+  // Check for optimization opportunities
+  return {
+    valid: true,
+    optimization_hints: ['Consider removing unnecessary groups']
+  };
+}
+```
+
+### 3. Include Generation Hints in Context Response
+```typescript
+return {
+  type: 'generation_context',
+  expert_prompt: expertPrompt,
+  generation_hints: {
+    preferred_model: 'claude-3-sonnet', // For simpler icons
+    temperature: 0.7,
+    expected_format: 'svg_code_block',
+    validation_regex: /<svg[^>]*>[\s\S]*<\/svg>/
+  },
+  fallback_instruction: "If generation fails, try with simpler geometric shapes"
+};
+```
+
+### 4. Smart Retry Mechanism
+Add metadata to help Claude Code retry intelligently if generation fails:
+
+```typescript
+return {
+  type: 'generation_context',
+  expert_prompt: expertPrompt,
+  retry_strategy: {
+    simplification_levels: [
+      "Full detail as requested",
+      "Simplified geometric version", 
+      "Basic symbolic representation"
+    ],
+    max_attempts: 3
+  }
+};
+```
+
+### 5. Batch Processing Support
+For multiple icons, return an array of contexts:
+
+```typescript
+// Handle batch requests efficiently
+if (request.batch) {
+  return {
+    type: 'batch_generation_context',
+    contexts: request.prompts.map(p => ({
+      id: generateId(),
+      expert_prompt: buildPrompt(p),
+      suggested_filename: generateFilename(p)
+    }))
+  };
+}
+```
+
+### 6. Progressive Enhancement Pattern
+Return immediately usable fallback + enhancement prompt:
+
+```typescript
+return {
+  type: 'progressive_generation',
+  immediate_fallback: getBasicSVGTemplate(request.type), // Basic shape
+  enhancement_prompt: expertPrompt, // For AI to improve upon
+  merge_strategy: 'replace' // or 'overlay', 'combine'
+};
+```
+
+### 7. Add Metadata for Learning
+Include information that helps improve future generations:
+
+```typescript
+return {
+  type: 'generation_context',
+  expert_prompt: expertPrompt,
+  learning_metadata: {
+    style_examples: previousSuccessfulIcons.get(style),
+    common_mistakes: ['Avoid gradients for flat design', 'Keep paths simple'],
+    quality_checklist: ['Single color', 'Scalable', 'Centered in viewBox']
+  }
+};
+```
+
+### Optimal Final Architecture
+```typescript
+class IconMCPServer {
+  async handleGenerateIcon(request: IconRequest): Promise<IconResponse> {
+    // Phase detection
+    const phase = this.detectPhase(request);
+    
+    switch(phase) {
+      case 'CONTEXT':
+        // Return rich context for generation
+        return {
+          type: 'awaiting_generation',
+          expert_prompt: this.buildExpertPrompt(request),
+          suggested_filename: this.generateFilename(request),
+          validation_rules: this.getValidationRules(request.style),
+          next_action: 'generate_then_callback'
+        };
+        
+      case 'SAVE':
+        // Validate and save the generated SVG
+        const validation = this.validateSVG(request.svg);
+        if (!validation.valid) {
+          return {
+            type: 'validation_failed',
+            issues: validation.issues,
+            retry_prompt: this.buildRetryPrompt(validation.issues)
+          };
+        }
+        
+        const savedPath = await this.saveIcon(request.svg, request.filename);
+        return {
+          type: 'complete',
+          filepath: savedPath,
+          optimization_suggestions: validation.optimizations
+        };
+    }
+  }
+}
+```
+
+---
+
 **Current Status:** 🎉 **LLM-Agnostic Production Ready** - Universal MCP server with context-based generation, zero provider dependencies, comprehensive testing, and global distribution. Ready for Phase 2 platform and installation enhancements.
