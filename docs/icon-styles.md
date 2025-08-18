@@ -24,3 +24,7 @@ An approach that uses a smooth transition between two complementary colors to cr
 ### Minimalistic
 A design philosophy that simplifies icons to their most essential elements, using clean lines, basic shapes, and a limited color palette.
 - **Synonyms:** Flat, Simple, Clean
+
+### Black-White-Flat
+A monochromatic style that utilizes simple flat design principles with black outlines on white backgrounds. This style emphasizes clarity and minimalism through geometric shapes, uniform stroke weights, and the absence of gradients, shadows, or complex details. Icons are constructed using basic elements like rectangles, circles, and lines to create immediately recognizable symbols.
+- **Synonyms:** Monochrome, Black & White Icons, Line Art, Binary Color, Contrast Icons, Stark Flat
