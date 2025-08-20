@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gear Test</title>
+    <style>
+        body { background: #f0f0f0; padding: 20px; }
+        svg { width: 200px; height: 200px; border: 1px solid #ccc; margin: 10px; }
+        .overlay-container { 
+            position: relative; 
+            display: inline-block; 
+            width: 200px; 
+            height: 200px; 
+            border: 1px solid #ccc; 
+            margin: 10px;
+        }
+        .overlay-container svg { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            margin: 0; 
+            border: none;
+        }
+        .original { opacity: 0.3; }
+        .simplified { opacity: 1.0; }
+    </style>
+</head>
+<body>
+    <h2>Step 1 - Mirrored Gear:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Main gear body (matching original size) -->
+        <circle cx="12" cy="12" r="9" />
+        
+        <!-- Bottom half (keep exactly as is) -->
+        <rect x="20" y="10.5" width="2" height="3" />
+        <rect x="19.5" y="14" width="2" height="3" transform="rotate(120 12 12)" />
+        <rect x="16.5" y="17.5" width="2" height="3" transform="rotate(150 12 12)" />
+        <rect x="10.5" y="20" width="3" height="2" />
+        <rect x="5.5" y="17.5" width="2" height="3" transform="rotate(210 12 12)" />
+        <rect x="2.5" y="14" width="2" height="3" transform="rotate(240 12 12)" />
+        <rect x="2" y="10.5" width="2" height="3" />
+        
+        <!-- Top half (mirrored Y coordinates) -->
+        <rect x="2" y="10.5" width="2" height="3" />
+        <rect x="2.5" y="10" width="2" height="3" transform="rotate(120 12 12)" />
+        <rect x="5.5" y="6.5" width="2" height="3" transform="rotate(150 12 12)" />
+        <rect x="10.5" y="4" width="3" height="2" />
+        <rect x="16.5" y="6.5" width="2" height="3" transform="rotate(210 12 12)" />
+        <rect x="19.5" y="10" width="2" height="3" transform="rotate(240 12 12)" />
+        
+        <!-- Center hole (matching original) -->
+        <circle cx="12" cy="12" r="3.5" fill="white" />
+    </svg>
+    
+    <h2>Step 2 - Fix Duplicates:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Main gear body -->
+        <circle cx="12" cy="12" r="9" />
+        
+        <!-- Left and Right teeth (keep as is) -->
+        <rect x="20" y="10.5" width="2" height="3" />
+        <rect x="2" y="10.5" width="2" height="3" />
+        
+        <!-- Bottom teeth -->
+        <rect x="19.5" y="14" width="2" height="3" transform="rotate(120 12 12)" />
+        <rect x="16.5" y="17.5" width="2" height="3" transform="rotate(150 12 12)" />
+        <rect x="10.5" y="20" width="3" height="2" />
+        <rect x="5.5" y="17.5" width="2" height="3" transform="rotate(210 12 12)" />
+        <rect x="2.5" y="14" width="2" height="3" transform="rotate(240 12 12)" />
+        
+        <!-- Top teeth (mirrored from bottom) -->
+        <rect x="2.5" y="10" width="2" height="3" transform="rotate(120 12 12)" />
+        <rect x="5.5" y="6.5" width="2" height="3" transform="rotate(150 12 12)" />
+        <rect x="10.5" y="4" width="3" height="2" />
+        <rect x="16.5" y="6.5" width="2" height="3" transform="rotate(210 12 12)" />
+        <rect x="19.5" y="10" width="2" height="3" transform="rotate(240 12 12)" />
+        
+        <!-- Center hole -->
+        <circle cx="12" cy="12" r="3.5" fill="white" />
+    </svg>
+    
+    <h2>Step 4 - Clean 6 Teeth:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Main gear body -->
+        <circle cx="12" cy="12" r="9" />
+        
+        <!-- 6 teeth total - symmetrical -->
+        
+        <!-- Top tooth -->
+        <rect x="10.5" y="4" width="3" height="2" />
+        
+        <!-- Bottom tooth -->
+        <rect x="10.5" y="20" width="3" height="2" />
+        
+        <!-- Top-right corner (45° tilt) -->
+        <rect x="16.5" y="6.5" width="2" height="3" transform="rotate(45 12 12)" />
+        
+        <!-- Bottom-right corner (45° tilt) -->
+        <rect x="16.5" y="17.5" width="2" height="3" transform="rotate(135 12 12)" />
+        
+        <!-- Top-left corner (45° tilt) -->
+        <rect x="5.5" y="6.5" width="2" height="3" transform="rotate(315 12 12)" />
+        
+        <!-- Bottom-left corner (45° tilt) -->
+        <rect x="5.5" y="17.5" width="2" height="3" transform="rotate(225 12 12)" />
+        
+        <!-- Center hole -->
+        <circle cx="12" cy="12" r="3.5" fill="white" />
+    </svg>
+
+    <h2>Step 5 - Simple 6 Teeth:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Main gear body (smaller to fit in viewBox) -->
+        <circle cx="12" cy="12" r="7" />
+        
+        <!-- 6 teeth - simple positioning, no transforms -->
+        
+        <!-- Top tooth -->
+        <rect x="11" y="3" width="2" height="4" />
+        
+        <!-- Bottom tooth -->
+        <rect x="11" y="17" width="2" height="4" />
+        
+        <!-- Top-right tooth (diagonal) -->
+        <rect x="16" y="6" width="3" height="1.5" transform="rotate(45 17.5 6.75)" />
+        
+        <!-- Bottom-right tooth (diagonal) -->
+        <rect x="16" y="16.5" width="3" height="1.5" transform="rotate(-45 17.5 17.25)" />
+        
+        <!-- Top-left tooth (diagonal) -->
+        <rect x="5" y="6" width="3" height="1.5" transform="rotate(-45 6.5 6.75)" />
+        
+        <!-- Bottom-left tooth (diagonal) -->
+        <rect x="5" y="16.5" width="3" height="1.5" transform="rotate(45 6.5 17.25)" />
+        
+        <!-- Center hole -->
+        <circle cx="12" cy="12" r="3" fill="white" />
+    </svg>
+
+    <h2>Step 8 - Clock Positions (BROKEN):</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Main gear body -->
+        <circle cx="12" cy="12" r="7" />
+        
+        <!-- 6 teeth - BIGGER and positioned at clock positions -->
+        <!-- ALL SAME SIZE: width="4" height="5" -->
+        
+        <!-- 12 o'clock (top) -->
+        <rect x="10" y="1" width="4" height="5" />
+        
+        <!-- 6 o'clock (bottom) -->
+        <rect x="10" y="18" width="4" height="5" />
+        
+        <!-- 2 o'clock (60° from top) -->
+        <rect x="16" y="4" width="4" height="5" transform="rotate(60 12 12)" />
+        
+        <!-- 4 o'clock (120° from top) -->
+        <rect x="16" y="4" width="4" height="5" transform="rotate(120 12 12)" />
+        
+        <!-- 8 o'clock (240° from top) -->
+        <rect x="16" y="4" width="4" height="5" transform="rotate(240 12 12)" />
+        
+        <!-- 10 o'clock (300° from top) -->
+        <rect x="16" y="4" width="4" height="5" transform="rotate(300 12 12)" />
+        
+        <!-- Center hole -->
+        <circle cx="12" cy="12" r="3" fill="white" />
+    </svg>
+
+    <h2>Overlay Alignment Test:</h2>
+    <div class="overlay-container">
+        <!-- Original (faded background) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" class="original">
+            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+        </svg>
+        
+        <!-- My simplified version (on top) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="simplified">
+            <!-- Construction guides -->
+            <!-- Inner ring (gear body) - 5% bigger: 8.5 * 1.05 = 8.925 -->
+            <circle cx="12" cy="12" r="8.925" stroke="blue" fill="none" stroke-width="0.5" />
+            <!-- Outer ring (teeth boundary guide) -->
+            <circle cx="12" cy="12" r="11" stroke="green" fill="none" stroke-width="0.5" stroke-dasharray="2,2" />
+            
+            <!-- 6 teeth - 66% bigger again: width 4→6.5, height 5→8 -->
+            
+            <!-- 12 o'clock (top) - 66% bigger teeth -->
+            <rect x="8.75" y="-1" width="6.5" height="8" fill="red" opacity="0.7" />
+            
+            <!-- 6 o'clock (bottom) - 66% bigger teeth -->
+            <rect x="8.75" y="17" width="6.5" height="8" fill="red" opacity="0.7" />
+            
+            <!-- 2 o'clock (60°) - 66% bigger teeth -->
+            <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(60 12 12)" fill="red" opacity="0.7" />
+            
+            <!-- 4 o'clock (120°) - 66% bigger teeth -->
+            <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(120 12 12)" fill="red" opacity="0.7" />
+            
+            <!-- 8 o'clock (240°) - 66% bigger teeth -->
+            <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(240 12 12)" fill="red" opacity="0.7" />
+            
+            <!-- 10 o'clock (300°) - 66% bigger teeth -->
+            <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(300 12 12)" fill="red" opacity="0.7" />
+            
+            <!-- Center hole -->
+            <circle cx="12" cy="12" r="3.5" fill="white" stroke="red" stroke-width="0.5" />
+        </svg>
+    </div>
+
+    <h2>Original material-settings.svg:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+    </svg>
+</body>
+</html>

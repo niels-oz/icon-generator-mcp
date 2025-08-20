@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Icon Test</title>
+    <style>
+        body { background: #f0f0f0; padding: 20px; }
+        svg { width: 200px; height: 200px; border: 1px solid #ccc; margin: 10px; }
+        .overlay-container { 
+            position: relative; 
+            display: inline-block; 
+            width: 200px; 
+            height: 200px; 
+            border: 1px solid #ccc; 
+            margin: 10px;
+        }
+        .overlay-container svg { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            margin: 0; 
+            border: none;
+        }
+        .original { opacity: 0.3; }
+        .simplified { opacity: 1.0; }
+    </style>
+</head>
+<body>
+    <h2>User Icon Overlay Test:</h2>
+    <div class="overlay-container">
+        <!-- Original (faded background) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" class="original">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+        
+        <!-- My simplified version (on top) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="simplified">
+            <!-- Head (circle) -->
+            <circle cx="12" cy="8" r="4" fill="red" opacity="0.7" stroke="red" stroke-width="0.5" />
+            
+            <!-- Body/shoulders (main ellipse) -->
+            <rect x="4" y="14" width="16" height="6" rx="8" fill="red" opacity="0.7" stroke="red" stroke-width="0.5" />
+            <!-- Proper rectangle - moved up by 3 units (1 times its height) -->
+            <rect x="4" y="17" width="16" height="3" fill="red" opacity="0.7" stroke="red" stroke-width="0.5" />
+        </svg>
+    </div>
+
+    <h2>Original material-user.svg:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+    </svg>
+
+    <h2>My Current Simplified Version:</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+        <!-- Head (perfect circle) -->
+        <circle cx="12" cy="8" r="4" />
+        
+        <!-- Body/shoulders (thin rectangle, exact positioning) -->
+        <rect x="4" y="16" width="16" height="2" rx="1" />
+    </svg>
+</body>
+</html>

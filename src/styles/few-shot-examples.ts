@@ -9,6 +9,9 @@ export interface StyleConfig {
   description: string;
   examples: FewShotExample[];
   promptTemplate: string;
+  synonyms: string[];
+  status: 'supported' | 'experimental' | 'deprecated';
+  priority: number;
 }
 
 export const STYLE_CONFIGS: Record<string, StyleConfig> = {
@@ -16,6 +19,9 @@ export const STYLE_CONFIGS: Record<string, StyleConfig> = {
     name: 'Black & White Flat',
     description: 'Simple flat icons with black outlines on white background, minimal details, clean geometric shapes',
     promptTemplate: 'Create a {topic} icon in black and white with simple flat design. {content}. Use only black outlines on white background, minimal details, clean geometric shapes.',
+    synonyms: ['monochrome', 'black & white icons', 'line art', 'binary color', 'contrast icons', 'stark flat', 'black-white-flat', 'black white flat'],
+    status: 'supported',
+    priority: 1,
     examples: [
       {
         prompt: 'Create a code review icon in black and white with simple flat design. Show a document with code lines and a checkmark overlay. Use only black outlines on white background, minimal details, clean geometric shapes.',

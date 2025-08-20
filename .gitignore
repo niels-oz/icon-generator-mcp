@@ -77,6 +77,8 @@ test-output-*.svg
 test_*.svg
 *.svg
 
+.playwright-mcp/
+
 # Test output directory
 test/test-output/
 
