@@ -87,6 +87,52 @@ export const STYLE_CONFIGS: Record<string, StyleConfig> = {
         description: 'Two overlapping documents with comparison arrow'
       }
     ]
+  },
+  'material-design': {
+    name: 'Material Design',
+    description: 'Bold geometric shapes with filled forms, no outlines, minimal detail',
+    promptTemplate: 'Create a {topic} icon in Material Design. {content}. Solid black fill, no strokes. 24x24 viewBox, 20x20 safe area. Geometric primitives only. 2dp corner radius on outer shape.',
+    synonyms: ['material-design', 'material design', 'google icons', 'material you', 'material symbols', 'material', 'google material', 'md icons'],
+    status: 'supported',
+    priority: 2,
+    examples: [
+      {
+        prompt: 'Create a heart icon in Material Design. Classic heart shape for favorites. Solid black fill, no strokes. 24x24 viewBox, 20x20 safe area. Geometric primitives only. 2dp corner radius on outer shape.',
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+  <path d="M12 20 
+           C8 16, 4 12, 4 8 
+           C4 5, 6 3, 9 3 
+           C10.5 3, 12 4, 12 6
+           C12 4, 13.5 3, 15 3
+           C18 3, 20 5, 20 8
+           C20 12, 16 16, 12 20 Z" />
+</svg>`,
+        description: 'Symmetric curved path forming heart, centered in 20x20 area'
+      },
+      {
+        prompt: 'Create a settings icon in Material Design. Gear with teeth for configuration. Solid black fill, no strokes. 24x24 viewBox, 20x20 safe area. Geometric primitives only. 2dp corner radius on outer shape.',
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+  <circle cx="12" cy="12" r="8.925" />
+  <rect x="8.75" y="-1" width="6.5" height="8" />
+  <rect x="8.75" y="17" width="6.5" height="8" />
+  <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(60 12 12)" />
+  <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(120 12 12)" />
+  <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(240 12 12)" />
+  <rect x="8.75" y="-1" width="6.5" height="8" transform="rotate(300 12 12)" />
+  <circle cx="12" cy="12" r="3.5" fill="white" />
+</svg>`,
+        description: 'Circle center with 6 rectangular teeth at 60° intervals, white center hole'
+      },
+      {
+        prompt: 'Create a user icon in Material Design. Person silhouette with head and shoulders. Solid black fill, no strokes. 24x24 viewBox, 20x20 safe area. Geometric primitives only. 2dp corner radius on outer shape.',
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+  <circle cx="12" cy="8" r="4" />
+  <rect x="4" y="14" width="16" height="6" rx="8" />
+  <rect x="4" y="17" width="16" height="3" />
+</svg>`,
+        description: 'Circle (head) above two-part body (curved shoulders + straight torso)'
+      }
+    ]
   }
 };
 
