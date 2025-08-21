@@ -40,7 +40,7 @@ SVG:
 ${example.svg}
 `).join('\n')}
 
-Follow the exact same style, structure, and visual approach as these examples.`;
+Follow the exact same style, structure, and visual approach as these examples. These examples show the style technique - you can apply this same approach to ANY topic. The examples demonstrate HOW to create icons in this style, not WHAT icons to create.`;
   }
 
   // Add reference SVGs if provided
