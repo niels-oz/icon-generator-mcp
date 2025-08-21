@@ -1,6 +1,6 @@
 {
   "name": "icon-generator-mcp",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Zero-dependency MCP server for AI-powered SVG icon generation with multimodal LLM support",
   "main": "dist/server.js",
   "bin": {

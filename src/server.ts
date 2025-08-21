@@ -14,7 +14,7 @@ function getVersion(): string {
     return packageJson.version;
   } catch (error) {
     // Fallback for tests or other environments where package.json might not be accessible
-    return '0.4.0';
+    return '0.5.1';
   }
 }
 

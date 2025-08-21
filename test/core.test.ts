@@ -12,7 +12,7 @@ describe('MCP Server Core Interface', () => {
   describe('Server Initialization', () => {
     it('should initialize correctly', () => {
       expect(server.name).toBe('icon-generator-mcp');
-      expect(server.version).toBe('0.5.0');
+      expect(server.version).toBe('0.5.1');
     });
 
     it('should register two tools with correct schema', () => {
